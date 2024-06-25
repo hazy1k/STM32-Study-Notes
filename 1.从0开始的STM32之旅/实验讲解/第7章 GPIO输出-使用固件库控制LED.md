@@ -1,4 +1,4 @@
-# 第7章 GPIO输出—使用固件库点亮LED
+# 第7章 GPIO输出—使用固件库控制LED
 
 ## 1. 硬件设计
 
@@ -8,7 +8,7 @@
 
 ## 2. 软件设计
 
-    为了使工程更加有条理和方便迁移，我们把LED灯控制相关的代码分别独立存储。在“工程模板”之上新建“bsp_led.c”及“bsp_led.h”文件， 其中的“bsp”即Board Support Packet的缩写(板级支持包)，这些文件也可根据您的喜好命名， 这些文件不属于STM32标准库的内容，是由我们自己根据应用需要编写的。
+    为了使工程更加有条理和方便迁移，我们把LED灯控制相关的代码分别独立存储。在“工程模板”之上新建一个文件夹“led”，这个文件里我们用来存放“led.c”和“led.h”
 
 ### 2.1 编程目的
 
@@ -23,7 +23,7 @@
 #### 2.2.1 LED灯脚宏定义
 
 ```c
-// 代码清单:GPIO输出-1 LED控制引脚相关的宏
+// LED控制引脚相关的宏
 
 // R-红色
 #define LED1_GPIO_PORT      GPIOB
@@ -45,21 +45,21 @@
 
 #### 2.2.2 控制LED灯亮灭状态的宏定义
 
-      为了方便控制LED灯，我们把LED灯常用的亮、灭及状态反转的控制也直接定义成宏，见 [代码清单:GPIO输出-2](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_output.html#gpio-2) 。
+      为了方便控制LED灯，我们把LED灯常用的亮、灭及状态反转的控制也直接定义成宏：
 
 ```c
-// 代码清单:GPIO输出-2 控制LED亮灭的宏
+// 控制LED亮灭的宏
 
 /* 直接操作寄存器的方法控制IO */
-#define digitalHi(p,i)       {p->BSRR=i;}    //输出为高电平
-#define digitalLo(p,i)       {p->BRR=i;}     //输出低电平
-#define digitalToggle(p,i)   {p->ODR ^=i;}   //输出反转状态
+#define digitalHi(p,i)       {p->BSRR=i;}    // 输出为高电平
+#define digitalLo(p,i)       {p->BRR=i;}     // 输出低电平
+#define digitalToggle(p,i)   {p->ODR ^=i;}   // 输出反转状态
 
 
 /* 定义控制IO的宏 */
-#define LED1_TOGGLE       digitalToggle(LED1_GPIO_PORT,LED1_GPIO_PIN)
-#define LED1_OFF          digitalHi(LED1_GPIO_PORT,LED1_GPIO_PIN)
-#define LED1_ON           digitalLo(LED1_GPIO_PORT,LED1_GPIO_PIN)
+#define LED1_TOGGLE       digitalToggle(LED1_GPIO_PORT,LED1_GPIO_PIN) // 状态反转
+#define LED1_OFF          digitalHi(LED1_GPIO_PORT,LED1_GPIO_PIN) // 关闭-高电平
+#define LED1_ON           digitalLo(LED1_GPIO_PORT,LED1_GPIO_PIN) // 打开-低电平
 
 #define LED2_TOGGLE       digitalToggle(LED2_GPIO_PORT,LED2_GPIO_PIN)
 #define LED2_OFF          digitalHi(LED2_GPIO_PORT,LED2_GPIO_PIN)
@@ -72,67 +72,37 @@
 /* 基本混色，后面高级用法使用PWM可混出全彩颜色,且效果更好 */
 
 //红
-#define LED_RED  \
-                    LED1_ON;\
-                    LED2_OFF\
-                    LED3_OFF
+#define LED_RED LED1_ON; LED2_OFF; LED3_OFF
 
 //绿
-#define LED_GREEN       \
-                    LED1_OFF;\
-                    LED2_ON\
-                    LED3_OFF
+#define LED_GREEN LED1_OFF; LED2_ON; LED3_OFF
 
 //蓝
-#define LED_BLUE    \
-                    LED1_OFF;\
-                    LED2_OFF\
-                    LED3_ON
-
+#define LED_BLUE LED1_OFF; LED2_OFF; LED3_ON
 
 //黄(红+绿)
-#define LED_YELLOW  \
-                    LED1_ON;\
-                    LED2_ON\
-                    LED3_OFF
+#define LED_YELLOW LED1_ON; LED2_ON; LED3_OFF
+
 //紫(红+蓝)
-#define LED_PURPLE  \
-                    LED1_ON;\
-                    LED2_OFF\
-                    LED3_ON
+#define LED_PURPLE LED1_ON; LED2_OFF; LED3_ON
 
 //青(绿+蓝)
-#define LED_CYAN \
-                    LED1_OFF;\
-                    LED2_ON\
-                    LED3_ON
+#define LED_CYAN LED1_OFF; LED2_ON; LED3_ON
 
 //白(红+绿+蓝)
-#define LED_WHITE   \
-                    LED1_ON;\
-                    LED2_ON\
-                    LED3_ON
+#define LED_WHITE LED1_ON; LED2_ON; LED3_ON
 
 //黑(全部关闭)
-#define LED_RGBOFF  \
-                    LED1_OFF;\
-                    LED2_OFF\
-                    LED3_OFF
+#define LED_RGBOFF LED1_OFF; LED2_OFF; LED3_OFF
 ```
 
     这部分宏控制LED亮灭的操作是直接向BSRR、BRR和ODR这三个寄存器写入控制指令来实现的，对BSRR写1输出高电平， 对BRR写1输出低电平，对ODR寄存器某位进行异或操作可反转位的状态。
 
     RGB彩灯可以实现混色，如最后一段代码我们控制红灯和绿灯亮而蓝灯灭，可混出黄色效果。
 
-    代码中的“\”是C语言中的续行符语法，表示续行符的下一行与续行符所在的代码是同一行。 代码中因为宏定义关键字“#define”只是对当前行有效，所以我们使用续行符来连接起来， 以下的代码是等效的：
-
-```c
-#define LED_YELLOW LED1_ON; LED2_ON; LED3_OFF
-```
-
 ### 2.2.3 LED GPIO初始化函数
 
-    利用上面的宏，编写LED灯的初始化函数，见 [代码清单:GPIO输出-3](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_output.html#gpio-3) 。
+    利用上面的宏，编写LED灯的初始化函数：
 
 ```c
 // 代码清单:GPIO输出-3 LED GPIO初始化函数
@@ -143,39 +113,27 @@ void LED_GPIO_Config(void)
     GPIO_InitTypeDef GPIO_InitStructure;
 
     /*开启LED相关的GPIO外设时钟*/
-    RCC_APB2PeriphClockCmd( LED1_GPIO_CLK|
-                            LED2_GPIO_CLK|
-                            LED3_GPIO_CLK, ENABLE);
+    RCC_APB2PeriphClockCmd( LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
     /*选择要控制的GPIO引脚*/
     GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;
-
     /*设置引脚模式为通用推挽输出*/
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-
     /*设置引脚速率为50MHz */
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-
     /*调用库函数，初始化GPIO*/
     GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);
-
     /*选择要控制的GPIO引脚*/
     GPIO_InitStructure.GPIO_Pin = LED2_GPIO_PIN;
-
     /*调用库函数，初始化GPIO*/
     GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStructure);
-
     /*选择要控制的GPIO引脚*/
     GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
-
     /*调用库函数，初始化GPIOF*/
     GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
-
     /* 关闭所有led灯   */
     GPIO_SetBits(LED1_GPIO_PORT, LED1_GPIO_PIN);
-
     /* 关闭所有led灯   */
     GPIO_SetBits(LED2_GPIO_PORT, LED2_GPIO_PIN);
-
     /* 关闭所有led灯   */
     GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
 }
@@ -197,23 +155,16 @@ void LED_GPIO_Config(void)
 
 #### 2.2.4 主函数
 
-    编写完LED灯的控制函数后，就可以在main函数中测试了，见 [代码清单:GPIO输出-4](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_output.html#gpio-4) 。
+    编写完LED灯的控制函数后，就可以在main函数中测试了
 
 ```c
-// 代码清单:GPIO输出-4 控制LED灯 ，main文件
-
 #include "stm32f10x.h"
-#include "./led/bsp_led.h"
+#include "led.h"
 
 #define SOFT_DELAY Delay(0x0FFFFF);
 
 void Delay(__IO u32 nCount);
 
-/**
-* @brief  主函数
-* @param  无
-* @retval 无
-*/
 int main(void)
 {
     /* LED 端口初始化 */
@@ -221,17 +172,17 @@ int main(void)
 
     while (1)
     {
-        LED1_ON;              // 亮
-        SOFT_DELAY;
-        LED1_OFF;          // 灭
+        LED1_ON; // 亮
+        SOFT_DELAY; // 延时
+        LED1_OFF; // 灭
 
-        LED2_ON;             // 亮
+        LED2_ON;             
         SOFT_DELAY;
-        LED2_OFF;          // 灭
+        LED2_OFF;          
 
-        LED3_ON;             // 亮
+        LED3_ON;             
         SOFT_DELAY;
-        LED3_OFF;          // 灭
+        LED3_OFF;         
 
         /*轮流显示 红绿蓝黄紫青白 颜色*/
         LED_RED;
@@ -267,3 +218,56 @@ void Delay(__IO uint32_t nCount)     //简单的延时函数
 ```
 
     在main函数中，调用我们前面定义的LED_GPIO_Config初始化好LED的控制引脚，然后直接调用各种控制LED灯亮灭的宏来实现LED灯的控制。
+
+## 3. 小结
+
+    前期写功能实现的代码倒是不难，关键是如何配置和初始化才是难点，虽然每个配置我们都已经讲了，但是既然是小结，在此重新总结一下：
+
+- 首先就是写LED的头文件了，在这个头文件里写什么呢：主要就是定义各种宏-方便后面调试
+
+- 首先就是定义LED1~3的宏，例如：
+
+```c
+// LED1对应颜色为红色
+#define LED1_GPIO_PORT        GPIOB                 // 用LED1_GPIO_PORT代替GPIOB，输出输入端口     
+#define LED1_GPIO_CLK         RCC_APB2Periph_GPIOB // 用LED1_GPIO_CLK代替RCC_APB2Periph_GPIOB，端口时钟
+#define LED1_GPIO_PIN         GPIO_Pin_5             // 用LED1_GPIO_PIN代表GPIO_Pin_5，接的哪个引脚    
+```
+
+- 接着比较重要的就是定义方法控制IO口实现输出高低电平：
+
+```c
+// 前面我们就知道对BSRR写1输出高电平， 对BRR写1输出低电平，对ODR寄存器某位进行异或操作可反转位的状态。
+// 所以看注释应该能看懂吧
+#define    digitalHi(p, i)         {p->BSRR = i;} // 高电平            
+#define    digitalLo(p, i)         {p->BRR  = i;} // 低电平
+#define    digitalToggle(p, i)     {p->ODR  ^= i;}// 反转
+
+// 为了更加方便接下来控制LED所以还需定义控制IO的宏
+// 这个都不用注释都能看懂
+#define LED1_TOGGLE         digitalToggle(LED1_GPIO_PORT, LED1_GPIO_PIN) 
+#define LED1_OFF            digitalHi(LED1_GPIO_PORT, LED1_GPIO_PIN)     
+#define LED1_ON             digitalLo(LED1_GPIO_PORT, LED1_GPIO_PIN)     
+
+#define LED2_TOGGLE         digitalToggle(LED2_GPIO_PORT, LED2_GPIO_PIN)
+#define LED2_OFF            digitalHi(LED2_GPIO_PORT, LED2_GPIO_PIN)
+#define LED2_ON             digitalLo(LED2_GPIO_PORT, LED2_GPIO_PIN)
+
+#define LED3_TOGGLE         digitalToggle(LED3_GPIO_PORT, LED3_GPIO_PIN)
+#define LED3_OFF            digitalHi(LED3_GPIO_PORT, LED3_GPIO_PIN)
+#define LED3_ON             digitalLo(LED3_GPIO_PORT, LED3_GPIO_PIN)
+```
+
+- 后面就是多种LED混合了，可有可无
+
+- 开始写LCD.c文件，这个主要就是定义一个结构体，把LED1~3都封装到里面，还配置了推挽输出模式和50MHz速度，就拿LED1举例吧：
+
+```c
+/*选择要控制的GPIO引脚*/
+GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;
+
+/*调用库函数，初始化GPIO，此时的GPIOB控制的就是LED1的引脚啦*/
+GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);    
+```
+
+- 主函数很简单，没什么可说的，至此工程完成
