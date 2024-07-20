@@ -1,5 +1,5 @@
 {
-  "name": "BH-F103",
+  "name": "BH-STM32",
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [],
@@ -20,10 +20,16 @@
         "name": "CMSIS",
         "files": [
           {
-            "path": "../../Libraries/CMSIS/core_cm3.c"
+            "path": "../../Libraries/CMSIS/core_cm3.h"
+          },
+          {
+            "path": "../../Libraries/CMSIS/stm32f10x.h"
           },
           {
             "path": "../../Libraries/CMSIS/system_stm32f10x.c"
+          },
+          {
+            "path": "../../Libraries/CMSIS/system_stm32f10x.h"
           }
         ],
         "folders": []
@@ -107,18 +113,26 @@
         "name": "USER",
         "files": [
           {
-            "path": "../../User/stm32f10x_it.c"
-          },
-          {
             "path": "../../User/main.c"
           },
           {
             "path": "../../User/stm32f10x_conf.h"
           },
           {
+            "path": "../../User/stm32f10x_it.c"
+          },
+          {
             "path": "../../User/stm32f10x_it.h"
+          },
+          {
+            "path": "../../User/beep/bsp_beep.c"
           }
         ],
+        "folders": []
+      },
+      {
+        "name": "DOC",
+        "files": [],
         "folders": []
       }
     ]
@@ -127,16 +141,16 @@
   "deviceName": null,
   "packDir": null,
   "miscInfo": {
-    "uid": "ce1819c0baee4bccc46a11f0f6b65b2c"
+    "uid": "1d20a0cd280458f8cdd5a4ab909a1542"
   },
   "targets": {
-    "BITBAND": {
+    "beep": {
       "excludeList": [],
       "toolchain": "AC5",
       "compileConfig": {
         "cpuType": "Cortex-M3",
         "floatingPointHardware": "none",
-        "scatterFilePath": "",
+        "scatterFilePath": "../../../../../../stm32-ram.sct",
         "useCustomScatterFile": false,
         "storageLayout": {
           "RAM": [
@@ -258,14 +272,43 @@
         "speed": 8000,
         "otherCmds": ""
       },
-      "uploadConfigMap": {},
+      "uploadConfigMap": {
+        "JLink": {
+          "bin": "",
+          "baseAddr": "",
+          "cpuInfo": {
+            "vendor": "null",
+            "cpuName": "null"
+          },
+          "proType": 1,
+          "speed": 8000,
+          "otherCmds": ""
+        },
+        "STLink": {
+          "bin": "beep.hex",
+          "proType": "SWD",
+          "resetMode": "default",
+          "runAfterProgram": true,
+          "speed": 4000,
+          "address": "0x8000000",
+          "elFile": "None",
+          "optionBytes": ".eide/beep.st.option.bytes.ini",
+          "otherCmds": ""
+        },
+        "Custom": {
+          "bin": "",
+          "commandLine": "",
+          "eraseChipCommand": ""
+        }
+      },
       "custom_dep": {
         "name": "default",
         "incList": [
-          "../../User",
           "../../Libraries/CMSIS",
+          "../../User",
           "../../Libraries/FWlib/inc",
-          "RTE/_BITBAND"
+          ".cmsis/include",
+          "RTE/_beep"
         ],
         "libList": [],
         "defineList": [

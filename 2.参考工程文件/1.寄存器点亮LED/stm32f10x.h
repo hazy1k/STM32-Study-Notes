@@ -1,7 +1,5 @@
 // 用来存放STM32寄存器映射的代码
 
-// 外设  perirhral
-
 #define  PERIPH_BASE               ((unsigned int)0x40000000)
 #define  APB1PERIPH_BASE           PERIPH_BASE
 #define  APB2PERIPH_BASE          (PERIPH_BASE + 0x10000)
@@ -17,5 +15,3 @@
 #define  GPIOB_CRL              *(unsigned int*)(GPIOB_BASE + 0x00)
 #define  GPIOB_CRH              *(unsigned int*)(GPIOB_BASE + 0x04)
 #define  GPIOB_ODR              *(unsigned int*)(GPIOB_BASE + 0x0C)
-
-	
