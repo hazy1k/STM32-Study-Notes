@@ -5,19 +5,21 @@ void Delay(__IO u32 nCount);
 
 int main(void)
 {	
-	// 蜂鸣器初始化
+	// 鍒濆鍖栬渹楦ｅ櫒GPIO
 	BEEP_GPIO_Config();	
 	
 	while(1)
 	{		
-		BEEP( ON ); 	
+		BEEP( ON ); // 寮�鍚渹楦ｅ櫒	
 		Delay(0x0FFFFF);	
+
 		BEEP( OFF );		
 		Delay(0x0FFFFF);
 	}
 }
 
-void Delay(__IO uint32_t nCount) // 简单的延时函数
+// 寤舵椂鍑芥暟
+void Delay(__IO uint32_t nCount) 
 {
 	for(; nCount != 0; nCount--);
 }

@@ -1,4 +1,4 @@
-#include "./beep/bsp_beep.h"   
+#include "bsp_beep.h"   
 
 // ·äÃùÆ÷³õÊ¼»¯º¯Êı
 void BEEP_GPIO_Config(void)
