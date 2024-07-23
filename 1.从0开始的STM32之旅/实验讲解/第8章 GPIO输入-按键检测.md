@@ -1,4 +1,4 @@
-# 第八章 GPIO输入-按键控制LED
+# 第七章 GPIO输入-按键控制LED
 
 ## 1. 硬件设计
 
@@ -50,24 +50,24 @@
 
 void Key_GPIO_Config(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-	/*开启按键端口的时钟*/
-	RCC_APB2PeriphClockCmd(KEY1_GPIO_CLK|KEY2_GPIO_CLK,ENABLE);
-	
-	// 选择按键的引脚
-	GPIO_InitStructure.GPIO_Pin = KEY1_GPIO_PIN; 
-	// 设置按键的引脚为浮空输入
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
-	// 使用结构体初始化按键
-	GPIO_Init(KEY1_GPIO_PORT, &GPIO_InitStructure);
-	
-	// 选择按键的引脚
-	GPIO_InitStructure.GPIO_Pin = KEY2_GPIO_PIN; 
-	// 设置按键的引脚为浮空输入
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
-	// 使用结构体初始化按键
-	GPIO_Init(KEY2_GPIO_PORT, &GPIO_InitStructure);	
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /*开启按键端口的时钟*/
+    RCC_APB2PeriphClockCmd(KEY1_GPIO_CLK|KEY2_GPIO_CLK,ENABLE);
+
+    // 选择按键的引脚
+    GPIO_InitStructure.GPIO_Pin = KEY1_GPIO_PIN; 
+    // 设置按键的引脚为浮空输入
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+    // 使用结构体初始化按键
+    GPIO_Init(KEY1_GPIO_PORT, &GPIO_InitStructure);
+
+    // 选择按键的引脚
+    GPIO_InitStructure.GPIO_Pin = KEY2_GPIO_PIN; 
+    // 设置按键的引脚为浮空输入
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+    // 使用结构体初始化按键
+    GPIO_Init(KEY2_GPIO_PORT, &GPIO_InitStructure);    
 }
 ```
 
@@ -90,16 +90,16 @@ void Key_GPIO_Config(void)
 ```c
 // 按键检测函数
 uint8_t Key_Scan(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
-{			
-	/*检测是否有按键按下 */
-	if(GPIO_ReadInputDataBit(GPIOx, GPIO_Pin) == KEY_ON )  
-	{	 
-		/*等待按键释放 */
-		while(GPIO_ReadInputDataBit(GPIOx,GPIO_Pin) == KEY_ON);   
-		return 	KEY_ON;	 
-	}
-	else
-		return KEY_OFF;
+{            
+    /*检测是否有按键按下 */
+    if(GPIO_ReadInputDataBit(GPIOx, GPIO_Pin) == KEY_ON )  
+    {     
+        /*等待按键释放 */
+        while(GPIO_ReadInputDataBit(GPIOx,GPIO_Pin) == KEY_ON);   
+        return     KEY_ON;     
+    }
+    else
+        return KEY_OFF;
 }
 ```
 
@@ -116,47 +116,45 @@ uint8_t Key_Scan(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 // LED初始化函数
 void LED_GPIO_Config(void)
-{		
-		/*定义一个GPIO_InitTypeDef类型的结构体*/
-		GPIO_InitTypeDef GPIO_InitStructure;
+{        
+        /*定义一个GPIO_InitTypeDef类型的结构体*/
+        GPIO_InitTypeDef GPIO_InitStructure;
 
-		/*开启LED相关的GPIO外设时钟*/
-		RCC_APB2PeriphClockCmd( LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
-		/*选择要控制的GPIO引脚*/
-		GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;	
+        /*开启LED相关的GPIO外设时钟*/
+        RCC_APB2PeriphClockCmd( LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
+        /*选择要控制的GPIO引脚*/
+        GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;    
 
-		/*设置引脚模式为通用推挽输出*/
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
+        /*设置引脚模式为通用推挽输出*/
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
 
-		/*设置引脚速率为50MHz */   
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+        /*设置引脚速率为50MHz */   
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 
-		/*调用库函数，初始化GPIO*/
-		GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);	
-		
-		/*选择要控制的GPIO引脚*/
-		GPIO_InitStructure.GPIO_Pin = LED2_GPIO_PIN;
+        /*调用库函数，初始化GPIO*/
+        GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);    
 
-		/*调用库函数，初始化GPIO*/
-		GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStructure);
-		
-		/*选择要控制的GPIO引脚*/
-		GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
+        /*选择要控制的GPIO引脚*/
+        GPIO_InitStructure.GPIO_Pin = LED2_GPIO_PIN;
 
-		/*调用库函数，初始化GPIOF*/
-		GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
+        /*调用库函数，初始化GPIO*/
+        GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStructure);
 
-		/* 关闭所有led灯	*/
-		GPIO_SetBits(LED1_GPIO_PORT, LED1_GPIO_PIN);
-		
-		/* 关闭所有led灯	*/
-		GPIO_SetBits(LED2_GPIO_PORT, LED2_GPIO_PIN);	 
-    
-    /* 关闭所有led灯	*/
-		GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
+        /*选择要控制的GPIO引脚*/
+        GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
+
+        /*调用库函数，初始化GPIOF*/
+        GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
+
+        /* 关闭所有led灯    */
+        GPIO_SetBits(LED1_GPIO_PORT, LED1_GPIO_PIN);
+
+        /* 关闭所有led灯    */
+        GPIO_SetBits(LED2_GPIO_PORT, LED2_GPIO_PIN);     
+
+    /* 关闭所有led灯    */
+        GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
 }
-
-
 ```
 
     上一章我们已经详细解释过了，这里不在赘述
@@ -197,3 +195,7 @@ int main(void)
     写入程序后，初始LED关，按下key1，LED亮（红）再按下关闭，key2--LED（绿），有趣的是你可以把两个灯同时打开就能得到混合颜色，至于为什么显示这种颜色，上一章已经说过或者参考led函数的头文件。
 
     代码不难而且注释也写得很详细了，主要就是一个配置问题和一个扫描函数，led可以照搬
+
+---
+
+2024.7.22第一次修订
