@@ -1,17 +1,18 @@
 #include "stm32f10x.h"
 #include "led.h"
 
-#define SOFT_DELAY Delay(0x0FFFFF); // 延时
+#define SOFT_DELAY Delay(0x0FFFFF); // 软件延时
 
 void Delay(__IO u32 nCount); // 延时函数声明 
 
 int main(void)
 {	
-	/* LED 端口初始化 */
+	// LED 端口初始化
 	LED_GPIO_Config();	 
 
 	while (1)
 	{
+		// 轮流点亮 LED1、LED2、LED3实现流水灯效果
 		LED1_ON;    // LED1开
 		SOFT_DELAY; // 延迟
 		LED1_OFF;	// LED1关	 
@@ -23,7 +24,7 @@ int main(void)
 		LED3_ON;	// LED3开		
 		SOFT_DELAY; // 延迟
 		LED3_OFF;   // LED3关
-		
+
 		/*轮流显示 红绿蓝黄紫青白 颜色*
 		LED_RED;
 		SOFT_DELAY;
