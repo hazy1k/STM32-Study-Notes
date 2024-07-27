@@ -16,7 +16,7 @@
 
 ```c
 #ifndef __EXTI_H
-#define	__EXTI_H
+#define    __EXTI_H
 
 
 #include "stm32f10x.h"
@@ -46,7 +46,6 @@
 void EXTI_Key_Config(void);
 
 #endif
-
 ```
 
 在上面的宏定义中，我们除了开GPIO的端口时钟外，我们还打开了AFIO的时钟， 这是因为等下配置EXTI信号源的时候需要用到AFIO的外部中断控制寄存器AFIO_EXTICRx。
@@ -58,10 +57,10 @@ void EXTI_Key_Config(void);
 static void NVIC_Configuration(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
-  
+
   // 1.配置NVIC为优先级组1
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1); // 使用库函数misc.C中的函数-NVIC_PriorityGroupConfig()配置NVIC为优先级组1
-  
+
   // 2.配置中断源：按键1
   NVIC_InitStructure.NVIC_IRQChannel = KEY1_INT_EXTI_IRQ; // 实际上是使用的是EXTI_IRQn
 
@@ -74,7 +73,7 @@ static void NVIC_Configuration(void)
   // 5.使能中断通道
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
-  
+
   // 6.配置中断源：按键2，其他使用上面相关配置
   NVIC_InitStructure.NVIC_IRQChannel = KEY2_INT_EXTI_IRQ;
   NVIC_Init(&NVIC_InitStructure);
@@ -91,54 +90,54 @@ static void NVIC_Configuration(void)
 // 配置IO为EXTI中断口，并设置中断优先级
 void EXTI_Key_Config(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;  // 定义GPIO初始化结构体变量
-	EXTI_InitTypeDef EXTI_InitStructure; // 定义EXTI初始化结构体变量
+    GPIO_InitTypeDef GPIO_InitStructure;  // 定义GPIO初始化结构体变量
+    EXTI_InitTypeDef EXTI_InitStructure; // 定义EXTI初始化结构体变量
 
-	// 使能GPIO时钟
-	RCC_APB2PeriphClockCmd(KEY1_INT_GPIO_CLK, ENABLE);
+    // 使能GPIO时钟
+    RCC_APB2PeriphClockCmd(KEY1_INT_GPIO_CLK, ENABLE);
   RCC_APB2PeriphClockCmd(KEY2_INT_GPIO_CLK, ENABLE);
-												
-	// 配置NVIC中断
-	NVIC_Configuration();
-	
+
+    // 配置NVIC中断
+    NVIC_Configuration();
+
 /*--------------------------KEY1配置-----------------------------*/
-	// 1.选择按键用到的GPIO引脚
+    // 1.选择按键用到的GPIO引脚
   GPIO_InitStructure.GPIO_Pin = KEY1_INT_GPIO_PIN;
 
   // 2.配置为浮空输入
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_Init(KEY1_INT_GPIO_PORT, &GPIO_InitStructure);
 
-	// 3.选择EXTI的信号源
+    // 3.选择EXTI的信号源
   GPIO_EXTILineConfig(KEY1_INT_EXTI_PORTSOURCE, KEY1_INT_EXTI_PINSOURCE); 
   EXTI_InitStructure.EXTI_Line = KEY1_INT_EXTI_LINE;
-	
-	// 4.配置EXTI为中断模式
+
+    // 4.配置EXTI为中断模式
   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 
-	// 5.上升沿中断
+    // 5.上升沿中断
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
 
-  // 6.使能中断	
+  // 6.使能中断    
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure);
-	
+
   /*--------------------------KEY2配置-----------------------------*/
-	/* 选择按键用到的GPIO */	
+    /* 选择按键用到的GPIO */    
   GPIO_InitStructure.GPIO_Pin = KEY2_INT_GPIO_PIN;
-  /* 配置为浮空输入 */	
+  /* 配置为浮空输入 */    
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_Init(KEY2_INT_GPIO_PORT, &GPIO_InitStructure);
 
-	/* 选择EXTI的信号源 */
+    /* 选择EXTI的信号源 */
   GPIO_EXTILineConfig(KEY2_INT_EXTI_PORTSOURCE, KEY2_INT_EXTI_PINSOURCE); 
   EXTI_InitStructure.EXTI_Line = KEY2_INT_EXTI_LINE;
-	
-	/* EXTI为中断模式 */
+
+    /* EXTI为中断模式 */
   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	/* 下降沿中断 */
+    /* 下降沿中断 */
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-  /* 使能中断 */	
+  /* 使能中断 */    
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure);
 }
@@ -157,5 +156,3 @@ void EXTI_Key_Config(void)
 - 中断服务函数：首先肯定是要先初始化GPIO和EXTI两个结构体啦，再有打开时钟不能完，初始化一下NVIC。前期工作完成，正式来配置key1（key2同理）这个也比较公式化了再配合EXTI框图应该比较容易，1.选择引脚；2.配置输入模式（浮空输入）；3.选择EXTI作为信号源；4.配置EXTI为中断模式；5.使EXTI上升沿中断；6.使能中断
 
 达成的效果：当我们按下按键->产生中断->led状态翻转（我们这里使用按键控制）
-
-
