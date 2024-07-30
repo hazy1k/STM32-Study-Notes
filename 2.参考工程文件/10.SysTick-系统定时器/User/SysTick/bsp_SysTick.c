@@ -19,6 +19,25 @@ void SysTick_Init(void)
 	}
 }
 
+// us延时程序,10us为一个单位
+void Delay_us(__IO u32 nTime)
+{ 
+	TimingDelay = nTime;	
+
+	// 使能滴答定时器  
+	SysTick->CTRL |=  SysTick_CTRL_ENABLE_Msk; // CTRL-SysTick控制及状态寄存器
+
+	while(TimingDelay != 0); // 等待时间到达
+}
+
+// 获取节拍程序
+void TimingDelay_Decrement(void)
+{
+	if (TimingDelay != 0x00) // 如果计数器不为0
+	{ 
+		TimingDelay--; // 计数器减1
+	}
+}
 
 // couter 减1的时间 等于 1/systick_clk
 // 当counter 从 reload 的值减小到0的时候，为一个循环，如果开启了中断则执行中断服务程序，
