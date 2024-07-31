@@ -1,95 +1,67 @@
-/**
-  ******************************************************************************
-  * @file    main.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   串口中断接收测试
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
- 
- 
 #include "stm32f10x.h"
 #include "./led/bsp_led.h" 
 #include "./usart/bsp_usart.h" 
+#include <stdio.h> // 添加标准输入输出库头文件
 
-static void Show_Message(void);
+static void Show_Message(void); // 打印指令输入提示信息
   
-/**
-  * @brief  主函数
-  * @param  无
-  * @retval 无
-  */
 int main(void)
 {	
-  char ch;
+  char i;
   
-  /* 初始化RGB彩灯 */
+  // 1.初始化led
   LED_GPIO_Config();
   
-  /* 初始化USART 配置模式为 115200 8-N-1 */
+  // 2.初始化串口
   USART_Config();
 	
-  /* 打印指令输入提示信息 */
+  // 3.打印提示信息
   Show_Message();
   while(1)
 	{	
     /* 获取字符指令 */
-    ch=getchar();
-    printf("接收到字符：%c\n",ch);
-    
-    /* 根据字符指令控制RGB彩灯颜色 */
-    switch(ch)
-    {
-      case '1':
-        LED_RED;
-      break;
-      case '2':
-        LED_GREEN;
-      break;
-      case '3':
-        LED_BLUE;
-      break;
-      case '4':
-        LED_YELLOW;
-      break;
-      case '5':
-        LED_PURPLE;
-      break;
-      case '6':
-        LED_CYAN;
-      break;
-      case '7':
-        LED_WHITE;
-      break;
-      case '8':
-        LED_RGBOFF;
-      break;
-      default:
-        /* 如果不是指定指令字符，打印提示信息 */
-        Show_Message();
-        break;      
-    }   
+    i = getchar();
+    printf("接收到字符：%c\n", i); // 打印字符而不是ASCII值
+
+      /* 根据字符指令控制RGB彩灯颜色 */
+      switch(i)
+      {
+        case '1': // 使用字符进行比较
+          LED_RED; // 1.红色
+          break;
+        case '2':
+          LED_GREEN; // 2.绿色
+          break; 
+        case '3':
+          LED_BLUE; // 3.蓝色
+          break;
+        case '4':
+          LED_YELLOW; // 4.黄色
+          break;
+        case '5':
+          LED_PURPLE; // 5.紫色
+          break;
+        case '6':
+          LED_CYAN; // 6.青色
+          break;
+        case '7':
+          LED_WHITE; // 7.白色
+          break;
+        case '8':
+          LED_RGBOFF; // 8.灭
+          break;
+        default:
+          Show_Message();
+          break;      
+      }   
 	}	
 }
 
-
-/**
-  * @brief  打印指令输入提示信息
-  * @param  无
-  * @retval 无
-  */
+// 打印指令输入提示信息
 static void Show_Message(void)
 {
   printf("\r\n   这是一个通过串口通信指令控制RGB彩灯实验 \n");
-  printf("使用  USART  参数为：%d 8-N-1 \n",DEBUG_USART_BAUDRATE);
+  printf("使用  USART  参数为：%d 8-N-1 \n", DEBUG_USART_BAUDRATE);
   printf("开发板接到指令后控制RGB彩灯颜色，指令对应如下：\n");
   printf("   指令   ------ 彩灯颜色 \n");
   printf("     1    ------    红 \n");
@@ -101,5 +73,3 @@ static void Show_Message(void)
   printf("     7    ------    白 \n");
   printf("     8    ------    灭 \n");  
 }
-
-/*********************************************END OF FILE**********************/

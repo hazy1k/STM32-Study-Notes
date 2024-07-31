@@ -164,4 +164,3 @@ int fgetc(FILE *f) // 函数参数：文件指针
 		// 返回接收到的数据
 		return (int)USART_ReceiveData(DEBUG_USARTx);
 }
-
