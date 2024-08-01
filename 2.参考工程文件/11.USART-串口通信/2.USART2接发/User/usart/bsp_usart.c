@@ -1,34 +1,12 @@
-/**
-  ******************************************************************************
-  * @file    bsp_usart.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   重定向c库printf函数到usart端口
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火STM32 F103-指南者 开发板  
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
-
 #include "bsp_usart.h"
 
- /**
-  * @brief  配置嵌套向量中断控制器NVIC
-  * @param  无
-  * @retval 无
-  */
+// 配置向量中断控制器NVIC
 static void NVIC_Configuration(void)
 {
+  // 初始化NVIC结构体
   NVIC_InitTypeDef NVIC_InitStructure;
-  
   /* 嵌套向量中断控制器组选择 */
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  
   /* 配置USART为中断源 */
   NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
   /* 抢断优先级*/
@@ -41,19 +19,14 @@ static void NVIC_Configuration(void)
   NVIC_Init(&NVIC_InitStructure);
 }
 
- /**
-  * @brief  USART GPIO 配置,工作参数配置
-  * @param  无
-  * @retval 无
-  */
+// USART GPIO 配置,工作参数配置
 void USART_Config(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure; // 定义GPIO初始化结构体
+	USART_InitTypeDef USART_InitStructure; // 定义USART初始化结构体
 
 	// 打开串口GPIO的时钟
 	DEBUG_USART_GPIO_APBxClkCmd(DEBUG_USART_GPIO_CLK, ENABLE);
-	
 	// 打开串口外设的时钟
 	DEBUG_USART_APBxClkCmd(DEBUG_USART_CLK, ENABLE);
 
@@ -63,7 +36,7 @@ void USART_Config(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(DEBUG_USART_TX_GPIO_PORT, &GPIO_InitStructure);
 
-  // 将USART Rx的GPIO配置为浮空输入模式
+    // 将USART Rx的GPIO配置为浮空输入模式
 	GPIO_InitStructure.GPIO_Pin = DEBUG_USART_RX_GPIO_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(DEBUG_USART_RX_GPIO_PORT, &GPIO_InitStructure);
@@ -92,12 +65,8 @@ void USART_Config(void)
 	
 	// 使能串口
 	USART_Cmd(DEBUG_USARTx, ENABLE);		
-
-  // 清除发送完成标志
-	//USART_ClearFlag(USART1, USART_FLAG_TC);     
 }
 
-/*****************  发送一个字符 **********************/
 void Usart_SendByte( USART_TypeDef * pUSARTx, uint8_t ch)
 {
 	/* 发送一个字节数据到USART */
@@ -107,7 +76,6 @@ void Usart_SendByte( USART_TypeDef * pUSARTx, uint8_t ch)
 	while (USART_GetFlagStatus(pUSARTx, USART_FLAG_TXE) == RESET);	
 }
 
-/*****************  发送字符串 **********************/
 void Usart_SendString( USART_TypeDef * pUSARTx, char *str)
 {
 	unsigned int k=0;
@@ -119,10 +87,11 @@ void Usart_SendString( USART_TypeDef * pUSARTx, char *str)
   
   /* 等待发送完成 */
   while(USART_GetFlagStatus(pUSARTx,USART_FLAG_TC)==RESET)
-  {}
+  {
+
+  }
 }
 
-/*****************  发送一个16位数 **********************/
 void Usart_SendHalfWord( USART_TypeDef * pUSARTx, uint16_t ch)
 {
 	uint8_t temp_h, temp_l;

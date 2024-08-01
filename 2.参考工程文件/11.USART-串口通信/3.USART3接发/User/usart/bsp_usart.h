@@ -56,8 +56,8 @@
 #define  DEBUG_USART_GPIO_CLK           (RCC_APB2Periph_GPIOB)
 #define  DEBUG_USART_GPIO_APBxClkCmd    RCC_APB2PeriphClockCmd
     
-#define  DEBUG_USART_TX_GPIO_PORT         GPIOB   
-#define  DEBUG_USART_TX_GPIO_PIN          GPIO_Pin_10
+#define  DEBUG_USART_TX_GPIO_PORT       GPIOB   
+#define  DEBUG_USART_TX_GPIO_PIN        GPIO_Pin_10
 #define  DEBUG_USART_RX_GPIO_PORT       GPIOB
 #define  DEBUG_USART_RX_GPIO_PIN        GPIO_Pin_11
 

@@ -93,8 +93,8 @@
 #define  DEBUG_USART_GPIO_CLK           (RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD)
 #define  DEBUG_USART_GPIO_APBxClkCmd    RCC_APB2PeriphClockCmd
     
-#define  DEBUG_USART_TX_GPIO_PORT         GPIOC   
-#define  DEBUG_USART_TX_GPIO_PIN          GPIO_Pin_12
+#define  DEBUG_USART_TX_GPIO_PORT       GPIOC   
+#define  DEBUG_USART_TX_GPIO_PIN        GPIO_Pin_12
 #define  DEBUG_USART_RX_GPIO_PORT       GPIOD
 #define  DEBUG_USART_RX_GPIO_PIN        GPIO_Pin_2
 
@@ -107,4 +107,4 @@ void Usart_SendByte( USART_TypeDef * pUSARTx, uint8_t ch);
 void Usart_SendString( USART_TypeDef * pUSARTx, char *str);
 void Usart_SendHalfWord( USART_TypeDef * pUSARTx, uint16_t ch);
 
-#endif /* __USART_H */
+#endif
