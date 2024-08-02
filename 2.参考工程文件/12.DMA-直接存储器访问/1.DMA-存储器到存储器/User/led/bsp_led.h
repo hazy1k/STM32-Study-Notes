@@ -1,31 +1,23 @@
 #ifndef __LED_H
 #define	__LED_H
 
-
 #include "stm32f10x.h"
-
-
-/* 定义LED连接的GPIO端口, 用户只需要修改下面的代码即可改变控制的LED引脚 */
 
 // R-红色
 #define LED1_GPIO_PORT    	GPIOB			              /* GPIO端口 */
 #define LED1_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define LED1_GPIO_PIN		  	GPIO_Pin_5			        /* 连接到SCL时钟线的GPIO */
+#define LED1_GPIO_PIN		GPIO_Pin_5			        /* 连接到SCL时钟线的GPIO */
 
 // G-绿色
 #define LED2_GPIO_PORT    	GPIOB			              /* GPIO端口 */
 #define LED2_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define LED2_GPIO_PIN		  	GPIO_Pin_0			        /* 连接到SCL时钟线的GPIO */
+#define LED2_GPIO_PIN		GPIO_Pin_0			        /* 连接到SCL时钟线的GPIO */
 
 // B-蓝色
 #define LED3_GPIO_PORT    	GPIOB			              /* GPIO端口 */
 #define LED3_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define LED3_GPIO_PIN		  	GPIO_Pin_1			        /* 连接到SCL时钟线的GPIO */
+#define LED3_GPIO_PIN		GPIO_Pin_1			        /* 连接到SCL时钟线的GPIO */
 
-/** the macro definition to trigger the led on or off 
-  * 1 - off
-  *0 - on
-  */
 #define ON  0
 #define OFF 1
 

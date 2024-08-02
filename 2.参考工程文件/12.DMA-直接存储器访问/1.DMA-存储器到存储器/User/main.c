@@ -1,13 +1,9 @@
-
-// DMA-存储器到存储器模式 ，即内部的FLASH到内部的SRAM
-	
 #include "stm32f10x.h"
 #include "./led/bsp_led.h"
 
-
 // 当使用存储器到存储器模式时候，通道可以随便选，没有硬性的规定
-#define DMA_CHANNEL     DMA1_Channel6
-#define DMA_CLOCK       RCC_AHBPeriph_DMA1
+#define DMA_CHANNEL     DMA1_Channel6 // 我们这里使用的通道是DMA1_Channel6
+#define DMA_CLOCK       RCC_AHBPeriph_DMA1 // DMA1时钟
 
 // 传输完成标志
 #define DMA_FLAG_TC     DMA1_FLAG_TC6
@@ -28,49 +24,43 @@ const uint32_t aSRC_Const_Buffer[BUFFER_SIZE]= {
                                     0x51525354,0x55565758,0x595A5B5C,0x5D5E5F60,
                                     0x61626364,0x65666768,0x696A6B6C,0x6D6E6F70,
                                     0x71727374,0x75767778,0x797A7B7C,0x7D7E7F80};
-/* 定义DMA传输目标存储器
- * 存储在内部的SRAM中																		
- */
+
+// 定义DMA传输目标存储器-存储在内部的SRAM中																		
 uint32_t aDST_Buffer[BUFFER_SIZE];
 
-#define SOFT_DELAY Delay(0x0FFFFF);
-void Delay(__IO u32 nCount); 
-uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength);
-void DMA_Config(void);																	
+#define SOFT_DELAY Delay(0x0FFFFF); // 简单的延时函数
+void Delay(__IO u32 nCount); // 延时函数声明
+uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength); // 判断两个数据源是否完全相等的函数声明
+void DMA_Config(void); // DMA配置函数声明																
 																		
-/**
-  * @brief  主函数
-  * @param  无  
-  * @retval 无
-  */
 int main(void)
 {
-  /* 定义存放比较结果变量 */
+  // 1.定义存放比较结果变量
   uint8_t TransferStatus;
   
-	/* LED 端口初始化 */
+	// 2.LED 端口初始化
 	LED_GPIO_Config();
     
-  /* 设置RGB彩色灯为紫色 */
+  // 3.设置RGB彩色灯为紫色
   LED_PURPLE;  
   
-  /* 简单延时函数 */
+  // 4.简单延时函数
   Delay(0xFFFFFF);  
   
-  /* DMA传输配置 */
+  // 5.DMA传输配置
   DMA_Config(); 
   
-  /* 等待DMA传输完成 */
-  while(DMA_GetFlagStatus(DMA_FLAG_TC)==RESET)
+  // 6.等待DMA传输完成
+  while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
   {
     
   }   
   
-  /* 比较源数据与传输后数据 */
-  TransferStatus=Buffercmp(aSRC_Const_Buffer, aDST_Buffer, BUFFER_SIZE);
+  // 7.比较源数据与传输后数据
+  TransferStatus = Buffercmp(aSRC_Const_Buffer, aDST_Buffer, BUFFER_SIZE);
   
-  /* 判断源数据与传输后数据比较结果*/
-  if(TransferStatus==0)  
+  // 8.判断源数据与传输后数据比较结果
+  if(TransferStatus == 0)  
   {
     /* 源数据与传输后数据不相等时RGB彩色灯显示红色 */
     LED_RED;
@@ -83,6 +73,7 @@ int main(void)
 
 	while (1)
 	{		
+
 	}
 }
 
@@ -91,49 +82,64 @@ void Delay(__IO uint32_t nCount)	 //简单的延时函数
 	for(; nCount != 0; nCount--);
 }
 
+// DMA配置函数
 void DMA_Config(void)
 {
+    // 1.DMA初始化结构体
 	  DMA_InitTypeDef DMA_InitStructure;
 	
-		// 开启DMA时钟
+		// 2.开启DMA时钟
 		RCC_AHBPeriphClockCmd(DMA_CLOCK, ENABLE);
-		// 源数据地址
+
+		// 3.源数据地址
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)aSRC_Const_Buffer;
-		// 目标地址
+
+		// 4.目标数据地址
 		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)aDST_Buffer;
-		// 方向：外设到存储器（这里的外设是内部的FLASH）	
+
+		// 6.设置传输方向：外设到存储器（这里的外设是内部的FLASH）	
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-		// 传输大小	
+
+		// 7.设置传输大小	
 		DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE;
-		// 外设（内部的FLASH）地址递增	    
+
+		// 8.设置外设（内部的FLASH）地址递增    
 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
-		// 内存地址递增
+
+		// 9.内存地址递增
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-		// 外设数据单位	
+
+		// 10.外设数据单位	
 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-		// 内存数据单位
-		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;	 
-		// DMA模式，一次或者循环模式
+
+		// 11.内存数据单位
+		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
+
+		// 12.设置DMA模式，一次或者循环模式
 		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-		//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;  
-		// 优先级：高	
+		//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+
+		// 13.设置通道优先级：高	
 		DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-		// 使能内存到内存的传输
+
+		// 14.使能内存到内存的传输
 		DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
-		// 配置DMA通道		   
+
+		// 15.配置DMA通道		   
 		DMA_Init(DMA_CHANNEL, &DMA_InitStructure);
-    //清除DMA数据流传输完成标志位
+
+    // 16.清除DMA数据流传输完成标志位
     DMA_ClearFlag(DMA_FLAG_TC);
-		// 使能DMA
-		DMA_Cmd(DMA_CHANNEL,ENABLE);
+
+		// 17.使能DMA
+		DMA_Cmd(DMA_CHANNEL, ENABLE);
 }
 
-/**
-  * 判断指定长度的两个数据源是否完全相等，
-  * 如果完全相等返回1，只要其中一对数据不相等返回0
-  */
-uint8_t Buffercmp(const uint32_t* pBuffer, 
-                  uint32_t* pBuffer1, uint16_t BufferLength)
+/*
+判断指定长度的两个数据源是否完全相等，
+如果完全相等返回1，只要其中一对数据不相等返回0
+*/
+uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength)
 {
   /* 数据长度递减 */
   while(BufferLength--)
@@ -149,7 +155,7 @@ uint8_t Buffercmp(const uint32_t* pBuffer,
     pBuffer1++;
   }
   /* 完成判断并且对应数据相对 */
-  return 1;  
+  return 1; // 数据完全相等
 }
 
 //typedef struct
@@ -166,5 +172,3 @@ uint8_t Buffercmp(const uint32_t* pBuffer,
 //  uint32_t DMA_Priority;             // 通道优先级
 //  uint32_t DMA_M2M;                  // 存储器到存储器模式
 //}DMA_InitTypeDef;
-
-/*********************************************END OF FILE**********************/
