@@ -1,60 +1,58 @@
-
 #include "bsp_usart_dma.h"
 
-uint8_t ReceiveBuff[RECEIVEBUFF_SIZE];
+uint8_t ReceiveBuff[RECEIVEBUFF_SIZE]; // 接收缓冲区
 
-/**
-  * @brief  USART GPIO 配置,工作参数配置
-  * @param  无
-  * @retval 无
-  */
+// 串口配置函数
 void USART_Config(void)
 {
+	// 结构体定义
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStruct;
-	// 打开串口GPIO的时钟
+
+	// 1.打开串口GPIO的时钟
 	DEBUG_USART_GPIO_APBxClkCmd(DEBUG_USART_GPIO_CLK, ENABLE);
 	
-	// 打开串口外设的时钟
+	// 2.打开串口外设的时钟
 	DEBUG_USART_APBxClkCmd(DEBUG_USART_CLK, ENABLE);
  	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	NVIC_InitStruct.NVIC_IRQChannel = DEBUG_USART_IRQ;
-	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 3;
-	NVIC_Init(&NVIC_InitStruct);
+	// 3.配置NVIC
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // 设置抢占优先级2
+	NVIC_InitStruct.NVIC_IRQChannel = DEBUG_USART_IRQ; // 设置中断源
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE; // 使能中断
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1; // 抢占优先级
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 3; // 响应优先级
+	NVIC_Init(&NVIC_InitStruct); // 初始化NVIC
 
-	// 将USART Tx的GPIO配置为推挽复用模式
-	GPIO_InitStructure.GPIO_Pin = DEBUG_USART_TX_GPIO_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(DEBUG_USART_TX_GPIO_PORT, &GPIO_InitStructure);
+	// 4.将USART Tx的GPIO配置为推挽复用模式
+	GPIO_InitStructure.GPIO_Pin = DEBUG_USART_TX_GPIO_PIN; // 设置Tx引脚-PA9
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;        // 设置复用推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 设置GPIO速度为50MHz
+	GPIO_Init(DEBUG_USART_TX_GPIO_PORT, &GPIO_InitStructure); // 初始化GPIO
 
-  // 将USART Rx的GPIO配置为浮空输入模式
-	GPIO_InitStructure.GPIO_Pin = DEBUG_USART_RX_GPIO_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(DEBUG_USART_RX_GPIO_PORT, &GPIO_InitStructure);
+    // 5.将USART Rx的GPIO配置为浮空输入模式
+	GPIO_InitStructure.GPIO_Pin = DEBUG_USART_RX_GPIO_PIN; // 设置Rx引脚-PA10
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  // 设置浮空输入
+	GPIO_Init(DEBUG_USART_RX_GPIO_PORT, &GPIO_InitStructure); // 初始化GPIO
 	
 	// 配置串口的工作参数
-	// 配置波特率
-	USART_InitStructure.USART_BaudRate = DEBUG_USART_BAUDRATE;
-	// 配置 针数据字长
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	// 配置停止位
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	// 配置校验位
-	USART_InitStructure.USART_Parity = USART_Parity_No ;
-	// 配置硬件流控制
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	// 配置工作模式，收发一起
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	// 完成串口的初始化配置
-	USART_Init(DEBUG_USARTx, &USART_InitStructure);	
-	//使能空闲中断
+	// 1.配置波特率
+	USART_InitStructure.USART_BaudRate = DEBUG_USART_BAUDRATE; // 设置波特率115200
+	// 2.配置数据字长
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 设置数据字长8位
+	// 3.配置停止位
+	USART_InitStructure.USART_StopBits = USART_StopBits_1; // 设置停止位1
+	// 4.配置校验位
+	USART_InitStructure.USART_Parity = USART_Parity_No; // 设置无校验位
+	// 5.配置硬件流控制
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 设置无硬件流控制
+	// 6.配置工作模式，收发一起
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 设置收发一起工作模式
+	// 7.完成串口的初始化配置
+	USART_Init(DEBUG_USARTx, &USART_InitStructure); // 初始化串口
+	// 8.使能空闲中断
 	USART_ITConfig(DEBUG_USARTx,USART_IT_IDLE,ENABLE);
-	// 使能串口
+	// 9.使能串口
 	USART_Cmd(DEBUG_USARTx, ENABLE);	    
 }
 
@@ -139,11 +137,7 @@ int fgetc(FILE *f)
 		return (int)USART_ReceiveData(DEBUG_USARTx);
 }
 
-/**
-  * @brief  USARTx TX DMA 配置，内存到外设(USART1->DR)
-  * @param  无
-  * @retval 无
-  */
+// USARTx TX DMA 配置，内存到外设(USART1->DR)
 void USARTx_DMA_Config(void)
 {
 		DMA_InitTypeDef DMA_InitStructure;
@@ -168,7 +162,7 @@ void USARTx_DMA_Config(void)
 		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;	 
 		// DMA模式，一次或者循环模式
 //		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-		DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;	
+		DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; // 循环模式
 		// 优先级：中	
 		DMA_InitStructure.DMA_Priority = DMA_Priority_Medium; 
 		// 禁止内存到内存的传输
@@ -178,6 +172,3 @@ void USARTx_DMA_Config(void)
 		// 使能DMA
 		DMA_Cmd (USART_TX_DMA_CHANNEL,ENABLE);
 }
-
-
-
