@@ -1,26 +1,8 @@
-/**
-  ******************************************************************************
-  * @file    main.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   I2C EEPROM(AT24C02)测试，存储小数
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */
-  
 #include "stm32f10x.h"
 #include "./usart/bsp_usart.h"
 #include "./i2c/bsp_i2c_ee.h"
 #include "./led/bsp_led.h"
 #include <string.h>
-
 
 uint8_t cal_flag = 0;
 uint8_t k;
@@ -32,11 +14,6 @@ int int_bufffer[7] = {0};
 #define DOUBLE_ADDR       10
 #define LONGINT_ADDR      70
 
-/**
-  * @brief  主函数
-  * @param  无
-  * @retval 无
-  */
 int main(void)
 { 
   LED_GPIO_Config();
@@ -109,5 +86,3 @@ int main(void)
   {      
   }
 }
-
-/*********************************************END OF FILE**********************/

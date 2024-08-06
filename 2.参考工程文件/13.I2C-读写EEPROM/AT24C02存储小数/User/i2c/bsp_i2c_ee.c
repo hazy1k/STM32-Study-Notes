@@ -1,27 +1,10 @@
-/**
-  ******************************************************************************
-  * @file    bsp_i2c_ee.c
-  * @author  STMicroelectronics
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   i2c EEPROM(AT24C02)应用函数bsp
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
-
 #include "./i2c/bsp_i2c_ee.h"
 #include "./usart/bsp_usart.h"		
 
-/* STM32 I2C 快速模式 */
-#define I2C_Speed              400000  //*
+// STM32 I2C 快速模式
+#define I2C_Speed              400000 
 
-/* 这个地址只要与STM32外挂的I2C器件地址不一样即可 */
+// 这个地址只要与STM32外挂的I2C器件地址不一样即可
 #define I2Cx_OWN_ADDRESS7      0X0A   
 
 /* AT24C01/02每页有8个字节 */
@@ -38,78 +21,58 @@ static __IO uint32_t  I2CTimeout = I2CT_LONG_TIMEOUT;
 
 static uint32_t I2C_TIMEOUT_UserCallback(uint8_t errorCode);
 
-
-/**
-  * @brief  I2C I/O配置
-  * @param  无
-  * @retval 无
-  */
+// I2C的GPIO基础配置
 static void I2C_GPIO_Config(void)
 {
   GPIO_InitTypeDef  GPIO_InitStructure; 
 
-	/* 使能与 I2C 有关的时钟 */
-	EEPROM_I2C_APBxClock_FUN ( EEPROM_I2C_CLK, ENABLE );
-	EEPROM_I2C_GPIO_APBxClock_FUN ( EEPROM_I2C_GPIO_CLK, ENABLE );
+	// 使能与 I2C 有关的时钟
+	EEPROM_I2C_APBxClock_FUN (EEPROM_I2C_CLK, ENABLE );           // 使能I2C时钟
+	EEPROM_I2C_GPIO_APBxClock_FUN (EEPROM_I2C_GPIO_CLK, ENABLE ); // 使能I2C的GPIO时钟
 	
-    
-  /* I2C_SCL、I2C_SDA*/
-  GPIO_InitStructure.GPIO_Pin = EEPROM_I2C_SCL_PIN;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  // I2C_SCL、I2C_SDA配置
+  GPIO_InitStructure.GPIO_Pin = EEPROM_I2C_SCL_PIN;      // SCL引脚
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 50MHz
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;	       // 开漏输出
-  GPIO_Init(EEPROM_I2C_SCL_PORT, &GPIO_InitStructure);
+  GPIO_Init(EEPROM_I2C_SCL_PORT, &GPIO_InitStructure);   // 初始化SCL引脚
 	
-  GPIO_InitStructure.GPIO_Pin = EEPROM_I2C_SDA_PIN;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Pin = EEPROM_I2C_SDA_PIN;      // SDA引脚
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 50MHz
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;	       // 开漏输出
-  GPIO_Init(EEPROM_I2C_SDA_PORT, &GPIO_InitStructure);	
-	
-	
+  GPIO_Init(EEPROM_I2C_SDA_PORT, &GPIO_InitStructure);	 // 初始化SDA引脚 
 }
 
-
-/**
-  * @brief  I2C 工作模式配置
-  * @param  无
-  * @retval 无
-  */
+// I2C工作模式配置
 static void I2C_Mode_Configu(void)
 {
+  // 1.先定义一个结构体
   I2C_InitTypeDef  I2C_InitStructure; 
 
-  /* I2C 配置 */
+  // 2.I2C模式配置
   I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
 	
-	/* 高电平数据稳定，低电平数据变化 SCL 时钟线的占空比 */
+	// 3.高电平数据稳定，低电平数据变化 SCL 时钟线的占空比
   I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+  I2C_InitStructure.I2C_OwnAddress1 =I2Cx_OWN_ADDRESS7;
+
+  I2C_InitStructure.I2C_Ack = I2C_Ack_Enable; // 使能应答
 	
-  I2C_InitStructure.I2C_OwnAddress1 =I2Cx_OWN_ADDRESS7; 
-  I2C_InitStructure.I2C_Ack = I2C_Ack_Enable ;
+	// 4.I2C的寻址模式
+  I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; // 7位地址模式
 	
-	/* I2C的寻址模式 */
-  I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-	
-	/* 通信速率 */
-  I2C_InitStructure.I2C_ClockSpeed = I2C_Speed;
+	// 5.通信速率
+  I2C_InitStructure.I2C_ClockSpeed = I2C_Speed; // 快速模式
   
-	/* I2C 初始化 */
+	// 6.I2C 初始化
   I2C_Init(EEPROM_I2Cx, &I2C_InitStructure);
-  
-	/* 使能 I2C */
   I2C_Cmd(EEPROM_I2Cx, ENABLE);   
 }
 
-
-/**
-  * @brief  I2C 外设(EEPROM)初始化
-  * @param  无
-  * @retval 无
-  */
+// I2C 外设(EEPROM)初始化
 void I2C_EE_Init(void)
 {
 
-  I2C_GPIO_Config(); 
- 
+  I2C_GPIO_Config();  
   I2C_Mode_Configu();
 
 /* 根据头文件i2c_ee.h中的定义来选择EEPROM要写入的地址 */
@@ -134,16 +97,8 @@ void I2C_EE_Init(void)
 #endif
 }
 
-
-/**
-  * @brief   将缓冲区中的数据写到I2C EEPROM中
-  * @param   
-  *		@arg pBuffer:缓冲区指针
-  *		@arg WriteAddr:写地址
-  *     @arg NumByteToWrite:写的字节数
-  * @retval  无
-  */
-void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
+// 将缓冲区中的数据写到I2C EEPROM中
+void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite) // 函数参数：缓冲区指针，写地址，写字节数
 {
   u8 NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0;
 
@@ -220,14 +175,8 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 }
 
 
-/**
-  * @brief   写一个字节到I2C EEPROM中
-  * @param   
-  *		@arg pBuffer:缓冲区指针
-  *		@arg WriteAddr:写地址 
-  * @retval  无
-  */
-uint32_t I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr) 
+// 写一个字节到I2C EEPROM中
+uint32_t I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr) // 函数参数：缓冲区指针，写地址 
 {
   /* Send STRAT condition */
   I2C_GenerateSTART(EEPROM_I2Cx, ENABLE);
@@ -485,9 +434,6 @@ void I2C_EE_WaitEepromStandbyState(void)
     I2C_GenerateSTOP(EEPROM_I2Cx, ENABLE); 
 }
 
-
-
-
 /**
   * @brief  Basic management of the timeout situation.
   * @param  errorCode：错误代码，可以用来定位是哪个环节出错.
@@ -500,5 +446,3 @@ static  uint32_t I2C_TIMEOUT_UserCallback(uint8_t errorCode)
   
   return 0;
 }
-/*********************************************END OF FILE**********************/
-

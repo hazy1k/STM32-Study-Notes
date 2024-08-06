@@ -1,31 +1,8 @@
-/**
-  ******************************************************************************
-  * @file    bsp_i2c_ee.c
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   i2c EEPROM(AT24C02)应用函数bsp
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
-
 #include "bsp_i2c_ee.h"
 #include "bsp_i2c_gpio.h"
 #include "bsp_usart.h" 
 
-/*
-*********************************************************************************************************
-*	函 数 名: ee_CheckOk
-*	功能说明: 判断串行EERPOM是否正常
-*	形    参：无
-*	返 回 值: 1 表示正常， 0 表示不正常
-*********************************************************************************************************
-*/
+// 判断串行EERPOM是否正常
 uint8_t ee_CheckOk(void)
 {
 	if (i2c_CheckDevice(EEPROM_DEV_ADDR) == 0)
@@ -40,17 +17,8 @@ uint8_t ee_CheckOk(void)
 	}
 }
 
-/*
-*********************************************************************************************************
-*	函 数 名: ee_ReadBytes
-*	功能说明: 从串行EEPROM指定地址处开始读取若干数据
-*	形    参：_usAddress : 起始地址
-*			 _usSize : 数据长度，单位为字节
-*			 _pReadBuf : 存放读到的数据的缓冲区指针
-*	返 回 值: 0 表示失败，1表示成功
-*********************************************************************************************************
-*/
-uint8_t ee_ReadBytes(uint8_t *_pReadBuf, uint16_t _usAddress, uint16_t _usSize)
+// 从串行EEPROM指定地址处开始读取若干数据
+uint8_t ee_ReadBytes(uint8_t *_pReadBuf, uint16_t _usAddress, uint16_t _usSize) // 函数参数：读缓冲区指针，起始地址，数据长度
 {
 	uint16_t i;
 	
@@ -114,17 +82,8 @@ cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	return 0;
 }
 
-/*
-*********************************************************************************************************
-*	函 数 名: ee_WriteBytes
-*	功能说明: 向串行EEPROM指定地址写入若干数据，采用页写操作提高写入效率
-*	形    参：_usAddress : 起始地址
-*			 _usSize : 数据长度，单位为字节
-*			 _pWriteBuf : 存放读到的数据的缓冲区指针
-*	返 回 值: 0 表示失败，1表示成功
-*********************************************************************************************************
-*/
-uint8_t ee_WriteBytes(uint8_t *_pWriteBuf, uint16_t _usAddress, uint16_t _usSize)
+// 向串行EEPROM指定地址写入若干数据，采用页写操作提高写入效率
+uint8_t ee_WriteBytes(uint8_t *_pWriteBuf, uint16_t _usAddress, uint16_t _usSize) // 函数参数：写缓冲区指针，起始地址，数据长度
 {
 	uint16_t i,m;
 	uint16_t usAddr;
@@ -135,7 +94,6 @@ uint8_t ee_WriteBytes(uint8_t *_pWriteBuf, uint16_t _usAddress, uint16_t _usSize
 		简单的处理方法为：按字节写操作模式，每写1个字节，都发送地址
 		为了提高连续写的效率: 本函数采用page wirte操作。
 	*/
-
 	usAddr = _usAddress;	
 	for (i = 0; i < _usSize; i++)
 	{
@@ -199,7 +157,7 @@ cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	return 0;
 }
 
-
+// EEPROM擦除数据
 void ee_Erase(void)
 {
 	uint16_t i;
@@ -223,40 +181,29 @@ void ee_Erase(void)
 	}
 }
 
-
-/*--------------------------------------------------------------------------------------------------*/
 static void ee_Delay(__IO uint32_t nCount)	 //简单的延时函数
 {
 	for(; nCount != 0; nCount--);
 }
 
-
-/*
- * eeprom AT24C02 读写测试
- * 正常返回1，异常返回0
- */
+// eeprom AT24C02 读写测试
 uint8_t ee_Test(void) 
 {
   uint16_t i;
-	uint8_t write_buf[EEPROM_SIZE];
-  uint8_t read_buf[EEPROM_SIZE];
+  uint8_t write_buf[EEPROM_SIZE]; // 写缓冲区
+  uint8_t read_buf[EEPROM_SIZE]; // 读缓冲区
   
-/*-----------------------------------------------------------------------------------*/  
   if (ee_CheckOk() == 0)
 	{
-		/* 没有检测到EEPROM */
-		printf("没有检测到串行EEPROM!\r\n");
-				
+		printf("没有检测到串行EEPROM!\r\n");			
 		return 0;
 	}
-/*------------------------------------------------------------------------------------*/  
-  /* 填充测试缓冲区 */
+    // 填充测试缓冲区
 	for (i = 0; i < EEPROM_SIZE; i++)
 	{		
 		write_buf[i] = i;
 	}
-/*------------------------------------------------------------------------------------*/  
-  if (ee_WriteBytes(write_buf, 0, EEPROM_SIZE) == 0)
+    if(ee_WriteBytes(write_buf, 0, EEPROM_SIZE) == 0)
 	{
 		printf("写eeprom出错！\r\n");
 		return 0;
@@ -268,7 +215,7 @@ uint8_t ee_Test(void)
   
   /*写完之后需要适当的延时再去读，不然会出错*/
   ee_Delay(0x0FFFFF);
-/*-----------------------------------------------------------------------------------*/
+
   if (ee_ReadBytes(read_buf, 0, EEPROM_SIZE) == 0)
 	{
 		printf("读eeprom出错！\r\n");
@@ -278,7 +225,8 @@ uint8_t ee_Test(void)
 	{		
 		printf("读eeprom成功，数据如下：\r\n");
 	}
-/*-----------------------------------------------------------------------------------*/  
+ 
+  // 检查读出的数据是否正确
   for (i = 0; i < EEPROM_SIZE; i++)
 	{
 		if(read_buf[i] != write_buf[i])
@@ -297,4 +245,3 @@ uint8_t ee_Test(void)
   printf("eeprom读写测试成功\r\n");
   return 1;
 }
-/*********************************************END OF FILE**********************/

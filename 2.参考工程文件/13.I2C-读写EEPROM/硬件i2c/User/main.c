@@ -49,11 +49,11 @@ uint8_t I2C_Test(void)
    }
 
   //将I2c_Buf_Write中顺序递增的数据写入EERPOM中 
-	I2C_EE_BufferWrite(I2c_Buf_Write, EEP_Firstpage, 256); // 写入EEPROM函数参数：写入缓冲区，起始页地址，写入长度
+  I2C_EE_BufferWrite(I2c_Buf_Write, EEP_Firstpage, 256); // 写入EEPROM函数参数：写入缓冲区，起始页地址，写入长度
   EEPROM_INFO("\n\r写成功\n\r"); // 宏定义，打印提示信息 
   EEPROM_INFO("\n\r读出的数据\n\r"); // 宏定义，打印提示信息 
   //将EEPROM读出数据顺序保持到I2c_Buf_Read中
-	I2C_EE_BufferRead(I2c_Buf_Read, EEP_Firstpage, 256); // 读取EEPROM函数参数：读取缓冲区，起始页地址，读取长度
+  I2C_EE_BufferRead(I2c_Buf_Read, EEP_Firstpage, 256); // 读取EEPROM函数参数：读取缓冲区，起始页地址，读取长度
    
   // 将I2c_Buf_Read中的数据通过串口打印
 	for(i = 0; i < 256; i++)

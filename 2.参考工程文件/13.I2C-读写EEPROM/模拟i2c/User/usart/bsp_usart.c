@@ -1,28 +1,6 @@
-/**
-  ******************************************************************************
-  * @file    bsp_usart.c
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   调试用的printf串口，重定向printf到串口
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
-
-
 #include "./usart/bsp_usart.h"
 
-
- /**
-  * @brief  USART GPIO 配置,工作参数配置
-  * @param  无
-  * @retval 无
-  */
+// 串口初始化配置
 void USART_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -86,4 +64,3 @@ int fgetc(FILE *f)
 
 		return (int)USART_ReceiveData(DEBUG_USARTx);
 }
-
