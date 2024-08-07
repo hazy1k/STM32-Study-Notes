@@ -1,7 +1,8 @@
 {
     "folders": [
         {
-            "path": "."
+            "name": "RT-Thread MicroPython",
+            "path": "../../../../../../study_ESP32/4.参考实验程序/template"
         }
     ],
     "settings": {
@@ -9,16 +10,7 @@
         "C_Cpp.default.configurationProvider": "cl.eide",
         "C_Cpp.errorSquiggles": "disabled",
         "files.associations": {
-            ".eideignore": "ignore",
-            "*.a51": "a51",
-            "*.h": "c",
-            "*.c": "c",
-            "*.hxx": "cpp",
-            "*.hpp": "cpp",
-            "*.c++": "cpp",
-            "*.cpp": "cpp",
-            "*.cxx": "cpp",
-            "*.cc": "cpp"
+            ".mpyproject.json": "jsonc"
         },
         "[yaml]": {
             "editor.insertSpaces": true,
@@ -42,6 +34,12 @@
                 "command": "extension.execute",
                 "priority": 4
             }
+        ],
+        "python.autoComplete.extraPaths": [
+            "c:/Users/qiu/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
+        ],
+        "python.analysis.extraPaths": [
+            "c:/Users/qiu/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
         ]
     },
     "extensions": {
