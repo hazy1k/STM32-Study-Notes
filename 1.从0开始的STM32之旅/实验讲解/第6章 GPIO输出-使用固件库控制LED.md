@@ -2,7 +2,7 @@
 
 ## 1. 硬件设计
 
-    在开发板上面与LED的连接见图 [LED硬件原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_output.html#led) ，这是一个RGB灯，里面由红蓝绿三个小灯构成， 使用PWM控制时可以混合成256不同的颜色。
+    在开发板上面与LED的连接见图，这是一个RGB灯，里面由红蓝绿三个小灯构成， 使用PWM控制时可以混合成256不同的颜色。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/GPIOou002.png)
 
@@ -113,7 +113,7 @@ void LED_GPIO_Config(void)
     GPIO_InitTypeDef GPIO_InitStructure;
 
     /*开启LED相关的GPIO外设时钟*/
-    RCC_APB2PeriphClockCmd( LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
+    RCC_APB2PeriphClockCmd(LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
     /*选择要控制的GPIO引脚*/
     GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;
     /*设置引脚模式为通用推挽输出*/
@@ -274,4 +274,6 @@ GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);
 
 ---
 
-2024.7.22第一次修订
+2024.7.22 第一次修订
+
+2024.8.80 第二次修订，后期不再维护

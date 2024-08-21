@@ -4,7 +4,7 @@
 
     本章我们用到的硬件是-机械按键开关。在51单片机里我们已经学过了。此出再强调一下消抖。
 
-    按键机械触点断开、闭合时，由于触点的弹性作用，按键开关不会马上稳定接通或一下子断开， 使用按键时会产生图 [按键抖动说明图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_input.html#id2) 中的带波纹信号，需要用软件消抖处理滤波，不方便输入检测。本实验板连接的按键带硬件消抖功能， 见图 [按键原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/GPIO_input.html#id3) ，它利用电容充放电的延时，消除了波纹，从而简化软件的处理，软件只需要直接检测引脚的电平即可。
+    按键机械触点断开、闭合时，由于触点的弹性作用，按键开关不会马上稳定接通或一下子断开， 使用按键时会产生带波纹信号，需要用软件消抖处理滤波，不方便输入检测。本实验板连接的按键带硬件消抖功能， 见图 ，它利用电容充放电的延时，消除了波纹，从而简化软件的处理，软件只需要直接检测引脚的电平即可。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/GPIOin002.jpg)
 
@@ -58,7 +58,7 @@ void Key_GPIO_Config(void)
     // 选择按键的引脚
     GPIO_InitStructure.GPIO_Pin = KEY1_GPIO_PIN; 
     // 设置按键的引脚为浮空输入
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; // 浮空输入
     // 使用结构体初始化按键
     GPIO_Init(KEY1_GPIO_PORT, &GPIO_InitStructure);
 
@@ -89,14 +89,14 @@ void Key_GPIO_Config(void)
 
 ```c
 // 按键检测函数
-uint8_t Key_Scan(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+uint8_t Key_Scan(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) // 函数参数：端口号，引脚
 {            
     /*检测是否有按键按下 */
-    if(GPIO_ReadInputDataBit(GPIOx, GPIO_Pin) == KEY_ON )  
+    if(GPIO_ReadInputDataBit(GPIOx, GPIO_Pin) == KEY_ON ) // 库函数：GPIO_ReadInputDataBit，用于获取引脚状态
     {     
         /*等待按键释放 */
         while(GPIO_ReadInputDataBit(GPIOx,GPIO_Pin) == KEY_ON);   
-        return     KEY_ON;     
+        return KEY_ON;     
     }
     else
         return KEY_OFF;
@@ -196,6 +196,81 @@ int main(void)
 
     代码不难而且注释也写得很详细了，主要就是一个配置问题和一个扫描函数，led可以照搬
 
+    扫描按键函数中我们使用了一个新的库函数-GPIO_ReadInputDataBit，下面我们详细解释一下（以后一旦我们遇到新函数，都尽量解释一下吧，慢慢见多识广了）：
+
+在 STM32 标准外设库中，`GPIO_ReadInputDataBit` 函数的原型通常如下：
+
+```c
+BitAction GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, GPIO_PinState GPIO_Pin);
+```
+
+参数说明：
+
+1. **`GPIOx`**:
+   
+   - 类型：`GPIO_TypeDef*`
+   - 描述：指定要读取的 GPIO 端口。`GPIOx` 是一个指向 GPIO 端口寄存器的指针，如 `GPIOA`, `GPIOB`, `GPIOC` 等。
+   
+   例如，如果你传入 `GPIOA`，函数将读取 GPIOA 端口的引脚状态。
+
+2. **`GPIO_Pin`**:
+   
+   - 类型：`GPIO_PinState`
+   - 描述：指定要读取的 GPIO 引脚。这个参数是一个掩码值，用于选择特定的引脚。例如，`GPIO_Pin_0` 表示第 0 号引脚，`GPIO_Pin_1` 表示第 1 号引脚，依此类推。
+
+返回值：
+
+- **`Bit_SET`**：表示指定的 GPIO 引脚为高电平（逻辑 1）。
+- **`Bit_RESET`**：表示指定的 GPIO 引脚为低电平（逻辑 0）。
+
+函数作用：
+
+`GPIO_ReadInputDataBit` 函数的主要作用是读取一个 GPIO 引脚的电平状态，这在需要根据引脚的电平状态来做决策时非常有用。例如，读取一个按钮的状态或传感器的输出。
+
+假设你要读取 GPIOA 端口的第 5 号引脚的电平状态，你可以使用 `GPIO_ReadInputDataBit` 函数来完成。下面是一个简单的示例代码：
+
+```c
+#include "stm32f10x.h"
+
+// 假设你已经配置好了 GPIOA 的第 5 号引脚为输入模式
+
+int main(void)
+{
+    // 初始化 GPIOA，第 5 号引脚为输入模式
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    while (1)
+    {
+        // 读取 GPIOA 的第 5 号引脚的电平状态
+        BitAction pinState = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5);
+        
+        if (pinState == Bit_SET)
+        {
+            // 引脚为高电平，执行相关操作
+        }
+        else
+        {
+            // 引脚为低电平，执行相关操作
+        }
+        
+        // 延迟或其他操作
+    }
+}
+
+```
+
+在这个示例中：
+
+1. **GPIOA** 的第 5 号引脚被配置为浮空输入模式。
+2. `GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5)` 用于读取该引脚的电平状态。
+3. 根据返回的电平状态（`Bit_SET` 或 `Bit_RESET`），程序可以执行不同的操作。
+
 ---
 
-2024.7.22第一次修订
+2024.7.22 第一次修订
+
+2024.8.20 第二次修订，后期不再维护
