@@ -1,27 +1,5 @@
-/**
-  ******************************************************************************
-  * @file    bsp_usart.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   重定向c库printf函数到usart端口
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火STM32 F103-指南者 开发板  
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
-	
 #include "bsp_usart.h"
 
- /**
-  * @brief  配置嵌套向量中断控制器NVIC
-  * @param  无
-  * @retval 无
-  */
 static void NVIC_Configuration(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
@@ -41,11 +19,6 @@ static void NVIC_Configuration(void)
   NVIC_Init(&NVIC_InitStructure);
 }
 
- /**
-  * @brief  USART GPIO 配置,工作参数配置
-  * @param  无
-  * @retval 无
-  */
 void USART_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;

@@ -1,17 +1,13 @@
 
 #include "bsp_GeneralTim.h" 
 
-/**
-  * @brief  通用定时器PWM输出用到的GPIO初始化
-  * @param  无
-  * @retval 无
-  */
+// 通用定时器PWM输出用到的GPIO初始化
 static void GENERAL_TIM_GPIO_Config(void) 
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 
   // 输出比较通道1 GPIO 初始化
-	RCC_APB2PeriphClockCmd(GENERAL_TIM_CH1_GPIO_CLK, ENABLE);
+  RCC_APB2PeriphClockCmd(GENERAL_TIM_CH1_GPIO_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin =  GENERAL_TIM_CH1_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -39,33 +35,7 @@ static void GENERAL_TIM_GPIO_Config(void)
   GPIO_Init(GENERAL_TIM_CH3_PORT, &GPIO_InitStructure);
 }
 
-
-///*
-// * 注意：TIM_TimeBaseInitTypeDef结构体里面有5个成员，TIM6和TIM7的寄存器里面只有
-// * TIM_Prescaler和TIM_Period，所以使用TIM6和TIM7的时候只需初始化这两个成员即可，
-// * 另外三个成员是通用定时器和高级定时器才有.
-// *-----------------------------------------------------------------------------
-// *typedef struct
-// *{ TIM_Prescaler            都有
-// *	TIM_CounterMode			     TIMx,x[6,7]没有，其他都有
-// *  TIM_Period               都有
-// *  TIM_ClockDivision        TIMx,x[6,7]没有，其他都有
-// *  TIM_RepetitionCounter    TIMx,x[1,8,15,16,17]才有
-// *}TIM_TimeBaseInitTypeDef; 
-// *-----------------------------------------------------------------------------
-// */
-
-/* ----------------   PWM信号 周期和占空比的计算--------------- */
-// ARR ：自动重装载寄存器的值
-// CLK_cnt：计数器的时钟，等于 Fck_int / (psc+1) = 72M/(psc+1)
-// PWM 信号的周期 T = ARR * (1/CLK_cnt) = ARR*(PSC+1) / 72M
-// 占空比P=CCR/(ARR+1)
-/**
-  * @brief  通用定时器PWM输出初始化
-  * @param  无
-  * @retval 无
-	* @note   
-  */
+// 通用定时器PWM输出初始化
 static void GENERAL_TIM_Mode_Config(void)
 {
   // 开启定时器时钟,即内部时钟CK_INT=72M
@@ -121,15 +91,8 @@ static void GENERAL_TIM_Mode_Config(void)
 	TIM_Cmd(GENERAL_TIM, ENABLE);
 }
 
-/**
-  * @brief  通用定时器PWM输出用到的GPIO和PWM模式初始化
-  * @param  无
-  * @retval 无
-  */
 void GENERAL_TIM_Init(void)
 {
 	GENERAL_TIM_GPIO_Config();
 	GENERAL_TIM_Mode_Config();		
 }
-
-/*********************************************END OF FILE**********************/

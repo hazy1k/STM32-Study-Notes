@@ -1,11 +1,6 @@
-
 #include "bsp_AdvanceTim.h" 
 
- /**
-  * @brief  高级控制定时器 TIMx,x[1,8]中断优先级配置
-  * @param  无
-  * @retval 无
-  */
+// 高级控制定时器 TIMx 中断优先级配置
 static void ADVANCE_TIM_NVIC_Config(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure; 
@@ -20,11 +15,8 @@ static void ADVANCE_TIM_NVIC_Config(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
-/**
-  * @brief  高级定时器PWM输入用到的GPIO初始化
-  * @param  无
-  * @retval 无
-  */
+
+// 高级定时器GPIO初始化
 static void ADVANCE_TIM_GPIO_Config(void) 
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -35,33 +27,7 @@ static void ADVANCE_TIM_GPIO_Config(void)
   GPIO_Init(ADVANCE_TIM_CH1_PORT, &GPIO_InitStructure);	
 }
 
-
-///*
-// * 注意：TIM_TimeBaseInitTypeDef结构体里面有5个成员，TIM6和TIM7的寄存器里面只有
-// * TIM_Prescaler和TIM_Period，所以使用TIM6和TIM7的时候只需初始化这两个成员即可，
-// * 另外三个成员是通用定时器和高级定时器才有.
-// *-----------------------------------------------------------------------------
-// *typedef struct
-// *{ TIM_Prescaler            都有
-// *	TIM_CounterMode			     TIMx,x[6,7]没有，其他都有
-// *  TIM_Period               都有
-// *  TIM_ClockDivision        TIMx,x[6,7]没有，其他都有
-// *  TIM_RepetitionCounter    TIMx,x[1,8,15,16,17]才有
-// *}TIM_TimeBaseInitTypeDef; 
-// *-----------------------------------------------------------------------------
-// */
-
-/* ----------------   PWM信号 周期和占空比的计算--------------- */
-// ARR ：自动重装载寄存器的值
-// CLK_cnt：计数器的时钟，等于 Fck_int / (psc+1) = 72M/(psc+1)
-// PWM 信号的周期 T = ARR * (1/CLK_cnt) = ARR*(PSC+1) / 72M
-// 占空比P=CCR/(ARR+1)
-
-/**
-  * @brief  高级定时器PWM输入初始化和用到的GPIO初始化
-  * @param  无
-  * @retval 无
-  */
+// 高级定时器模式配置
 static void ADVANCE_TIM_Mode_Config(void)
 {
   // 开启定时器时钟,即内部时钟CK_INT=72M
@@ -127,16 +93,10 @@ static void ADVANCE_TIM_Mode_Config(void)
 	 // 使能高级控制定时器，计数器开始计数
   TIM_Cmd(ADVANCE_TIM, ENABLE);
 }
-/**
-  * @brief  高级定时器PWM输入初始化和用到的GPIO初始化
-  * @param  无
-  * @retval 无
-  */
+
 void ADVANCE_TIM_Init(void)
 {
 	ADVANCE_TIM_GPIO_Config();
 	ADVANCE_TIM_NVIC_Config();
 	ADVANCE_TIM_Mode_Config();		
 }
-
-/*********************************************END OF FILE**********************/

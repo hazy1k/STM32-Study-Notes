@@ -29,11 +29,7 @@
 #define            ADVANCE_TIM_IC1PWM_CHANNEL    TIM_Channel_1
 #define            ADVANCE_TIM_IC2PWM_CHANNEL    TIM_Channel_2
 
-/**************************º¯ÊýÉùÃ÷********************************/
-
 void ADVANCE_TIM_Init(void);
 
 
-#endif	/* __BSP_ADVANCETIME_H */
-
-
+#endif
