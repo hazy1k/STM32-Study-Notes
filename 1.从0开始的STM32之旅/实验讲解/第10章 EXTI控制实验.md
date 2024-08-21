@@ -16,7 +16,7 @@
 
 ```c
 #ifndef __EXTI_H
-#define    __EXTI_H
+#define __EXTI_H
 
 
 #include "stm32f10x.h"
@@ -95,7 +95,7 @@ void EXTI_Key_Config(void)
 
     // 使能GPIO时钟
     RCC_APB2PeriphClockCmd(KEY1_INT_GPIO_CLK, ENABLE);
-  RCC_APB2PeriphClockCmd(KEY2_INT_GPIO_CLK, ENABLE);
+    RCC_APB2PeriphClockCmd(KEY2_INT_GPIO_CLK, ENABLE);
 
     // 配置NVIC中断
     NVIC_Configuration();
@@ -156,3 +156,9 @@ void EXTI_Key_Config(void)
 - 中断服务函数：首先肯定是要先初始化GPIO和EXTI两个结构体啦，再有打开时钟不能完，初始化一下NVIC。前期工作完成，正式来配置key1（key2同理）这个也比较公式化了再配合EXTI框图应该比较容易，1.选择引脚；2.配置输入模式（浮空输入）；3.选择EXTI作为信号源；4.配置EXTI为中断模式；5.使EXTI上升沿中断；6.使能中断
 
 达成的效果：当我们按下按键->产生中断->led状态翻转（我们这里使用按键控制）
+
+也没有出现新的库函数，在中断应用中我们就已经介绍过了，
+
+---
+
+2024.8.21 第一次修订，后期不再维护
