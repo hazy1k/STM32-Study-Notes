@@ -84,7 +84,50 @@ static void NVIC_Configuration(void)
 
     当然，我们也可以把抢占优先级设置成一样，子优先级设置成不一样，这样就可以区别两个按键同时按下的情况，而不用硬件去对比硬件编号。
 
-3. 编写中断服务函数；
+3. 编写中断服务函数
+
+```c
+void KEY1_IRQHandler(void)
+{
+  //确保是否产生了EXTI Line中断
+	if(EXTI_GetITStatus(KEY1_INT_EXTI_LINE) != RESET) 
+	{
+		// LED1 取反		
+		LED1_TOGGLE;
+    //清除中断标志位
+		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
+	}  
+}
+
+void KEY2_IRQHandler(void)
+{
+  //确保是否产生了EXTI Line中断
+	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
+	{
+		// LED2 取反		
+		LED2_TOGGLE;
+    //清除中断标志位
+		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
+	}  
+}
+```
+
+来分析一下新出现的库函数吧：
+
+### `EXTI_GetITStatus`
+
+- **功能**: 该函数用于检查指定的外部中断线的中断状态。
+- **原型**: `ITStatus EXTI_GetITStatus(uint32_t EXTI_Line);`
+- **参数**: `EXTI_Line` 是要检查的外部中断线的标识符，通常是一个位掩码。
+- **返回值**: 返回 `SET` 或 `RESET`。如果中断发生，则返回 `SET`，否则返回 `RESET`。
+
+### `EXTI_ClearITPendingBit`
+
+- **功能**: 清除指定外部中断线的中断挂起标志位，以便下一次中断可以正常触发。
+- **原型**: `void EXTI_ClearITPendingBit(uint32_t EXTI_Line);`
+- **参数**: `EXTI_Line` 是要清除中断挂起标志位的外部中断线标识符。
+- **返回值**: 无返回值。
+4. EXTI 初始化
 
 ```c
 // 配置IO为EXTI中断口，并设置中断优先级

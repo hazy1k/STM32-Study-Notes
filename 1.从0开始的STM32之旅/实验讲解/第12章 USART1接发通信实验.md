@@ -2,13 +2,29 @@
 
 ## 1. 硬件设计
 
-为利用USART实现开发板与电脑通信，需要用到一个USB转USART的IC，我们选择CH340G芯片来实现这个功能，CH340G是一个USB总线的转接芯片， 实现USB转USART、USB转lrDA红外或者USB转打印机接口，我们使用其USB转USART功能。具体电路设计见图 [USB转串口硬件设计](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#usb) 。
+为利用USART实现开发板与电脑通信，需要用到一个USB转USART的IC，我们选择CH340G芯片来实现这个功能，CH340G是一个USB总线的转接芯片， 实现USB转USART、USB转lrDA红外或者USB转打印机接口，我们使用其USB转USART功能。
 
 我们将CH340G的TXD引脚与USART1的RX引脚连接，CH340G的RXD引脚与USART1的TX引脚连接。CH340G芯片集成在开发板上，其地线(GND)已与控制器的GND连通。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART011.png)
 
 ## 2. 软件设计
+
+### 2.1 编程目标
+
+1. 使能RX和TX引脚GPIO时钟和USART时钟；
+
+2. 初始化GPIO，并将GPIO复用到USART上；
+
+3. 配置USART参数；
+
+4. 配置中断控制器并使能USART接收中断；
+
+5. 使能USART；
+
+6. 在USART接收中断服务函数实现数据接收和发送。
+
+### 2.2 代码分析
 
 - USART1头文件配置-设置端口、引脚、中断
 
@@ -36,6 +52,10 @@
 #define  DEBUG_USART_IRQHandler         USART1_IRQHandler      // 串口1中断服务函数
 ```
 
+使用宏定义方便程序移植和升级 。开发板中的CH340G的收发引脚默认通过跳帽连接到USART1，如果想使用其他串口， 可以把CH340G跟USART1直接的连接跳帽拔掉，然后再把其他串口的IO用杜邦线接到CH340G的收发引脚即可。
+
+这里我们使用USART1，设定波特率为115200，选定USART的GPIO为PA9和PA10。
+
 - 配置NVIC
 
 ```c
@@ -62,6 +82,54 @@ static void NVIC_Configuration(void)
 }
 ```
 
+在中断章节已对嵌套向量中断控制器的工作机制做了详细的讲解，这里我们就直接使用，配置USART作为中断源，因为本实验没有使用其他中断，对优先级没什么具体要求。
+
+- 串口中断服务函数
+
+```c
+// 串口中断服务函数
+void DEBUG_USART_IRQHandler(void)
+{
+  uint8_t ucTemp;
+	if(USART_GetITStatus(DEBUG_USARTx, USART_IT_RXNE)!=RESET)
+	{		
+		ucTemp = USART_ReceiveData(DEBUG_USARTx);
+    USART_SendData(DEBUG_USARTx,ucTemp);    
+	}	 
+}
+```
+
+关于中断函数我们要详细说明一下，因为出现了新的库函数：
+
+1. **中断服务函数定义**：
+   
+   - `DEBUG_USART_IRQHandler()` 是一个串口中断服务函数，用于处理指定的串口（如 `DEBUG_USARTx`）的中断事件。
+
+2. **局部变量**：
+   
+   - `uint8_t ucTemp;`：定义了一个 8 位无符号整型变量，用于存储接收到的数据。
+
+3. **中断检查**：
+   
+   - `if (USART_GetITStatus(DEBUG_USARTx, USART_IT_RXNE) != RESET)`：
+     - `USART_GetITStatus()` 函数用于检查指定 USART 模块的中断状态。`USART_IT_RXNE` 是接收数据寄存器非空中断的标志。
+     - 如果接收到的数据寄存器非空中断被触发，函数返回值将不为 `RESET`，中断服务程序将继续执行。
+
+4. **读取数据**：
+   
+   - `ucTemp = USART_ReceiveData(DEBUG_USARTx);`：
+     - `USART_ReceiveData()` 函数从接收数据寄存器中读取一个字节的数据，并将其存储在 `ucTemp` 变量中。
+
+5. **发送数据**：
+   
+   - `USART_SendData(DEBUG_USARTx, ucTemp);`：
+     - `USART_SendData()` 函数将数据 `ucTemp` 发送到指定的 USART 发送数据寄存器。这通常用于回显收到的数据。
+
+6. **等待数据发送完成**：
+   
+   - `while (USART_GetFlagStatus(DEBUG_USARTx, USART_FLAG_TC) == RESET);`：
+     - `USART_GetFlagStatus()` 函数用于检查指定的 USART 标志位。`USART_FLAG_TC` 是传输完成标志。
+     - 这个 `while` 循环会阻塞，直到发送完成标志位 `USART_FLAG_TC` 被设置为 `SET`，即数据发送完成。这个操作确保数据完全发送出去。
 - 配置USART GPIO工作参数设置
 
 ```c
@@ -123,6 +191,31 @@ void USART_Config(void)
 }
 ```
 
+使用GPIO_InitTypeDef和USART_InitTypeDef结构体定义一个GPIO初始化变量以及一个USART初始化变量，这两个结构体内容我们之前已经有详细讲解。
+
+调用RCC_APB2PeriphClockCmd函数开启GPIO端口时钟，使用GPIO之前必须开启对应端口的时钟。使用RCC_APB2PeriphClockCmd函数开启USART时钟。
+
+使用GPIO之前都需要初始化配置它，并且还要添加特殊设置，因为我们使用它作为外设的引脚，一般都有特殊功能。 我们在初始化时需要把它的模式设置为复用功能。这里把串口的Tx引脚配置为复用推挽输出，Rx引脚为浮空输入，数据完全由外部输入决定。
+
+接下来，我们配置USART1通信参数为：波特率115200，字长为8，1个停止位，没有校验位，不使用硬件流控制，收发一体工作模式，然后调用USART初始化函数完成配置。
+
+程序用到USART接收中断，需要配置NVIC，这里调用NVIC_Configuration函数完成配置。配置完NVIC之后调用USART_ITConfig函数使能USART接收中断。
+
+最后调用USART_Cmd函数使能USART，这个函数最终配置的是USART_CR1的UE位，具体的作用是开启USART的工作时钟，没有时钟那USART这个外设自然就工作不了。
+
+照例，我们应该分析一下新出现的库函数：
+
+1. **`NVIC_Configuration();`**：
+   
+   - 这个函数通常用于配置嵌套向量中断控制器（NVIC）的中断优先级。通过设置中断优先级和中断使能状态，它控制哪个中断源的优先级更高，以及在中断请求时如何响应。
+
+2. **`USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);`**：
+   
+   - `USART_ITConfig` 函数用于启用或禁用特定 USART 的中断。在这里，`USART_IT_RXNE` 表示接收数据寄存器非空中断，使能这个中断后，每当接收到新数据时，会触发中断请求。`ENABLE` 表示启用这个中断。
+
+3. **`USART_Cmd(DEBUG_USARTx, ENABLE);`**：
+   
+   - `USART_Cmd` 函数用于使能或禁用指定的 USART 外设。`ENABLE` 参数表示启用 USART，使其开始工作，接收和发送数据。
 - 首先编写发送一个字节（8位）函数
 
 ```c
@@ -136,6 +229,10 @@ void Usart_SendByte(USART_TypeDef *pUSARTx, uint8_t ch) // 函数参数：串口
     whbie (USART_GetFlagStatus(pUSARTx, USART_FLAG_TXE) == RESET);    
 }
 ```
+
+Usart_SendByte函数用来在指定USART发送一个ASCLL码值字符，它有两个形参，第一个为USART，第二个为待发送的字符。 它是通过调用库函数USART_SendData来实现的，并且增加了等待发送完成功能。 通过使用USART_GetFlagStatus函数来获取USART事件标志来实现发送完成功能等待，它接收两个参数，一个是USART， 一个是事件标志。这里我们循环检测发送数据寄存器为空这个标志，当跳出while循环时说明发送数据寄存器为空这个事实。
+
+Usart_SendString函数用来发送一个字符串，它实际是调用Usart_SendByte函数发送每个字符，直到遇到空字符才停止发送。 最后使用循环检测发送完成的事件标志TC来实现保证数据发送完成后才退出函数。
 
 - 编写发送一个8位数组函数
 
@@ -165,7 +262,7 @@ void Usart_SendString( USART_TypeDef *pUSARTx, char *str) // 函数参数：串�
   unsigned int k=0;
   do 
   {
-    Usart_SendByte( pUSARTx, *(str + k) ); // 发送一个字节数据到USART
+    Usart_SendByte(pUSARTx, *(str + k) ); // 发送一个字节数据到USART
     k++;
   } while(*(str + k)!='\0'); // 直到字符串结束
 
@@ -267,3 +364,7 @@ int main(void)
     }    
 }
 ```
+
+---
+
+2024.8.24 第一次修订，后期不再维护
