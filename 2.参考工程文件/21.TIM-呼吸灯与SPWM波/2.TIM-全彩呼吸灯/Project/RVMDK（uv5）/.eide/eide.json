@@ -1,5 +1,5 @@
 {
-  "name": "BH-F103",
+  "name": "BH-STM32",
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [],
@@ -19,6 +19,9 @@
       {
         "name": "CMSIS",
         "files": [
+          {
+            "path": "../../Libraries/CMSIS/core_cm3.c"
+          },
           {
             "path": "../../Libraries/CMSIS/core_cm3.h"
           },
@@ -125,10 +128,7 @@
             "path": "../../User/stm32f10x_it.h"
           },
           {
-            "path": "../../User/Led/bsp_led.c"
-          },
-          {
-            "path": "../../User/SysTick/bsp_SysTick.c"
+            "path": "../../User/BreathingLight/bsp_breathing.c"
           }
         ],
         "folders": []
@@ -148,16 +148,16 @@
   "deviceName": null,
   "packDir": null,
   "miscInfo": {
-    "uid": "81d1cfa271b1f9bb1a23552c475a6e2a"
+    "uid": "c7c9f9ceed688f90885fae3a4de39f5c"
   },
   "targets": {
-    "SysTick": {
+    "呼吸灯": {
       "excludeList": [],
       "toolchain": "AC5",
       "compileConfig": {
         "cpuType": "Cortex-M3",
         "floatingPointHardware": "none",
-        "scatterFilePath": "../../../../../../stm32-ram.sct",
+        "scatterFilePath": "",
         "useCustomScatterFile": false,
         "storageLayout": {
           "RAM": [
@@ -286,10 +286,8 @@
           "../../Libraries/CMSIS",
           "../../User",
           "../../Libraries/FWlib/inc",
-          "../../User/Led",
-          "../../User/SysTick",
           ".cmsis/include",
-          "RTE/_SysTick"
+          "RTE/_呼吸灯"
         ],
         "libList": [],
         "defineList": [
@@ -301,14 +299,7 @@
         "AC5": {
           "version": 4,
           "beforeBuildTasks": [],
-          "afterBuildTasks": [
-            {
-              "name": "Copy linker output for Keil User Commands",
-              "command": "copy \".\\${OutDirBase}\\${ProjectName}.axf\" \".\\${OutDirBase}\\${KEIL_OUTPUT_NAME}.axf\"",
-              "disable": false,
-              "abortAfterFailed": true
-            }
-          ],
+          "afterBuildTasks": [],
           "global": {
             "use-microLIB": true,
             "output-debug-info": "enable"
@@ -324,6 +315,7 @@
           "asm-compiler": {},
           "linker": {
             "output-format": "elf",
+            "xo-base": "",
             "ro-base": "0x08000000",
             "rw-base": "0x20000000"
           }
