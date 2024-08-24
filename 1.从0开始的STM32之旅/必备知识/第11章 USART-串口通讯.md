@@ -14,11 +14,11 @@
 
 #### 1.1.1 电平标准
 
-    根据通讯使用的电平标准不同，串口通讯可分为TTL标准及RS-232标准，见表 [TTL电平标准与RS232电平标准](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#ttlrs232) 。
+    根据通讯使用的电平标准不同，串口通讯可分为TTL标准及RS-232标准，见表
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART01.png)
 
-    我们知道常见的电子电路中常使用TTL的电平标准，理想状态下，使用5V表示二进制逻辑1，使用0V表示逻辑0； 而为了增加串口通讯的远距离传输及抗干扰能力，它使用-15V表示逻辑1，+15V表示逻辑0。 使用RS232与TTL电平校准表示同一个信号时的对比见图 [RS-232与TTL电平标准下表示同一个信号](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#rs-232ttl) 。
+    我们知道常见的电子电路中常使用TTL的电平标准，理想状态下，使用5V表示二进制逻辑1，使用0V表示逻辑0； 而为了增加串口通讯的远距离传输及抗干扰能力，它使用-15V表示逻辑1，+15V表示逻辑0。 使用RS232与TTL电平校准表示同一个信号时的对比见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART003.jpg)
 
@@ -28,19 +28,19 @@
 
     在最初的应用中，RS-232串口标准常用于计算机、路由与调制调解器(MODEN，俗称“猫”)之间的通讯 ，在这种通讯系统中， 设备被分为数据终端设备DTE(计算机、路由)和数据通讯设备DCE(调制调解器)。我们以这种通讯模型讲解它们的信号线连接方式及各个信号线的作用。
 
-    在旧式的台式计算机中一般会有RS-232标准的COM口(也称DB9接口)，见图 [电脑主板上的COM口及串口线](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#com) 。
+    在旧式的台式计算机中一般会有RS-232标准的COM口(也称DB9接口)，见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART004.jpg)
 
     其中接线口以针式引出信号线的称为公头，以孔式引出信号线的称为母头。在计算机中一般引出公头接口，而在调制调解器设备中引出的一般为母头，使用上图中的串口线即可把它与计算机连接起来。通讯时，串口线中传输的信号就是使用前面讲解的RS-232标准调制的。
 
-    在这种应用场合下，DB9接口中的公头及母头的各个引脚的标准信号线接法见图 [DB9标准的公头及母头接法](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#db9) 及表 [DB9信号线说明](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id5) 。
+    在这种应用场合下，DB9接口中的公头及母头的各个引脚的标准信号线接法见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART005.jpg)
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART02.png)
 
-    上表中的是计算机端的DB9公头标准接法，由于两个通讯设备之间的收发信号(RXD与TXD)应交叉相连， 所以调制调解器端的DB9母头的收发信号接法一般与公头的相反，两个设备之间连接时，只要使用“直通型”的串口线连接起来即可， 见图 [计算机与调制调解器的信号线连接](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id6) 。
+    上表中的是计算机端的DB9公头标准接法，由于两个通讯设备之间的收发信号(RXD与TXD)应交叉相连， 所以调制调解器端的DB9母头的收发信号接法一般与公头的相反，两个设备之间连接时，只要使用“直通型”的串口线连接起来即可， 见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART006.jpg)
 
@@ -50,13 +50,13 @@
 
 ### 1.2 协议层
 
-    串口通讯的数据包由发送设备通过自身的TXD接口传输到接收设备的RXD接口。在串口通讯的协议层中， 规定了数据包的内容，它由启始位、主体数据、校验位以及停止位组成，通讯双方的数据包格式要约定一致才能正常收发数据， 其组成见图 [串口数据包的基本组成](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id8)
+    串口通讯的数据包由发送设备通过自身的TXD接口传输到接收设备的RXD接口。在串口通讯的协议层中， 规定了数据包的内容，它由启始位、主体数据、校验位以及停止位组成，通讯双方的数据包格式要约定一致才能正常收发数据， 其组成见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART007.jpg)
 
 #### 1.2.1 波特率
 
-    本章中主要讲解的是串口异步通讯，异步通讯中由于没有时钟信号(如前面讲解的DB9接口中是没有时钟信号的)， 所以两个通讯设备之间需要约定好波特率，即每个码元的长度，以便对信号进行解码， 图 [串口数据包的基本组成](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id8) 中用虚线分开的每一格就是代表一个码元。常见的波特率为4800、9600、115200等。
+    本章中主要讲解的是串口异步通讯，异步通讯中由于没有时钟信号(如前面讲解的DB9接口中是没有时钟信号的)， 所以两个通讯设备之间需要约定好波特率，即每个码元的长度，以便对信号进行解码， 图 [中用虚线分开的每一格就是代表一个码元。常见的波特率为4800、9600、115200等。
 
 #### 1.2.2 通讯的起始和停止信号
 
@@ -90,7 +90,7 @@
 
 ## 3. USART功能框图
 
-    USART的功能框图包含了USART最核心内容，掌握了功能框图，对USART就有一个整体的把握， 在编程时就思路就非常清晰。USART功能框图见图 [USART功能框图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id14) 。
+    USART的功能框图包含了USART最核心内容，掌握了功能框图，对USART就有一个整体的把握， 在编程时就思路就非常清晰。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART008.png)
 
@@ -108,7 +108,7 @@
 
     SCLK： 发送器时钟输出引脚。这个引脚仅适用于同步模式。
 
-    USART引脚在STM32F103VET6芯片具体分布见表 [STM32F103VET6芯片的USART引脚](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#stm32f103vet6usart) 。
+    USART引脚在STM32F103VET6芯片具体分布见表
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART03.png)
 
@@ -138,7 +138,7 @@
 
     停止位时间长短是可以通过USART控制寄存器2(USART_CR2)的STOP[1:0]位控制，可选0.5个、1个、1.5个和2个停止位。 默认使用1个停止位。2个停止位适用于正常USART模式、单线模式和调制解调器模式。0.5个和1.5个停止位用于智能卡模式。
 
-    当选择8位字长，使用1个停止位时，具体发送字符时序图见图 [字符发送时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id15) 。
+    当选择8位字长，使用1个停止位时，具体发送字符时序图见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART009.png)
 
@@ -186,7 +186,7 @@
 
 ### 3.2 中断控制
 
-    USART有多个中断请求事件，具体见表 [USART中断请求](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#id20)
+    USART有多个中断请求事件，具体见表
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART06.png)
 
@@ -242,225 +242,6 @@ typedef struct {
 
 4) USART_LastBit： 选择在发送最后一个数据位的时候时钟脉冲是否在SCLK引脚输出，可以是不输出脉冲(USART_LastBit_Disable)、输出脉冲(USART_LastBit_Enable)。它设定USART_CR2寄存器的LBCL位的值。
 
-## 5. USART1接发通信实验
+---
 
-    首先，我们来编写一个程序实现开发板与电脑通信，在开发板上电时通过USART发送一串字符串给电脑，然后开发板进入中断接收等待状态， 如果电脑有发送数据过来，开发板就会产生中断，我们在中断服务函数接收数据，并马上把数据返回发送给电脑。
-
-### 5.1 硬件设计
-
-    为利用USART实现开发板与电脑通信，需要用到一个USB转USART的IC，我们选择CH340G芯片来实现这个功能，CH340G是一个USB总线的转接芯片， 实现USB转USART、USB转lrDA红外或者USB转打印机接口，我们使用其USB转USART功能。具体电路设计见图 [USB转串口硬件设计](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/USART.html#usb) 。
-
-    我们将CH340G的TXD引脚与USART1的RX引脚连接，CH340G的RXD引脚与USART1的TX引脚连接。CH340G芯片集成在开发板上，其地线(GND)已与控制器的GND连通。
-
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART011.png)
-
-### 5.2 软件设计
-
-    这里只讲解核心的部分代码，有些变量的设置，头文件的包含等并没有涉及到，完整的代码请参考本章配套的工程。 我们创建了两个文件：bsp_usart.c和bsp _usart.h文件用来存放USART驱动程序及相关宏定义。
-
-#### 5.2.1 编程要点
-
-1. 使能RX和TX引脚GPIO时钟和USART时钟；
-
-2. 初始化GPIO，并将GPIO复用到USART上；
-
-3. 配置USART参数；
-
-4. 配置中断控制器并使能USART接收中断；
-
-5. 使能USART；
-
-6. 在USART接收中断服务函数实现数据接收和发送。
-
-#### 5.2.2 代码分析
-
-- GPIO和USART宏定义
-
-```c
-// 串口1-USART1
-#define  DEBUG_USARTx                   USART1
-#define  DEBUG_USART_CLK                RCC_APB2Periph_USART1
-#define  DEBUG_USART_APBxClkCmd         RCC_APB2PeriphClockCmd
-#define  DEBUG_USART_BAUDRATE           115200
-
-// USART GPIO 引脚宏定义
-#define  DEBUG_USART_GPIO_CLK           (RCC_APB2Periph_GPIOA)
-#define  DEBUG_USART_GPIO_APBxClkCmd    RCC_APB2PeriphClockCmd
-
-#define  DEBUG_USART_TX_GPIO_PORT       GPIOA
-#define  DEBUG_USART_TX_GPIO_PIN        GPIO_Pin_9
-#define  DEBUG_USART_RX_GPIO_PORT       GPIOA
-#define  DEBUG_USART_RX_GPIO_PIN        GPIO_Pin_10
-
-#define  DEBUG_USART_IRQ                USART1_IRQn
-#define  DEBUG_USART_IRQHandler         USART1_IRQHandler
-```
-
-    使用宏定义方便程序移植和升级 。开发板中的CH340G的收发引脚默认通过跳帽连接到USART1，如果想使用其他串口， 可以把CH340G跟USART1直接的连接跳帽拔掉，然后再把其他串口的IO用杜邦线接到CH340G的收发引脚即可。
-
-    这里我们使用USART1，设定波特率为115200，选定USART的GPIO为PA9和PA10。
-
-- 嵌套向量中断控制器NVIC配置
-
-```c
-static void NVIC_Configuration(void)
-{
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* 嵌套向量中断控制器组选择 */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
-    /* 配置USART为中断源 */
-    NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
-    /* 抢断优先级为1 */
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    /* 子优先级为1 */
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    /* 使能中断 */
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    /* 初始化配置NVIC */
-    NVIC_Init(&NVIC_InitStructure);
-}
-```
-
-    在中断章节已对嵌套向量中断控制器的工作机制做了详细的讲解，这里我们就直接使用，配置USART作为中断源，因为本实验没有使用其他中断，对优先级没什么具体要求
-
-- USQRT初始化配置
-
-```c
-void USART_Config(void)
-{
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
-
-    // 打开串口GPIO的时钟
-    DEBUG_USART_GPIO_APBxClkCmd(DEBUG_USART_GPIO_CLK, ENABLE);
-
-    // 打开串口外设的时钟
-    DEBUG_USART_APBxClkCmd(DEBUG_USART_CLK, ENABLE);
-
-    // 将USART Tx的GPIO配置为推挽复用模式
-    GPIO_InitStructure.GPIO_Pin = DEBUG_USART_TX_GPIO_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(DEBUG_USART_TX_GPIO_PORT, &GPIO_InitStructure);
-
-    // 将USART Rx的GPIO配置为浮空输入模式
-    GPIO_InitStructure.GPIO_Pin = DEBUG_USART_RX_GPIO_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(DEBUG_USART_RX_GPIO_PORT, &GPIO_InitStructure);
-
-    // 配置串口的工作参数
-    // 配置波特率
-    USART_InitStructure.USART_BaudRate = DEBUG_USART_BAUDRATE;
-    // 配置 针数据字长
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    // 配置停止位
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    // 配置校验位
-    USART_InitStructure.USART_Parity = USART_Parity_No ;
-    // 配置硬件流控制
-    USART_InitStructure.USART_HardwareFlowControl =
-        USART_HardwareFlowControl_None;
-    // 配置工作模式，收发一起
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    // 完成串口的初始化配置
-    USART_Init(DEBUG_USARTx, &USART_InitStructure);
-
-    // 串口中断优先级配置
-    NVIC_Configuration();
-
-    // 使能串口接收中断
-    USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
-
-    // 使能串口
-    USART_Cmd(DEBUG_USARTx, ENABLE);
-}
-```
-
-    使用GPIO_InitTypeDef和USART_InitTypeDef结构体定义一个GPIO初始化变量以及一个USART初始化变量，这两个结构体内容我们之前已经有详细讲解。
-
-    调用RCC_APB2PeriphClockCmd函数开启GPIO端口时钟，使用GPIO之前必须开启对应端口的时钟。使用RCC_APB2PeriphClockCmd函数开启USART时钟。
-
-    使用GPIO之前都需要初始化配置它，并且还要添加特殊设置，因为我们使用它作为外设的引脚，一般都有特殊功能。 我们在初始化时需要把它的模式设置为复用功能。这里把串口的Tx引脚配置为复用推挽输出，Rx引脚为浮空输入，数据完全由外部输入决定。
-
-    接下来，我们配置USART1通信参数为：波特率115200，字长为8，1个停止位，没有校验位，不使用硬件流控制，收发一体工作模式，然后调用USART初始化函数完成配置。
-
-    程序用到USART接收中断，需要配置NVIC，这里调用NVIC_Configuration函数完成配置。配置完NVIC之后调用USART_ITConfig函数使能USART接收中断。
-
-    最后调用USART_Cmd函数使能USART，这个函数最终配置的是USART_CR1的UE位，具体的作用是开启USART的工作时钟，没有时钟那USART这个外设自然就工作不了。
-
-- 字符发送
-
-```c
-/*****************  发送一个字符 **********************/
-void Usart_SendByte( USART_TypeDef * pUSARTx, uint8_t ch)
-{
-    /* 发送一个字节数据到USART */
-    USART_SendData(pUSARTx,ch);
-
-    /* 等待发送数据寄存器为空 */
-    while (USART_GetFlagStatus(pUSARTx, USART_FLAG_TXE) == RESET);
-}
-
-/*****************  发送字符串 **********************/
-void Usart_SendString( USART_TypeDef * pUSARTx, char *str)
-{
-    unsigned int k=0;
-    do {
-        Usart_SendByte( pUSARTx, *(str + k) );
-        k++;
-    } while (*(str + k)!='\0');
-
-    /* 等待发送完成 */
-    while (USART_GetFlagStatus(pUSARTx,USART_FLAG_TC)==RESET) {
-    }
-}
-```
-
-    Usart_SendByte函数用来在指定USART发送一个ASCLL码值字符，它有两个形参，第一个为USART，第二个为待发送的字符。 它是通过调用库函数USART_SendData来实现的，并且增加了等待发送完成功能。 通过使用USART_GetFlagStatus函数来获取USART事件标志来实现发送完成功能等待，它接收两个参数，一个是USART， 一个是事件标志。这里我们循环检测发送数据寄存器为空这个标志，当跳出while循环时说明发送数据寄存器为空这个事实。
-
-    Usart_SendString函数用来发送一个字符串，它实际是调用Usart_SendByte函数发送每个字符，直到遇到空字符才停止发送。 最后使用循环检测发送完成的事件标志TC来实现保证数据发送完成后才退出函数。
-
-- USQRT中断服务函数
-
-```c
-void DEBUG_USART_IRQHandler(void)
-{
-    uint8_t ucTemp;
-    if (USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET) 
-    {
-        ucTemp = USART_ReceiveData( DEBUG_USARTx );
-        USART_SendData(DEBUG_USARTx,ucTemp);
-    }
-}
-```
-
-    这段代码是存放在stm32f10x_it.c文件中的，该文件用来集中存放外设中断服务函数。当我们使能了中断并且中断发生时就会执行这里的中断服务函数。
-
-    我们使能了USART接收中断，当USART有接收到数据就会执行USART_IRQHandler函数。 USART_GetITStatus函数与USART_GetFlagStatus函数类似用来获取标志位状态，但USART_GetITStatus函数是专门用来获取中断事件标志的， 并返回该标志位状态。使用if语句来判断是否是真的产生USART数据接收这个中断事件， 如果是真的就使用USART数据读取函数USART_ReceiveData读取数据到指定存储区。 然后再调用USART数据发送函数USART_SendData把数据又发送给源设备，即PC端的串口调试助手。
-
-- 主函数
-
-```c
-int main(void)
-{
-    /*初始化USART 配置模式为 115200 8-N-1，中断接收*/
-    USART_Config();
-
-    Usart_SendString( DEBUG_USARTx,"这是一个串口中断接收回显实验\n");
-
-    while (1) 
-    {
-
-    }
-}
-```
-
-    首先我们需要调用USART_Config函数完成USART初始化配置，包括GPIO配置，USART配置，接收中断使能等等信息。
-
-    接下来就可以调用字符发送函数把数据发送给串口调试助手了。
-
-    最后主函数什么都不做，只是静静地等待USART接收中断的产生，并在中断服务函数把数据回传。
-
-## 6. 小结
+2024.8.23 第一次修订，后期不再维护

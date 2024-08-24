@@ -90,7 +90,7 @@ static void NVIC_Configuration(void)
 // 配置IO为EXTI中断口，并设置中断优先级
 void EXTI_Key_Config(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;  // 定义GPIO初始化结构体变量
+    GPIO_InitTypeDef GPIO_InitStructure; // 定义GPIO初始化结构体变量
     EXTI_InitTypeDef EXTI_InitStructure; // 定义EXTI初始化结构体变量
 
     // 使能GPIO时钟
@@ -142,6 +142,95 @@ void EXTI_Key_Config(void)
   EXTI_Init(&EXTI_InitStructure);
 }
 ```
+
+出现了-新的库函数！GPIO_EXTILineConfig()，来讲解一下吧：
+
+### 2.1.1 函数原型
+
+```c
+void GPIO_EXTILineConfig(uint8_t GPIO_PortSource, uint8_t GPIO_PinSource);
+```
+
+### 2.1.2 参数说明
+
+1. **`GPIO_PortSource`**：
+- 类型：`uint8_t`
+- 说明：指定外部中断源的 GPIO 端口。这通常是一个与 GPIO 端口相关的常量，例如 `GPIO_PortSourceGPIOA`、`GPIO_PortSourceGPIOB` 等。这些常量用于选择具体的 GPIO 端口（A、B、C、D、E）。
+2. **`GPIO_PinSource`**：
+   
+   - 类型：`uint8_t`
+   - 说明：指定外部中断源的 GPIO 引脚。这通常是一个与 GPIO 引脚相关的常量，例如 `GPIO_PinSource0`、`GPIO_PinSource1` 等。这些常量用于选择具体的 GPIO 引脚（0-15）。
+
+### 2.1.3 功能
+
+`GPIO_EXTILineConfig()` 函数将指定的 GPIO 引脚配置为外部中断源。这样，GPIO 引脚的状态变化（如上升沿、下降沿或两者）将触发相应的 EXTI 线中断请求。要使此配置生效，还需要对 EXTI 线进行进一步的配置，包括中断触发方式、优先级等。
+
+### 2.1.4 使用步骤
+
+1. **选择 GPIO 端口和引脚**：
+   在调用 `GPIO_EXTILineConfig()` 函数之前，确定要配置的 GPIO 端口和引脚。例如，假设你想将 GPIOB 的引脚 5 作为外部中断源。
+
+2. **配置 GPIO 引脚**：
+   你需要首先配置 GPIO 引脚为输入模式，并使能其上拉或下拉电阻（如果需要）。
+
+3. **调用 `GPIO_EXTILineConfig()` 函数**：
+   使用 `GPIO_EXTILineConfig()` 函数将 GPIO 引脚映射到相应的 EXTI 线。例如：
+
+```c
+GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);
+```
+
+4. **配置 EXTI**：
+   之后，你需要配置 EXTI 线的触发方式（上升沿、下降沿或双边沿）、中断优先级等。这些配置通常通过 `EXTI_Init()` 函数来完成。
+
+### 2.1.5 举例
+
+以下是一个简单的代码示例，展示如何配置 GPIOB 的引脚 5 为外部中断源：
+
+```c
+#include "stm32f4xx.h"
+
+void EXTI_Config(void) {
+    EXTI_InitTypeDef EXTI_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    // 启用 GPIOB 和 SYSCFG 时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    // 配置 GPIOB 引脚 5 为输入模式
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    // 配置 GPIO 引脚 5 作为 EXTI 线的源
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);
+
+    // 配置 EXTI 线 5
+    EXTI_InitStructure.EXTI_Line = EXTI_Line5;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; // 或 EXTI_Trigger_Falling, EXTI_Trigger_Rising_Falling
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+
+    // 配置 NVIC
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+```
+
+在这个示例中，我们完成了以下几个步骤：
+
+1. 启用 GPIOB 和 SYSCFG 的时钟。
+2. 配置 GPIOB 的引脚 5 为输入模式。
+3. 使用 `GPIO_EXTILineConfig()` 函数将 GPIOB 的引脚 5 配置为 EXTI 线的源。
+4. 配置 EXTI 线 5 的中断触发方式和使能中断。
+5. 配置 NVIC 以响应 EXTI 中断。
 
 ## 3. 小结
 
