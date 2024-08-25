@@ -1,27 +1,5 @@
-/**
-  ******************************************************************************
-  * @file    bsp_led.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   led应用函数接口
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */
-  
-#include "bsp_led.h"   
+ #include "bsp_led.h"   
 
- /**
-  * @brief  初始化控制LED的IO
-  * @param  无
-  * @retval 无
-  */
 void LED_GPIO_Config(void)
 {		
 		/*定义一个GPIO_InitTypeDef类型的结构体*/
@@ -59,7 +37,7 @@ void LED_GPIO_Config(void)
 		/* 关闭所有led灯	*/
 		GPIO_SetBits(LED2_GPIO_PORT, LED2_GPIO_PIN);	 
     
-    /* 关闭所有led灯	*/
+ 	   /* 关闭所有led灯	*/
 		GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
 }
 
@@ -68,4 +46,3 @@ void assert_failed(uint8_t* file, uint32_t line)
 	// 断言错误时执行的代码
 	LED1_ON;
 }
-/*********************************************END OF FILE**********************/
