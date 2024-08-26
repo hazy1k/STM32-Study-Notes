@@ -19,11 +19,6 @@
 
 #endif
 
- /*******
- *按键按下标置，按键K1和K2默认是低电平，按键按下的时候是高电平
- KEY_ON 0
- KEY_OFF 1
- ********/
 #define KEY_ON	1
 #define KEY_OFF	0
 

@@ -1,14 +1,8 @@
-
 #include "stm32f10x.h"
 #include "bsp_led.h"
 #include "bsp_key.h" 
 #include "bsp_wwdg.h" 
 
-/**
-  * @brief  主函数
-  * @param  无
-  * @retval 无
-  */ 
 int main(void)
 {	
 	uint8_t wwdg_tr, wwdg_wr; 
@@ -20,7 +14,7 @@ int main(void)
 	SOFT_Delay(0X00FFFFFF);	
 	
 	// 初始化WWDG：配置计数器初始值，配置上窗口值，启动WWDG，使能提前唤醒中断
-	WWDG_Config(0X7F, 0X5F, WWDG_Prescaler_8);
+	WWDG_Config(0X7F, 0X5F, WWDG_Prescaler_8); // 函数参数：计数器值，窗口值，预分频系数
 	
 	// 窗口值我们在初始化的时候设置成0X5F，这个值不会改变
 	wwdg_wr = WWDG->CFR & 0X7F;
@@ -39,14 +33,10 @@ int main(void)
 		// 所以要当计数器的值在窗口值和0X40之间的时候喂狗，其中0X40是固定的。
 		wwdg_tr = WWDG->CR & 0X7F;
 		
-		if( wwdg_tr < wwdg_wr )
+		if(wwdg_tr < wwdg_wr)
 		{
 			// 喂狗，重新设置计数器的值为最大0X7F
 			WWDG_Feed();
 		}
 	}
 }
-
-
-
-/*********************************************END OF FILE**********************/
