@@ -1,8 +1,8 @@
 # 第十五章 DMA存储器到存储器模式实验
 
-存储器到存储器模式可以实现数据在两个内存的快速拷贝。我们先定义一个静态的源数据，存放在内部FLASH， 然后使用DMA传输把源数据拷贝到目标地址上（内部SRAM），最后对比源数据和目标地址的数据，看看是否传输准确 。
-
 ## 1. 硬件设计
+
+存储器到存储器模式可以实现数据在两个内存的快速拷贝。我们先定义一个静态的源数据，存放在内部FLASH， 然后使用DMA传输把源数据拷贝到目标地址上（内部SRAM），最后对比源数据和目标地址的数据，看看是否传输准确 。
 
 DMA存储器到存储器实验不需要其他硬件要求，只用到RGB彩色灯用于指示程序状态。
 
@@ -24,7 +24,7 @@ DMA存储器到存储器实验不需要其他硬件要求，只用到RGB彩色�
 
 ```c
 // 当使用存储器到存储器模式时候，通道可以随便选，没有硬性的规定
-#define DMA_CHANNEL     DMA1_Channel6 // 我们这里使用的通道是DMA1_Channel6
+#define DMA_CHANNEL     DMA1_Channel6      // 我们这里使用的通道是DMA1_Channel6
 #define DMA_CLOCK       RCC_AHBPeriph_DMA1 // DMA1时钟
 
 // 传输完成标志
@@ -47,7 +47,7 @@ const uint32_t aSRC_Const_Buffer[BUFFER_SIZE]= {
                                     0x61626364,0x65666768,0x696A6B6C,0x6D6E6F70,
                                     0x71727374,0x75767778,0x797A7B7C,0x7D7E7F80};
 
-// 定义DMA传输目标存储器-存储在内部的SRAM中																		
+// 定义DMA传输目标存储器-存储在内部的SRAM中                                                                        
 uint32_t aDST_Buffer[BUFFER_SIZE];
 ```
 
@@ -64,53 +64,38 @@ aSRC_Const_Buffer[BUFFER_SIZE]定义用来存放源数据，并且使用了const
 void DMA_Config(void)
 {
         // 1.DMA初始化结构体
-	    DMA_InitTypeDef DMA_InitStructure;
-	
-		// 2.开启DMA时钟
-		RCC_AHBPeriphClockCmd(DMA_CLOCK, ENABLE);
-
-		// 3.源数据地址
+        DMA_InitTypeDef DMA_InitStructure;
+        // 2.开启DMA时钟
+        RCC_AHBPeriphClockCmd(DMA_CLOCK, ENABLE);
+        // 3.源数据地址
         DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)aSRC_Const_Buffer;
-
-		// 4.目标数据地址
-		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)aDST_Buffer;
-
-		// 6.设置传输方向：外设到存储器（这里的外设是内部的FLASH）	
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-
-		// 7.设置传输大小	
-		DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE;
-
-		// 8.设置外设（内部的FLASH）地址递增    
-		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
-
-		// 9.内存地址递增
-		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-
-		// 10.外设数据单位	
-		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-
-		// 11.内存数据单位
-		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
-
-		// 12.设置DMA模式，一次或者循环模式
-		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-		//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-
-		// 13.设置通道优先级：高	
-		DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-
-		// 14.使能内存到内存的传输
-		DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
-
-		// 15.配置DMA通道		   
-		DMA_Init(DMA_CHANNEL, &DMA_InitStructure);
-
+        // 4.目标数据地址
+        DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)aDST_Buffer;
+        // 6.设置传输方向：外设到存储器（这里的外设是内部的FLASH）    
+        DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+        // 7.设置传输大小    
+        DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE;
+        // 8.设置外设（内部的FLASH）地址递增    
+        DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+        // 9.内存地址递增
+        DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+        // 10.外设数据单位    
+        DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
+        // 11.内存数据单位
+        DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
+        // 12.设置DMA模式，一次或者循环模式
+        DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
+        //DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+        // 13.设置通道优先级：高    
+        DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+        // 14.使能内存到内存的传输
+        DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+        // 15.配置DMA通道           
+        DMA_Init(DMA_CHANNEL, &DMA_InitStructure);
        // 16.清除DMA数据流传输完成标志位
         DMA_ClearFlag(DMA_FLAG_TC);
-
-		// 17.使能DMA
-		DMA_Cmd(DMA_CHANNEL, ENABLE);
+        // 17.使能DMA
+        DMA_Cmd(DMA_CHANNEL, ENABLE);
 }
 ```
 
@@ -150,20 +135,20 @@ DMA_Cmd函数用于启动或者停止DMA数据传输，它接收两个参数，�
 */
 uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength)
 {
-  /* 数据长度递减 */
+  // 数据长度递减
   while(BufferLength--)
   {
-    /* 判断两个数据源是否对应相等 */
+    // 判断两个数据源是否对应相等 
     if(*pBuffer != *pBuffer1)
     {
-      /* 对应数据源不相等马上退出函数，并返回0 */
+      // 对应数据源不相等马上退出函数，并返回0
       return 0;
     }
-    /* 递增两个数据源的地址指针 */
+    // 递增两个数据源的地址指针
     pBuffer++;
     pBuffer1++;
   }
-  /* 完成判断并且对应数据相对 */
+  // 完成判断并且对应数据相对
   return 1; // 数据完全相等
 }
 ```
@@ -177,44 +162,36 @@ int main(void)
 {
   // 1.定义存放比较结果变量
   uint8_t TransferStatus;
-  
-	// 2.LED 端口初始化
-	LED_GPIO_Config();
-    
+  // 2.LED 端口初始化
+  LED_GPIO_Config();
   // 3.设置RGB彩色灯为紫色
   LED_PURPLE;  
-  
   // 4.简单延时函数
   Delay(0xFFFFFF);  
-  
   // 5.DMA传输配置
   DMA_Config(); 
-  
   // 6.等待DMA传输完成
   while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
   {
-    
+
   }   
-  
   // 7.比较源数据与传输后数据
   TransferStatus = Buffercmp(aSRC_Const_Buffer, aDST_Buffer, BUFFER_SIZE);
-  
   // 8.判断源数据与传输后数据比较结果
   if(TransferStatus == 0)  
   {
-    /* 源数据与传输后数据不相等时RGB彩色灯显示红色 */
+    // 源数据与传输后数据不相等时RGB彩色灯显示红色
     LED_RED;
   }
   else
   { 
-    /* 源数据与传输后数据相等时RGB彩色灯显示蓝色 */
+    // 源数据与传输后数据相等时RGB彩色灯显示蓝色
     LED_BLUE;
   }
+  while (1)
+  {        
 
-	while (1)
-	{		
-
-	}
+  }
 }
 ```
 
@@ -267,4 +244,33 @@ uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLe
 
 5. 主函数往往最简单了，自行看注释理解吧
 
+当然了出现新的库函数，我们应该介绍一下：
 
+1. **`DMA_Init(DMA_CHANNEL, &DMA_InitStructure);`**  
+   这个函数用于初始化DMA通道。`DMA_CHANNEL`是要配置的DMA通道的标识符，例如DMA1_Channel1，`&DMA_InitStructure`是一个指向`DMA_InitTypeDef`结构体的指针，包含了所有的配置参数，如数据方向、传输大小、优先级等。通过调用此函数，DMA通道会根据提供的配置结构体进行初始化，设置DMA的各项操作参数。
+
+2. **`DMA_ClearFlag(DMA_FLAG_TC);`**  
+   这个函数用于清除DMA的传输完成标志位。`DMA_FLAG_TC`是指传输完成的标志位，表示DMA传输完成时产生的标志。清除这个标志位是为了确保之前的传输完成标志不会干扰当前的DMA传输操作。在开始新的DMA传输前，清除标志位是一个重要步骤，以确保数据传输过程的正确性。
+
+3. **`DMA_Cmd(DMA_CHANNEL, ENABLE);`**  
+   这个函数用于启用DMA通道。`DMA_CHANNEL`指定要使能的DMA通道，例如DMA1_Channel1，`ENABLE`表示要启用该通道。调用此函数后，DMA通道将开始进行数据传输。这个步骤是启动DMA传输的关键，确保DMA能够按照预设的配置开始实际的数据搬运工作。
+
+```c
+while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
+{
+    // 空循环，等待DMA传输完成标志位置位
+}
+```
+
+1. **`DMA_GetFlagStatus(DMA_FLAG_TC)`**  
+   这个函数用于获取DMA标志位的状态。`DMA_FLAG_TC`代表传输完成标志（Transfer Complete Flag），它指示DMA传输是否已完成。函数返回标志位的当前状态。
+
+2. **`== RESET`**  
+   `RESET`是一个常量，用于表示标志位尚未被置位。DMA传输完成标志位在传输完成时会被置位为`SET`。在标志位为`RESET`时，表示传输尚未完成。
+
+3. **`while`循环**  
+   这个`while`循环持续检查DMA的传输完成标志位是否为`RESET`。也就是说，它会一直等待，直到`DMA_GetFlagStatus(DMA_FLAG_TC)`返回`SET`（传输完成）。在此之前，循环体内部是空的（没有任何操作），只是不断地轮询标志位状态。
+
+---
+
+2024.8.28 第一次修订，后期不再维护
