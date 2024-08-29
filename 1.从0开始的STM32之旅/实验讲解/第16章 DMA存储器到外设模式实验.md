@@ -37,7 +37,7 @@
 #define  DEBUG_USART_RX_GPIO_PIN        GPIO_Pin_10            // 串口RX GPIO引脚
 
 // 串口对应的DMA请求通道
-#define  USART_TX_DMA_CHANNEL     DMA1_Channel4                // 使用DMA1通道14
+#define  USART_TX_DMA_CHANNEL     DMA1_Channel4                // 使用DMA1通道4
 // 外设寄存器地址
 #define  USART_DR_ADDRESS        (USART1_BASE+0x04)            // USART数据寄存器地址
 // 一次发送的数据量
@@ -177,7 +177,7 @@ int main(void)
   // 填充将要发送的数据
   for(i = 0; i < SENDBUFF_SIZE; i++)
   {
-    SendBuff[i]     = 'P';
+    SendBuff[i] = 'P';
   }
 
   /*为演示DMA持续运行而CPU还能处理其它事情，持续使用DMA发送数据，量非常大，
@@ -211,3 +211,52 @@ DMA传输过程是不占用CPU资源的，可以一边传输一次运行其他�
 ## 3. 小结
 
 有了上一章的基础，这一次应该更容易理解，对照注释清晰明了，不同的是我们这是内部存储到外设，改一下配置就行啦，其他无异
+
+主函数里有一个库函数我们需要详细说明一下：
+
+### 函数原型
+
+```c
+void USART_DMACmd(USART_TypeDef* USARTx, FunctionalState NewState);
+```
+
+### 参数解释
+
+- **`USARTx`**: 这是 USART 外设的指针。例如，`USART1`、`USART2` 等。
+- **`USART_DMAReq`**: 这是 DMA 请求的类型。通常有两种类型：`USART_DMAReq_Tx`（发送请求）和 `USART_DMAReq_Rx`（接收请求）。
+- **`NewState`**: 指定要启用还是禁用 DMA 请求。可以是 `ENABLE`（启用）或 `DISABLE`（禁用）。
+
+### 工作原理
+
+1. **启用 DMA 请求**: 当启用 DMA 请求时，USART 在发送或接收数据时会触发 DMA 控制器，从而自动处理数据的传输，而不是由 CPU 直接进行传输。这使得数据传输更高效，特别是在大量数据传输时。
+
+2. **禁用 DMA 请求**: 禁用 DMA 请求后，USART 将不再自动使用 DMA 进行数据传输，数据将由 CPU 直接处理。
+
+### 示例代码
+
+下面是一个简单的例子，展示如何启用 USART1 的 DMA 发送请求：
+
+```c
+// 使能 USART1 的 DMA 发送请求
+USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+
+// 假设 USART1 已经被初始化并且 DMA 也配置好了
+// 现在可以将数据通过 DMA 发送
+
+// 发送数据
+const uint8_t data[] = "Hello, DMA!";
+DMA_ConfigureForUSART1Tx(data, sizeof(data)); // 这是一个假设的函数，用于配置 DMA 发送数据
+
+// 启动 DMA 传输
+DMA_Cmd(DMA1_Channel4, ENABLE); // 使能 DMA 通道，假设使用的是 DMA1 通道4
+```
+
+### 解释
+
+1. **`USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);`**: 启用 USART1 的 DMA 发送请求。
+2. **`DMA_ConfigureForUSART1Tx(data, sizeof(data));`**: 配置 DMA 以便它可以发送 `data` 数组中的数据。实际代码中，需要设置 DMA 的源地址、目的地址、传输长度等参数。
+3. **`DMA_Cmd(DMA1_Channel4, ENABLE);`**: 启动 DMA 通道以开始数据传输。
+
+---
+
+2024.8.29 第一次修订，后期不在维护
