@@ -1,0 +1,3 @@
+
+把CMSIS_DAP.dll文件复制到keil的如下安装目录替换原版即可。
+C:\Keil_v5\ARM\BIN
