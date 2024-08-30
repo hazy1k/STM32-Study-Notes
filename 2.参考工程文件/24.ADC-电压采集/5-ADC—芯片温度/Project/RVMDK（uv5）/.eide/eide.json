@@ -138,7 +138,11 @@
       },
       {
         "name": "DOC",
-        "files": [],
+        "files": [
+          {
+            "path": "../../Doc/readme.txt"
+          }
+        ],
         "folders": []
       }
     ]
@@ -286,7 +290,6 @@
           "../../User",
           "../../Libraries/FWlib/inc",
           "../../User/usart",
-          ".cmsis/include",
           "RTE/_ADC1_TEMP"
         ],
         "libList": [],
