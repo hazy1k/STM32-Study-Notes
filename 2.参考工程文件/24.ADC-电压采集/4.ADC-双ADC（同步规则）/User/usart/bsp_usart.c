@@ -1,10 +1,5 @@
 #include "bsp_usart.h"
 
- /**
-  * @brief  配置嵌套向量中断控制器NVIC
-  * @param  无
-  * @retval 无
-  */
 static void NVIC_Configuration(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
@@ -24,11 +19,6 @@ static void NVIC_Configuration(void)
   NVIC_Init(&NVIC_InitStructure);
 }
 
- /**
-  * @brief  USART GPIO 配置,工作参数配置
-  * @param  无
-  * @retval 无
-  */
 void USART_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;

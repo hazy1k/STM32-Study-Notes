@@ -1,7 +1,6 @@
 #ifndef __ADC_H
 #define	__ADC_H
 
-
 #include "stm32f10x.h"
 
 // 双模式时，ADC1和ADC2转换的数据都存放在ADC1的数据寄存器，
@@ -26,16 +25,13 @@
 #define    ADCx_2_GPIO_CLK                  RCC_APB2Periph_GPIOC  
 #define    ADCx_2_PORT                      GPIOC
 #define    ADCx_2_PIN                       GPIO_Pin_4
-#define    ADCx_2_CHANNEL                 ADC_Channel_14
+#define    ADCx_2_CHANNEL                   ADC_Channel_14
 
 #define    NOFCHANEL                        1
 
 // ADC1 对应 DMA1通道1，ADC3对应DMA2通道5，ADC2没有DMA功能
 #define    ADC_DMA_CHANNEL               DMA1_Channel1
 
-
 void ADCx_Init(void);
 
-
-#endif /* __ADC_H */
-
+#endif 
