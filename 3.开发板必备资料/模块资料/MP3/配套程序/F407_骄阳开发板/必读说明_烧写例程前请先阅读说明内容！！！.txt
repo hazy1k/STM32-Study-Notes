@@ -1,0 +1,5 @@
+使用1.VS1053_外部FLASH读歌时，先运行 USB_Device—外部FLASH模拟U盘 例程，
+并将开发板通过USB线连接电脑USB和开发板USB_BEVICE接口（KEY5旁边的Type-C接口），
+此时电脑会识别到一个U盘，若提示格式化将其格式化为FAT格式，本操作会使用外部FLASH
+后10M空间。将测试文件 TestFile.mp3 复制到模拟U盘根目录，确认完成此操作后
+在烧写 1.VS1053_外部FLASH读歌 例程。
