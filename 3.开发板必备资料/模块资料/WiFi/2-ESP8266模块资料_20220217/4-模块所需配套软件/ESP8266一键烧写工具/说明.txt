@@ -1,0 +1,9 @@
+野火STM32F103指南者板子WIFI部分FLASH芯片默认为512KB 使用512KB固件（已知问题：UDP发送不行）
+
+
+野火霸道F103和霸天虎F407板子WIFI部分FLASH芯片为1MB  
+单独ESP8266模块也为1MB 
+可以烧录ai-thinker_esp8266_at_firmware_dout_v1.5.4.1-a_20171130 里面的8Mbit固件
+
+
+https://www.firebbs.cn/forum.php?mod=viewthread&tid=15750
