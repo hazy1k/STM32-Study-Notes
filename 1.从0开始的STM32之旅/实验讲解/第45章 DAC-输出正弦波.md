@@ -1,0 +1,210 @@
+# 第四十五章 DAC-输出正弦波
+
+## 1. 硬件设计
+
+STM32的DAC外设有固定的输出通道，分别为PA4和PA5，不过，指南者开发板已经在板载SPI-FLASH芯片中使用了这两个引脚， 所以用作DAC通道输出电压时会受到干扰，影响实验
+
+![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC004.jpeg)
+
+PA5引脚连接到FLASH芯片的CLK引脚中，这可能会干扰DAC实验输出的电压信号，导致得不到正确的波形。经测试，在进行本实验时，只要不使用SPI-FLASH，DAC可以输出正常的波形，所以DAC和SPI-FLASH不在同一个实验中使用即可。
+
+在设计DAC专门的实际应用时，DAC的输出通道应独占，不与其它设备共用。本开发板的设计是考虑到各种资源分配，才不得不占用DAC通道的。
+
+实验时直接使用示波器测量PA4和PA5引脚的输出即可。
+
+## 2. 软件设计
+
+### 2.1 编程目标
+
+1) 计算获取正弦波数据表；
+
+2) 根据正弦波数据表的周期内点数和周期计算定时器触发间隔；
+
+3) 初始化DAC输出通道，初始化DAC工作模式；
+
+4) 配置触发DAC用的定时器；
+
+5) 配置DMA自动转运正弦波数据表。
+
+### 2.2 代码分析
+
+- 生成正弦波数据表
+
+要输出正弦波，实质是要控制DAC以v=sin(t)的正弦函数关系输出电压，其中v为电压输出，t为时间。
+
+而由于模拟信号连续而数字信号是离散的，所以使用DAC产生正弦波时，只能按一定时间间隔输出正弦曲线上的点， 在该时间段内输出相同的电压值，若缩短时间间隔，提高单个周期内的输出点数，可以得到逼近连续正弦波的图形， 见图 [DAC按点输出正弦波数据](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/DAC.html#id13) ，若在外部电路加上适当的电容滤波，可得到更完美的图形。
+
+![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC005.jpg)
+
+由于正弦曲线是周期函数，所以只需要得到单个周期内的数据后按周期重复即可，而单个周期内取样输出的点数又是有限的， 所以为了得到呈v=sin(t)函数关系电压值的数据通常不会实时计算获取，而是预先计算好函数单个周期内的电压数据表，并且转化成以DAC寄存器表示的值。
+
+如sin函数值的范围为[-1: +1]，而STM32的DAC输出电压范围为[0~3.3]V，按12位DAC分辨率表示的方法， 可写入寄存器的最大值为212 = 4096，即范围为[0:4096]。所以，实际输出时，会进行如下处理：
+
+1) 抬升sin函数的输出为正值：v = sin(t)+1 ， 此时，v的输出范围为[0:2]；
+
+2) 扩展输出至DAC的全电压范围: v = 3.3*(sin(t)+1)/2 ， 此时，v的输出范围为[0:3.3]，正是DAC的电压输出范围，扩展至全电压范围可以充分利用DAC的分辨率；
+
+3) 把电压值以DAC寄存器的形式表示：Reg_val = 212/3.3 * v = 211*(sin(t)+1)， 此时，存储到DAC寄存器的值范围为[0:4096]；
+
+4) 实践证明，在sin(t)的单个周期内，取32个点进行电压输出已经能较好地还原正弦波形， 所以在t∈[0:2π]区间内等间距根据上述Reg_val公式运算得到32个寄存器值，即可得到正弦波表；
+
+5) 控制DAC输出时，每隔一段相同的时间从上述正弦波表中取出一个新数据进行输出， 即可输出正弦波。改变间隔时间的单位长度，可以改变正弦波曲线的周期。
+
+为方便起见，我们使用了Python和Matlab脚本制作正弦波表，脚本的代码存储在本工程的目录下，感兴趣可以打开文件查看
+
+Python脚本的实现原理就是前面介绍的正弦波数据表的制作过程，运行后，该脚本把得到的正弦波表数据输出到目录下的py_dac_sinWav.c文件中， 见 [代码清单:DAC-3](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/DAC.html#dac-3) ，并且根据取样点描绘出示意图，见图 [python脚本根据正弦波表描绘的曲线图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/DAC.html#python) 。 Matlab脚本原理相同，此处不再列出，实际上使用C语言也能制作正弦波表，只是画图不方便而已。
+
+```c
+[2048, 2460, 2856, 3218, 3532, 3786, 3969, 4072,
+ 4093, 4031, 3887, 3668, 3382, 3042, 2661, 2255,
+ 1841, 1435, 1054,  714,  428,  209,   65,    3,
+   24,  127,  310,  564,  878, 1240, 1636, 2048]
+```
+
+![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC006.png)
+
+- DAC宏定义
+
+制作好正弦波数据表后，开始使用MDK编写STM32的DAC工程，首先设置好相关的宏
+
+```c
+//DAC DHR12RD寄存器，12位、右对齐、双通道
+#define DAC_DHR12RD_ADDRESS      (DAC_BASE+0x20)
+```
+
+此处定义的宏DAC_DHR12RD_ ADDRESS是寄存器DHR12RD的地址，该寄存器是12位右对齐的双通道寄存器， 见图 [DHR12RD寄存器说明](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/DAC.html#dhr12rd) 。在本实验中将会使用DMA把正弦波数据表的点数据赋值到该寄存器中， 往该寄存器赋值后的数据会在DAC被触发的时候搬运到2个DAC转换器，然后在这2个通道中输出以12位右对齐表示的这两个通道的电压。DAC中还有其它寄存器， 它们的功能类似，可以在《STM32中文参考手册》中了解到。
+
+![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC007.png)
+
+与DAC控制相关的引脚固定是PA4和PA5，就不使用宏定义了，在源代码中会直接使用引脚号操作。
+
+- DAC GPIO和模式配置
+
+```c
+// 使能DAC的时钟，初始化GPIO
+static void DAC_Config(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+    DAC_InitTypeDef  DAC_InitStructure;
+
+  // 使能GPIOA时钟
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);    
+    // 使能DAC时钟
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+  // DAC的GPIO配置，模拟输入
+  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4 | GPIO_Pin_5;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  // 配置DAC 通道1
+  DAC_InitStructure.DAC_Trigger = DAC_Trigger_T2_TRGO;                        // 使用TIM2作为触发源
+  DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_None;    // 不使用波形发生器
+  DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Disable;    // 不使用DAC输出缓冲
+  DAC_Init(DAC_Channel_1, &DAC_InitStructure);
+
+  // 配置DAC 通道2
+  DAC_Init(DAC_Channel_2, &DAC_InitStructure);
+
+  // 使能通道1 由PA4输出
+  DAC_Cmd(DAC_Channel_1, ENABLE);
+  // 使能通道2 由PA5输出 
+  DAC_Cmd(DAC_Channel_2, ENABLE);
+
+  // 使能DAC的DMA请求 
+  DAC_DMACmd(DAC_Channel_2, ENABLE);
+}
+```
+
+在DAC_Config函数中，完成了DAC通道的GPIO的初始化和DAC模式配置 。 其中GPIO按照要求被配置为模拟输入模式（没有模拟输出模式），在该模式下才能正常输出模拟信号。
+
+配置DAC工作模式时，则使用了DAC_InitTypeDef 类型的初始化结构体，把DAC通道1和2都配置成了使用定时器TIM2触发、 不使用波形发生器以及不使用DAC输出缓冲的模式。
+
+初始化完GPIO和DAC模式后，还使用了DAC_Cmd、DAC_DMACmd函数使能了通道以及DMA的请求。由于本实验中对DAC1和2的操作是同步的， 所以只要把DMA与DAC通道2关联起来即可，当使用DMA设置通道2的数据值时，同时更新通道1的内容。
+
+定时器配置及计算正弦波的频率
+
+初始化完DAC后，需要配置触发用的定时器，设定每次触发的间隔，以达到控制正弦波周期的目的。
+
+```c
+// 配置TIM
+static void DAC_TIM_Config(void)
+{
+
+    TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
+
+    // 使能TIM2时钟，TIM2CLK 为72M
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+  /* TIM2通用定时器配置 */
+  // TIM_TimeBaseStructInit(&TIM_TimeBaseStructure); 
+  TIM_TimeBaseStructure.TIM_Period = (20-1);                               // 定时周期 20  
+  TIM_TimeBaseStructure.TIM_Prescaler = 0x0;                               // 预分频，不分频 72M / (0+1) = 72M
+  TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;                        // 时钟分频系数
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; // 向上计数模式
+  TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+
+  // 配置TIM2触发源
+  TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);
+
+    // 使能TIM2
+  TIM_Cmd(TIM2, ENABLE);
+
+}
+```
+
+因为前面的DAC配置了TIM2当触发源，所以这里将对TIM2进行配置。TIM2的定时周期被配置为20，向上计数，不分频。 即TIM2每隔20*（1/72M）秒就会触发一次DAC事件，作DAC触发源使用的定时器并不需要设置中断，当定时器计数器向上计数至指定的值时， 产生Update事件，同时触发DAC把DHRx寄存器的数据转移到DORx，从而开始进行转换。
+
+![屏幕截图 2024 09 04 160543](https://img.picgo.net/2024/09/04/-2024-09-04-160543e1c0b83bf0fefb0a.png)
+
+在实际应用中，可以根据工程里的正弦波点数和定时器配置生成特定频率的正弦波。
+
+- DMA配置
+
+```c
+// 配置DMA
+static void DAC_DMA_Config(void)
+{    
+    DMA_InitTypeDef  DMA_InitStructure;
+
+    // 使能DMA2时钟
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+
+    // 配置DMA2
+  DMA_InitStructure.DMA_PeripheralBaseAddr = DAC_DHR12RD_ADDRESS;                  // 外设数据地址 寄存器 DHR12RD 的地址12位、右对齐、双通道
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&DualSine12bit ;                // 内存数据地址 DualSine12bit
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;                                            // 数据传输方向内存至外设
+  DMA_InitStructure.DMA_BufferSize = POINT_NUM;                                                        // 缓存大小为POINT_NUM字节    
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;                // 外设数据地址固定    
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                                    // 内存数据地址自增
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;    // 外设数据以字为单位
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;                    // 内存数据以字为单位    
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;                                                    // 循环模式
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;                                            // 高DMA通道优先级
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;                                                        // 非内存至内存模式    
+
+  DMA_Init(DMA2_Channel4, &DMA_InitStructure);
+
+  // 使能DMA2-14通道
+  DMA_Cmd(DMA2_Channel4, ENABLE);
+}
+```
+
+在上述代码中，定义了由脚本得到的正弦波数据表Sine12bit变量，一共为POINT_NUM（32）个点。在DAC_Mode_Init函数中， 调用了前面介绍的DAC_Config和DAC_TIM_Config初始化DAC和定时器，然后在for循环中把单通道的正弦波数据表Sine12bit复制扩展成为双通道的数据DualSine12bit， 扩展后的数据将会直接被DMA搬运至DAC的DHR12RD寄存器中。
+
+复制完数据后，DAC_Mode_Init调用下面的DAC_DMA_Config函数初始化DMA，配置的重点是要设置好DHR12RD寄存器的地址， 正弦波数据的内存地址（注意是双通道数据DualSine12bit），DMA缓存的个数（即单个周期的正弦波点数）以及DMA工作在循环模式。
+
+经过这样的配置后，定时器每间隔一定的时间就会触发DMA搬运双通道正弦波表的一个数据到DAC双通道寄存器进行转换， 每完成一个周期后DMA重新开始循环，从而达到连续输出波形的目的。
+
+- 主函数
+
+```c
+int main(void)
+{
+    /*初始化DAC，开始DAC转换*/
+    DAC_Mode_Init();
+
+    while (1);
+}
+```
+
+本工程的主函数非常简单，直接调用DAC_Mode_Init即可完成所有的配置，此时再使用示波器测量PA4、PA5引脚可查看其输出的波形。
