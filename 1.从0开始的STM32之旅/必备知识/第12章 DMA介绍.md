@@ -113,8 +113,115 @@ typedef struct
 
 11) DMA_M2M： 存储器到存储器模式，使用存储器到存储器时用到，设定DMA_CCR的位14 MEN2MEN即可启动存储器到存储器模式。
 
+### 4.1 简单举例
+
+单单学了结构体怎么行，我们马上就来使用
+
+下面是一个简单的例子，演示如何使用 `DMA_InitTypeDef` 结构体来配置一个DMA通道进行内存到外设的数据传输。这个例子将通过DMA将数据从内存传输到USART外设。
+
+```c
+#include "stm32f4xx.h"
+
+// 定义缓冲区大小和数据
+#define BUFFER_SIZE 64
+uint8_t tx_buffer[BUFFER_SIZE] = "Hello, DMA with USART1!";
+
+// 配置DMA
+void DMA_Config(void) {
+    DMA_InitTypeDef DMA_InitStruct;
+
+    // 启用DMA1时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+    // 配置DMA通道
+    DMA_InitStruct.DMA_Channel = DMA_Channel_4; // 选择DMA通道4
+    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)(&(USART1->DR)); // 外设基地址为USART1的数据寄存器
+    DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t)tx_buffer; // 内存基地址为数据缓冲区
+    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral; // 数据方向从内存到外设
+    DMA_InitStruct.DMA_BufferSize = BUFFER_SIZE; // 设置传输缓冲区大小
+    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable; // 外设地址不递增
+    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable; // 内存地址递增
+    DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataAlign_Byte; // 外设数据宽度为字节
+    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataAlign_Byte; // 内存数据宽度为字节
+    DMA_InitStruct.DMA_Mode = DMA_Mode_Normal; // DMA工作模式为正常模式
+    DMA_InitStruct.DMA_Priority = DMA_Priority_High; // DMA通道优先级为高
+    DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable; // 禁用FIFO模式
+    DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_Full; // FIFO阈值为满
+    DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single; // 内存突发模式为单次
+    DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // 外设突发模式为单次
+
+    // 初始化DMA2流7
+    DMA_Init(DMA1_Stream4, &DMA_InitStruct);
+
+    // 启用DMA传输完成中断
+    DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
+
+    // 配置USART1使用DMA进行数据传输
+    USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+
+    // 启动DMA传输
+    DMA_Cmd(DMA1_Stream4, ENABLE);
+}
+
+// 主函数
+int main(void) {
+    // 初始化系统时钟
+    SystemInit();
+
+    // 配置USART1
+    USART_InitTypeDef USART_InitStruct;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); // 启用USART1时钟
+
+    USART_InitStruct.USART_BaudRate = 9600; // 设置波特率为9600
+    USART_InitStruct.USART_WordLength = USART_WordLength_8b; // 8位数据长度
+    USART_InitStruct.USART_StopBits = USART_StopBits_1; // 1位停止位
+    USART_InitStruct.USART_Parity = USART_Parity_No; // 无奇偶校验
+    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 不使用硬件流控制
+    USART_InitStruct.USART_Mode = USART_Mode_Tx; // 只配置为发送模式
+    USART_Init(USART1, &USART_InitStruct); // 初始化USART1
+
+    USART_Cmd(USART1, ENABLE); // 启用USART1
+
+    // 配置DMA
+    DMA_Config();
+
+    // 主循环
+    while (1) {
+        // 主循环中可以添加其他代码
+    }
+}
+
+```
+
+### 4.2 详细注释
+
+1. **DMA_Config 函数**:
+   
+   - **`DMA_InitStruct.DMA_Channel`**: 选择DMA通道4，适用于USART1。
+   - **`DMA_InitStruct.DMA_PeripheralBaseAddr`**: 设置外设基地址为USART1的数据寄存器地址。
+   - **`DMA_InitStruct.DMA_Memory0BaseAddr`**: 设置内存基地址为 `tx_buffer` 的起始地址。
+   - **`DMA_InitStruct.DMA_DIR`**: 设置数据传输方向为从内存到外设。
+   - **`DMA_InitStruct.DMA_BufferSize`**: 设置传输的数据量为缓冲区大小。
+   - **`DMA_InitStruct.DMA_PeripheralInc`**: 禁用外设地址递增，因为USART寄存器地址固定。
+   - **`DMA_InitStruct.DMA_MemoryInc`**: 启用内存地址递增。
+   - **`DMA_InitStruct.DMA_PeripheralDataSize`** 和 **`DMA_InitStruct.DMA_MemoryDataSize`**: 设置数据宽度为字节。
+   - **`DMA_InitStruct.DMA_Mode`**: 设置为正常模式。
+   - **`DMA_InitStruct.DMA_Priority`**: 设置DMA通道优先级为高。
+   - **`DMA_InitStruct.DMA_FIFOMode`**, **`DMA_InitStruct.DMA_FIFOThreshold`**, **`DMA_InitStruct.DMA_MemoryBurst`**, **`DMA_InitStruct.DMA_PeripheralBurst`**: 配置FIFO和突发模式。
+
+2. **主函数**:
+   
+   - 初始化系统时钟。
+   - 配置USART1的基本参数，并启用USART1。
+   - 调用 `DMA_Config` 函数配置DMA。
+   - 进入主循环，保持程序运行。
+
+通过这种配置，你可以利用DMA将数据从内存高效地传输到USART外设进行发送。
+
 ---
 
 2024.7.29 从后面起，就单纯讲理论原理了，实验单独开章节讲，因为把实验加上去整篇就显得过于长了，并且不利于分类阅读，以前的加了就加了吧，后面理论和实验分章节讲解
 
 2024.8.28 第二次修订，后期不再维护
+
+2024.9.4 有阅读量，加更

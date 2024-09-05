@@ -242,6 +242,208 @@ typedef struct {
 
 4) USART_LastBit： 选择在发送最后一个数据位的时候时钟脉冲是否在SCLK引脚输出，可以是不输出脉冲(USART_LastBit_Disable)、输出脉冲(USART_LastBit_Enable)。它设定USART_CR2寄存器的LBCL位的值。
 
+### 4.1 简单举例
+
+有些读者看懂了结构体但是不知道怎么使用，我们可以看看简单应用嘛：
+
+假设你有一个USART外设，并且你需要配置它以使用外部时钟，并设置时钟极性和相位。以下是如何使用 `USART_ClockInitTypeDef` 结构体来实现这个配置的代码示例。
+
+```c
+#include "stm32f4xx.h"  // 假设你使用的是STM32F4系列微控制器
+
+// 定义USART_ClockInitTypeDef结构体
+USART_ClockInitTypeDef USART_ClockInitStruct;
+
+// 配置USART的时钟设置
+void USART_Config(void) {
+    // 假设我们要配置USART1
+    USART_TypeDef *USARTx = USART1;
+
+    // 初始化USART_ClockInitTypeDef结构体
+    USART_ClockInitStruct.USART_Clock = USART_CLOCK_ENABLE;  // 启用时钟
+    USART_ClockInitStruct.USART_CPOL = USART_CPOL_LOW;       // 时钟极性：低电平空闲
+    USART_ClockInitStruct.USART_CPHA = USART_CPHA_1EDGE;     // 时钟相位：第一沿采样
+    USART_ClockInitStruct.USART_LastBit = USART_LASTBIT_DISABLE; // 禁用最后一位时钟脉冲
+
+    // 调用配置函数
+    USART_ClockInit(USARTx, &USART_ClockInitStruct);
+}
+
+// 主函数
+int main(void) {
+    // 初始化系统
+    SystemInit();
+
+    // 配置USART
+    USART_Config();
+
+    // 主循环
+    while (1) {
+        // 在这里添加你的应用代码
+    }
+}
+```
+
+---
+
+### 4.2 复杂例子
+
+这里我们也可以展示稍微复杂一点的例子：
+
+假设我们要通过USART1发送一个数据缓冲区到一个外部设备，并且数据传输需要使用DMA进行异步处理。这个过程中，USART1会使用外部时钟源来进行同步通信。
+
+硬件需求
+
+1. 外部时钟源连接到USART1的时钟引脚。
+2. 数据缓冲区用于DMA传输。
+3. DMA控制器用于管理数据传输。
+
+参考代码
+
+```c
+#include "stm32f4xx.h"
+
+// 定义数据缓冲区大小
+#define BUFFER_SIZE 256
+
+// 数据缓冲区，发送的数据
+uint8_t tx_buffer[BUFFER_SIZE] = "Hello, USART1 with DMA and external clock!";
+
+// 初始化USART1的外部时钟配置
+void USART1_ClockConfig(void) {
+    USART_ClockInitTypeDef USART_ClockInitStruct;
+
+    // 启用USART1的时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+
+    // 配置USART1的时钟参数
+    USART_ClockInitStruct.USART_Clock = USART_CLOCK_ENABLE; // 启用时钟
+    USART_ClockInitStruct.USART_CPOL = USART_CPOL_HIGH;     // 时钟极性高
+    USART_ClockInitStruct.USART_CPHA = USART_CPHA_2EDGE;    // 时钟相位在第二沿采样
+    USART_ClockInitStruct.USART_LastBit = USART_LASTBIT_DISABLE; // 不启用最后一个位的时钟脉冲
+
+    // 应用USART时钟配置
+    USART_ClockInit(USART1, &USART_ClockInitStruct);
+}
+
+// 初始化USART1的基本参数
+void USART1_Init(void) {
+    USART_InitTypeDef USART_InitStruct;
+
+    // 配置USART1的参数
+    USART_InitStruct.USART_BaudRate = 9600;               // 设置波特率为9600
+    USART_InitStruct.USART_WordLength = USART_WordLength_8b; // 数据位长度8位
+    USART_InitStruct.USART_StopBits = USART_StopBits_1;  // 停止位为1位
+    USART_InitStruct.USART_Parity = USART_Parity_No;      // 不使用校验位
+    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 不使用硬件流控制
+    USART_InitStruct.USART_Mode = USART_Mode_Tx;          // 只配置为发送模式
+
+    // 初始化USART1
+    USART_Init(USART1, &USART_InitStruct);
+
+    // 启用USART1
+    USART_Cmd(USART1, ENABLE);
+}
+
+// 初始化DMA用于USART1的数据传输
+void DMA_Init(void) {
+    DMA_InitTypeDef DMA_InitStruct;
+
+    // 启用DMA2的时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+
+    // 配置DMA2流7用于USART1的发送
+    DMA_InitStruct.DMA_Channel = DMA_Channel_4; // DMA通道4用于USART1
+    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)(&(USART1->DR)); // 外设基地址为USART1的数据寄存器
+    DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t)tx_buffer; // 内存基地址为数据缓冲区
+    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral; // 数据方向从内存到外设
+    DMA_InitStruct.DMA_BufferSize = BUFFER_SIZE; // 缓冲区大小
+    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable; // 外设地址不增量
+    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable; // 内存地址增量
+    DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataAlign_Byte; // 外设数据对齐为字节
+    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataAlign_Byte; // 内存数据对齐为字节
+    DMA_InitStruct.DMA_Mode = DMA_Mode_Normal; // DMA正常模式
+    DMA_InitStruct.DMA_Priority = DMA_Priority_High; // DMA优先级高
+    DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable; // 禁用FIFO模式
+    DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_Full; // FIFO阈值为满
+    DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single; // 内存突发传输单次
+    DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // 外设突发传输单次
+
+    // 配置DMA2流7
+    DMA_Init(DMA2_Stream7, &DMA_InitStruct);
+
+    // 启用DMA传输完成中断
+    DMA_ITConfig(DMA2_Stream7, DMA_IT_TC, ENABLE);
+
+    // 配置USART1使用DMA进行数据传输
+    USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+
+    // 启动DMA传输
+    DMA_Cmd(DMA2_Stream7, ENABLE);
+}
+
+// DMA传输完成中断处理函数
+void DMA2_Stream7_IRQHandler(void) {
+    // 检查是否是DMA传输完成中断
+    if (DMA_GetITStatus(DMA2_Stream7, DMA_IT_TCIF7)) {
+        // 清除中断标志
+        DMA_ClearITPendingBit(DMA2_Stream7, DMA_IT_TCIF7);
+        // 可以在此添加处理传输完成后的操作代码
+    }
+}
+
+// 主函数
+int main(void) {
+    // 初始化系统时钟
+    SystemInit();
+
+    // 配置USART1的外部时钟
+    USART1_ClockConfig();
+
+    // 初始化USART1
+    USART1_Init();
+
+    // 初始化DMA
+    DMA_Init();
+
+    // 主循环
+    while (1) {
+        // 可以在这里添加其他应用代码
+    }
+}
+
+```
+
+1. **USART1外部时钟配置 (`USART1_ClockConfig`)**:
+   
+   - 启用USART1的时钟。
+   - 配置USART1的时钟设置（使用外部时钟源、设置时钟极性和相位）。
+
+2. **USART1初始化 (`USART1_Init`)**:
+   
+   - 配置USART1的基本参数，例如波特率、数据位长度、停止位、校验等。
+   - 启用USART1。
+
+3. **DMA初始化 (`DMA_Init`)**:
+   
+   - 启用DMA2的时钟。
+   - 配置DMA流7用于USART1的传输，包括数据方向、内存和外设数据宽度等。
+   - 启用DMA传输完成中断。
+   - 启用USART1的DMA传输请求并启动DMA传输。
+
+4. **DMA中断处理函数 (`DMA2_Stream7_IRQHandler`)**:
+   
+   - 处理DMA传输完成中断，清除中断标志并执行相关操作。
+
+5. **主函数 (`main`)**:
+   
+   - 初始化系统时钟、USART1、DMA。
+   - 进入主循环，可用于其他应用代码。
+
+这个示例展示了如何结合使用USART的同步模式、DMA数据传输，以及外部时钟源配置，从而实现一个复杂的通信和数据处理场景。
+
 ---
 
 2024.8.23 第一次修订，后期不再维护
+
+2024.9.4 有阅读量，加更
