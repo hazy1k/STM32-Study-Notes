@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>RTC 万年历实验</TargetName>
+    <TargetName>RTCtime</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>

@@ -162,7 +162,7 @@
       }
     ]
   },
-  "outDir": "build",
+  "outDir": "output",
   "deviceName": null,
   "packDir": null,
   "miscInfo": {

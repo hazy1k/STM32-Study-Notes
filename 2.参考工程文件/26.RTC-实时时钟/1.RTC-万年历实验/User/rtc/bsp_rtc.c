@@ -504,8 +504,3 @@ void Time_Display(uint32_t TimeVar,struct rtc_time *tm)
 #endif
 		
 }
-
-
-
-
-/************************END OF FILE***************************************/

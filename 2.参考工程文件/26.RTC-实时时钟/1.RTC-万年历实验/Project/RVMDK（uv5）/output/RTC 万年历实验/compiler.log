@@ -1,0 +1,25 @@
+>>> cc
+
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\core_cm3.d": No such file or directory
+.\..\..\Libraries\CMSIS\core_cm3.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_adc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_adc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\misc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\misc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dbgmcu.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dbgmcu.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\system_stm32f10x.d": No such file or directory
+.\..\..\Libraries\CMSIS\system_stm32f10x.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_bkp.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_bkp.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_cec.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_cec.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_crc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_crc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_can.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_can.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dac.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dac.c: 0 warnings, 1 error
+
+>>> ld
+

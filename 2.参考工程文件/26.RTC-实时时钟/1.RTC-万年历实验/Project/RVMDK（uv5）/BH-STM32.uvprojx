@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>RTC 万年历实验</TargetName>
+      <TargetName>RTCtime</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\AC5</pCCUsed>
@@ -620,5 +620,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>BH-STM32</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

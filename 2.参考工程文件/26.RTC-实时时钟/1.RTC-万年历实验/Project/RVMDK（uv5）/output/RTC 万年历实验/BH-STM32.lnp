@@ -1,0 +1,1 @@
+--cpu Cortex-M3 --library_type=microlib --scatter "e:/StudyNote/study_STM32/2.参考工程文件/26.RTC-实时时钟/1.RTC-万年历实验/Project/RVMDK（uv5）/output/RTC 万年历实验/BH-STM32.sct" --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers --list ".\output\RTC 万年历实验\BH-STM32.map"

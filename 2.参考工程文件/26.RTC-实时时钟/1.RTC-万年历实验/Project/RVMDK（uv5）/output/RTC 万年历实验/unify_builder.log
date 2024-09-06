@@ -1,0 +1,129 @@
+[2024-09-05 17:07:21]	[info] incremental build: 35 source files changed
+These source files will be recompiled
+---
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\CMSIS\core_cm3.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\CMSIS\startup\startup_stm32f10x_hd.s': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\CMSIS\system_stm32f10x.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\misc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_adc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_bkp.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_can.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_cec.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_crc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dac.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dbgmcu.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dma.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_exti.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_flash.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_fsmc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_gpio.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_i2c.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_iwdg.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_pwr.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_rcc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_rtc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_sdio.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_spi.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_tim.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_usart.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_wwdg.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\Key\bsp_key.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\font\fonts.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\lcd\bsp_ili9341_lcd.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\main.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_calendar.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_date.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_rtc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\stm32f10x_it.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\usart\bsp_usart.c': object (.o) file not exist
+
+[2024-09-05 17:07:21]	compilation failed at : "e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dbgmcu.c", exit code: 1
+command: 
+  "e:\dianzi\MDK\ARM\AC5\bin\armcc.exe" -c --apcs=interwork -I../../Libraries/CMSIS -I../../User -I../../Libraries/FWlib/inc -I.cmsis/include -I"RTE/_RTC 万年历实验" -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER --cpu Cortex-M3 --li --c99 -D__MICROLIB -O0 --split_sections --diag_suppress=1 --diag_suppress=1295 -g -o ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dbgmcu.o" --no_depend_system_headers --depend ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dbgmcu.d" .\..\..\Libraries\FWlib\src\stm32f10x_dbgmcu.c
+   at unify_builder.Program.compileByMulThread(Int32 thrNum, CmdInfo[] cmds_, List`1 errLogs)
+   at unify_builder.Program.Main(String[] args_)
+---
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_cec.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_cec.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_adc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_adc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_can.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_can.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_crc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_crc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dac.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dac.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\misc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\misc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\system_stm32f10x.d": No such file or directory
+.\..\..\Libraries\CMSIS\system_stm32f10x.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\core_cm3.d": No such file or directory
+.\..\..\Libraries\CMSIS\core_cm3.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dbgmcu.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dbgmcu.c: 0 warnings, 1 error
+
+[2024-09-05 17:10:25]	[info] incremental build: 34 source files changed
+These source files will be recompiled
+---
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\CMSIS\core_cm3.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\CMSIS\system_stm32f10x.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\misc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_adc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_bkp.c': dependence (.d) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_can.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_cec.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_crc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dac.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dbgmcu.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dma.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_exti.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_flash.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_fsmc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_gpio.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_i2c.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_iwdg.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_pwr.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_rcc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_rtc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_sdio.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_spi.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_tim.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_usart.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_wwdg.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\Key\bsp_key.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\font\fonts.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\lcd\bsp_ili9341_lcd.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\main.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_calendar.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_date.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\rtc\bsp_rtc.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\stm32f10x_it.c': object (.o) file not exist
+'e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\User\usart\bsp_usart.c': object (.o) file not exist
+
+[2024-09-05 17:10:25]	compilation failed at : "e:\StudyNote\study_STM32\2.参考工程文件\26.RTC-实时时钟\1.RTC-万年历实验\Libraries\FWlib\src\stm32f10x_dac.c", exit code: 1
+command: 
+  "e:\dianzi\MDK\ARM\AC5\bin\armcc.exe" -c --apcs=interwork -I../../Libraries/CMSIS -I../../User -I../../Libraries/FWlib/inc -I.cmsis/include -I"RTE/_RTC 万年历实验" -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER --cpu Cortex-M3 --li --c99 -D__MICROLIB -O0 --split_sections --diag_suppress=1 --diag_suppress=1295 -g -o ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dac.o" --no_depend_system_headers --depend ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dac.d" .\..\..\Libraries\FWlib\src\stm32f10x_dac.c
+   at unify_builder.Program.compileByMulThread(Int32 thrNum, CmdInfo[] cmds_, List`1 errLogs)
+   at unify_builder.Program.Main(String[] args_)
+---
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\core_cm3.d": No such file or directory
+.\..\..\Libraries\CMSIS\core_cm3.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_adc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_adc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\misc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\misc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dbgmcu.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dbgmcu.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\CMSIS\system_stm32f10x.d": No such file or directory
+.\..\..\Libraries\CMSIS\system_stm32f10x.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_bkp.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_bkp.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_cec.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_cec.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_crc.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_crc.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_can.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_can.c: 0 warnings, 1 error
+"no source": Error:  #219: error while deleting file ".\output\RTC 万年历实验\.obj\__\__\Libraries\FWlib\src\stm32f10x_dac.d": No such file or directory
+.\..\..\Libraries\FWlib\src\stm32f10x_dac.c: 0 warnings, 1 error
+
