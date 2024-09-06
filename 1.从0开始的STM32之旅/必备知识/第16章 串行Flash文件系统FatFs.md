@@ -26,13 +26,13 @@ FatFs文件系统的源码可以从fatfs官网下载:[FatFs - Generic FAT Filesy
 
 ### 2.1 FatFs的目录结构
 
-在移植FatFs文件系统到开发板之前，我们先要到FatFs的官网获取源码，官网有对FatFs做详细的介绍，有兴趣可以了解。 解压之后可看到里面有 doc 和 src 这两个文件夹，见图 [FatFs文件目录](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id4) 。 doc 文件夹里面是一些使用帮助文档； src 才是FatFs文件系统的源码。
+在移植FatFs文件系统到开发板之前，我们先要到FatFs的官网获取源码，官网有对FatFs做详细的介绍，有兴趣可以了解。 解压之后可看到里面有 doc 和 src 这两个文件夹。doc 文件夹里面是一些使用帮助文档； src 才是FatFs文件系统的源码。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF003.png)
 
 ### 2.2 FatFs帮助文档
 
-打开 doc 文件夹，可看到如图 [doc文件夹的文件目录](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#doc) 的文件目录：
+打开 doc 文件夹，可看到如图的文件目录：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF004.png)
 
@@ -40,7 +40,7 @@ FatFs文件系统的源码可以从fatfs官网下载:[FatFs - Generic FAT Filesy
 
 ### 2.3 FatFs源码
 
-打开 src 文件夹，可看到如图 [src文件夹的文件目录](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#src) 的文件目录：
+打开 src 文件夹，可看到如图的文件目录：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF005.png)
 
@@ -63,3 +63,9 @@ src文件夹下的源码文件功能简介如下：
 - cc936.c：本文件在option目录下，是简体中文支持所需要添加的文件，包含了简体中文的GBK和Unicode相互转换功能函数。
 
 - ffconf.h: 这个头文件包含了对FatFs功能配置的宏定义，通过修改这些宏定义就可以裁剪FatFs的功能。如需要支持简体中文， 需要把 ffconf.h中的_CODE_PAGE 的宏改成936并把上面的cc936.c文件加入到工程之中。
+
+更多内容可参考：[FatFs文件系统 - 孤情剑客 - 博客园](https://www.cnblogs.com/The-explosion/p/13170732.html)
+
+---
+
+2024.9.6 第一次修订，后期不再维护

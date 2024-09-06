@@ -2,7 +2,7 @@
 
 ## 1. FatFs程序结构图
 
-移植FatFs之前我们先通过FatFs的程序结构图了解FatFs在程序中的关系网络，见图 [FatFs程序结构图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id9) 。
+移植FatFs之前我们先通过FatFs的程序结构图了解FatFs在程序中的关系网络
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF006.png)
 
@@ -20,15 +20,15 @@ FatFs属于软件组件，不需要附带其他硬件电路。我们使用SPI Fl
 
 上一章我们已经实现了SPI Flash芯片驱动程序，并实现了读写测试， 为移植FatFs方便，我们直接拷贝一份工程， 我们在工程基础上添加FatFs组件，并修改main函数的用户程序即可。
 
-1) 先拷贝一份SPI Flash芯片测试的工程文件(整个文件夹)，并修改文件夹名为“SPI—FatFs文件系统”。 将FatFs源码中的src文件夹整个文件夹拷贝一份至“SPI—FatFs文件系统USER”文件夹下并修改名为“FATFS”， 见图 [拷贝FatFs源码到工程](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id12) 。
+1) 先拷贝一份SPI Flash芯片测试的工程文件(整个文件夹)，并修改文件夹名为“SPI—FatFs文件系统”。 将FatFs源码中的src文件夹整个文件夹拷贝一份至“SPI—FatFs文件系统USER”文件夹下并修改名为“FATFS”， 见图：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF007.png)
 
-2) 使用KEIL软件打开工程文件(..SPI—FatFs文件系统ProjectRVMDK(uv5)\ BH-F103.uvprojx)， 并将FatFs组件文件添加到工程中， 需要添加有ff.c、diskio.c和cc936.c三个文件，见图 [添加FatFS文件到工程](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id13) 。
+2) 使用KEIL软件打开工程文件(..SPI—FatFs文件系统ProjectRVMDK(uv5)\ BH-F103.uvprojx)， 并将FatFs组件文件添加到工程中， 需要添加有ff.c、diskio.c和cc936.c三个文件
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF008.jpg)
 
-3) 添加FATFS文件夹到工程的include选项中。打开工程选项对话框，选择“C/C++”选项下的“Include Paths”项目， 在弹出路径设置对话框中选择添加“FATFS”文件夹，见图 [添加FATFS路径到工程选项](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id14) 。
+3) 添加FATFS文件夹到工程的include选项中。打开工程选项对话框，选择“C/C++”选项下的“Include Paths”项目， 在弹出路径设置对话框中选择添加“FATFS”文件夹
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/FLASHF009.jpg)
 
@@ -36,7 +36,7 @@ FatFs属于软件组件，不需要附带其他硬件电路。我们使用SPI Fl
 
 ## 4. FatFs底层设备驱动函数
 
-FatFs文件系统与底层介质的驱动分离开来，对底层介质的操作都要交给用户去实现，它仅仅是提供了一个函数接口而已。 表 [FatFs移植需要用户支持函数](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id16) 为FatFs移植时用户必须支持的函数。 通过表 [FatFs移植需要用户支持函数](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id16) 我们可以清晰知道很多函数是在一定条件下才需要添加的， 只有前三个函数是必须添加的。我们完全可以根据实际需求选择实现用到的函数。
+FatFs文件系统与底层介质的驱动分离开来，对底层介质的操作都要交给用户去实现，它仅仅是提供了一个函数接口而已。 表为FatFs移植时用户必须支持的函数。 通过表我们可以清晰知道很多函数是在一定条件下才需要添加的， 只有前三个函数是必须添加的。我们完全可以根据实际需求选择实现用到的函数。
 
 前三个函数是实现读文件最基本需求。接下来三个函数是实现创建文件、修改文件需要的。为实现格式化功能， 需要在disk_ioctl添加两个获取物理设备信息选项。我们一般只要实现前面六个函数就可以了，已经足够满足大部分功能。
 
@@ -53,7 +53,7 @@ FatFs文件系统与底层介质的驱动分离开来，对底层介质的操作
 - 宏定义
 
 ```c
-/* 为每个设备定义一个物理编号 */
+// 为每个设备定义一个物理编号
 #define ATA         0     // 预留SD卡使用
 #define SPI_FLASH   1     // 外部SPI Flash
 ```
@@ -66,23 +66,20 @@ SD卡是预留接口，在讲解SDIO接口相关章节后会用到，可以实�
 
 ```c
 DSTATUS disk_status (
-    BYTE pdrv   /* 物理编号 */
-)
+    BYTE pdrv   // 物理编号
+) 
 {
-
     DSTATUS status = STA_NOINIT;
-
     switch (pdrv) {
-    case ATA: /* SD CARD */
+    case ATA: // SD CARD 
         break;
-
     case SPI_FLASH:
-        /* SPI Flash状态检测：读取SPI Flash 设备ID */
+        // SPI Flash状态检测：读取SPI Flash 设备ID 
         if (sFLASH_ID == SPI_FLASH_ReadID()) {
-            /* 设备ID读取结果正确 */
+            // 设备ID读取结果正确
             status &= ~STA_NOINIT;
         } else {
-            /* 设备ID读取结果错误 */
+            // 设备ID读取结果错误 
             status = STA_NOINIT;;
         }
         break;
@@ -96,29 +93,38 @@ DSTATUS disk_status (
 
 disk_status函数只有一个参数pdrv，表示物理编号。一般我们都是使用switch函数实现对pdrv的分支判断。 对于SD卡只是预留接口，留空即可。对于SPI Flash芯片，我们直接调用在SPI_FLASH_ReadID()获取设备ID， 然后判断是否正确，如果正确，函数返回正常标准；如果错误，函数返回异常标志。SPI_FLASH_ReadID()是定义在bsp_spi_flash.c文件中，上一章节已做了分析。
 
+简化流程：
+
+- **`DSTATUS status = STA_NOINIT;`**: 初始化状态为 `STA_NOINIT`，表示设备尚未初始化。
+- **`switch (pdrv)`**: 根据传入的物理编号 `pdrv`，选择不同的设备类型进行处理。
+  - **`case ATA:`**: 处理 SD 卡（具体实现尚未完成）。
+  - **`case SPI_FLASH:`**: 处理 SPI Flash，读取其设备 ID 进行状态检测。
+  - **`default:`**: 对于不认识的设备类型，返回 `STA_NOINIT`。
+
+---
+
 - 设备初始化
 
 ```c
 DSTATUS disk_initialize (
-    BYTE pdrv       /* 物理编号 */
+    BYTE pdrv       // 物理编号
 )
 {
     uint16_t i;
     DSTATUS status = STA_NOINIT;
     switch (pdrv) {
-    case ATA:          /* SD CARD */
+    case ATA:          // SD CARD
         break;
-
-    case SPI_FLASH:    /* SPI Flash */
-        /* 初始化SPI Flash */
+    case SPI_FLASH:    // SPI Flash 
+        // 初始化SPI Flash 
         SPI_FLASH_Init();
-        /* 延时一小段时间 */
-        i=500;
+        // 延时一小段时间
+        i = 500;
         while (--i);
-        /* 唤醒SPI Flash */
+        // 唤醒SPI Flash 
         SPI_Flash_WAKEUP();
-        /* 获取SPI Flash芯片状态 */
-        status=disk_status(SPI_FLASH);
+        // 获取SPI Flash芯片状态
+        status = disk_status(SPI_FLASH);
         break;
 
     default:
@@ -132,24 +138,37 @@ disk_initialize函数也是有一个参数pdrv，用来指定设备物理编号�
 
 最后调用disk_status函数获取SPI Flash芯片状态，并返回状态值。
 
+简化流程：
+
+- **`DSTATUS status = STA_NOINIT;`**: 初始化状态为 `STA_NOINIT`。
+- **`switch (pdrv)`**: 根据传入的物理编号选择不同的设备类型进行处理。
+  - **`case ATA:`**: 处理 SD 卡（目前未实现）。
+  - **`case SPI_FLASH:`**:
+    - 调用 `SPI_FLASH_Init()` 初始化 SPI Flash。
+    - 使用一个简单的延时循环等待设备稳定。
+    - 调用 `SPI_Flash_WAKEUP()` 唤醒 SPI Flash。
+    - 使用 `disk_status(SPI_FLASH)` 获取设备状态并更新 `status`。
+
+---
+
 - 读取扇区
 
 ```c
 DRESULT disk_read (
-    BYTE pdrv,    /* 设备物理编号(0..) */
-    BYTE *buff,   /* 数据缓存区 */
-    DWORD sector, /* 扇区首地址 */
-    UINT count    /* 扇区个数(1..128) */
+    BYTE pdrv,    // 设备物理编号(0..) 
+    BYTE *buff,   // 数据缓存区 
+    DWORD sector, // 扇区首地址 
+    UINT count    // 扇区个数(1..128) 
 )
 {
     DRESULT status = RES_PARERR;
     switch (pdrv) {
-    case ATA: /* SD CARD */
+    case ATA: // SD CARD 
         break;
 
     case SPI_FLASH:
-        /* 扇区偏移2MB，外部Flash文件系统空间放在SPI Flash后面6MB空间 */
-        sector+=512;
+        // 扇区偏移2MB，外部Flash文件系统空间放在SPI Flash后面6MB空间 
+        sector += 512;
         SPI_FLASH_BufferRead(buff, sector <<12, count<<12);
         status = RES_OK;
         break;
@@ -169,29 +188,46 @@ BYTE类型实际是unsigned char类型，DWORD类型实际是unsigned long类型
 
 对于SPI Flash芯片，主要是使用SPI_FLASH_BufferRead()实现在指定地址读取指定长度的数据，它接收三个参数， 第一个参数为指定数据存放地址指针。第二个参数为指定数据读取地址，这里使用左移运算符，左移12位实际是乘以4096， 这与每个扇区大小是息息相关的。第三个参数为读取数据个数，也是需要使用左移运算符。
 
+简化流程：
+
+- **扇区偏移**: `sector += 512;`
+  
+  - 偏移量设为 512，以适应 SPI Flash 的特定文件系统位置。
+
+- **读取操作**: `SPI_FLASH_BufferRead(buff, sector <<12, count<<12);`
+  
+  - 使用 `SPI_FLASH_BufferRead` 函数从 SPI Flash 中读取数据。
+  - `sector << 12` 和 `count << 12` 将扇区地址和扇区数量转换为字节地址。
+
+- **状态更新**: `status = RES_OK;`
+  
+  - 读取成功，更新状态为 `RES_OK`。
+
+---
+
 - 扇区写入
 
 ```c
 DRESULT disk_write (
-    BYTE pdrv,        /* 设备物理编号(0..) */
-    const BYTE *buff, /* 欲写入数据的缓存区 */
-    DWORD sector,     /* 扇区首地址 */
-    UINT count        /* 扇区个数(1..128) */
+    BYTE pdrv,        // 设备物理编号(0..) 
+    const BYTE *buff, // 欲写入数据的缓存区 
+    DWORD sector,     // 扇区首地址 
+    UINT count        // 扇区个数(1..128) 
 )
 {
     uint32_t write_addr;
     DRESULT status = RES_PARERR;
     if (!count) {
-        return RES_PARERR;    /* Check parameter */
+        return RES_PARERR;    // Check parameter 
     }
 
     switch (pdrv) {
-    case ATA: /* SD CARD */
+    case ATA: // SD CARD 
         break;
 
     case SPI_FLASH:
-        /* 扇区偏移2MB，外部Flash文件系统空间放在SPI Flash后面6MB空间 */
-        sector+=512;
+        // 扇区偏移2MB，外部Flash文件系统空间放在SPI Flash后面6MB空间
+        sector += 512;
         write_addr = sector<<12;
         SPI_FLASH_SectorErase(write_addr);
         SPI_FLASH_BufferWrite((u8 *)buff,write_addr,count<<12);
@@ -207,31 +243,55 @@ DRESULT disk_write (
 
 disk_write函数有四个形参，pdrv为设备物理编号。buff指向待写入扇区数据的首地址。sector，指定要写入数据的扇区首地址。 count指定扇区数量。对于SPI Flash芯片，在写入数据之前需要先擦除，所以用到扇区擦除函数(SPI_FLASH_SectorErase)。 然后就是在调用数据写入函数(SPI_FLASH_BufferWrite)把数据写入到指定位置内。
 
+简化流程：
+
+- **扇区偏移**: `sector += 512;`
+  
+  - 偏移量设为 512，以适应 SPI Flash 的特定文件系统位置。
+
+- **写入地址**: `write_addr = sector << 12;`
+  
+  - 计算实际的写入地址，以字节为单位。
+
+- **擦除扇区**: `SPI_FLASH_SectorErase(write_addr);`
+  
+  - 在写入之前擦除指定的扇区。
+
+- **写入数据**: `SPI_FLASH_BufferWrite((u8 *)buff, write_addr, count << 12);`
+  
+  - 使用 `SPI_FLASH_BufferWrite` 函数将数据写入 SPI Flash。
+
+- **状态更新**: `status = RES_OK;`
+  
+  - 写入成功，更新状态为 `RES_OK`。
+
+---
+
 - 其他控制
 
 ```c
 DRESULT disk_ioctl (
-    BYTE pdrv,    /* 物理编号 */
-    BYTE cmd,     /* 控制指令 */
-    void *buff    /* 写入或者读取数据地址指针 */
+    BYTE pdrv,    // 物理编号 
+    BYTE cmd,     // 控制指令 
+    void *buff    // 写入或者读取数据地址指针
 )
 {
     DRESULT status = RES_PARERR;
     switch (pdrv) {
-    case ATA: /* SD CARD */
+    case ATA: // SD CARD 
         break;
 
     case SPI_FLASH:
-        switch (cmd) {
-        /* 扇区数量：1536*4096/1024/1024=6(MB) */
+        switch(cmd) {
+        // 扇区数量：1536*4096/1024/1024=6(MB)
         case GET_SECTOR_COUNT:
             *(DWORD * )buff = 1536;
             break;
-        /* 扇区大小  */
+        // 扇区大小
         case GET_SECTOR_SIZE :
             *(WORD * )buff = 4096;
             break;
-        /* 同时擦除扇区个数 */
+        // 同时擦除扇区个数 
         case GET_BLOCK_SIZE :
             *(DWORD * )buff = 1;
             break;
@@ -250,18 +310,38 @@ disk_ioctl函数有三个形参，pdrv为设备物理编号，cmd为控制指令
 
 对于SPI Flash芯片，为支持FatFs格式化功能， 需要用到获取扇区数量(GET_SECTOR_COUNT)指令和获取擦除块数量(GET_BLOCK_SIZE)指令。 另外，SD卡扇区大小为512字节，SPI Flash芯片一般设置扇区大小为4096字节，所以需要用到获取扇区大小(GET_SECTOR_SIZE)指令。
 
+简化流程：
+
+- **扇区数量**: `*(DWORD * )buff = 1536;`
+  
+  - 返回 SPI Flash 的扇区数量。
+
+- **扇区大小**: `*(WORD * )buff = 4096;`
+  
+  - 返回每个扇区的大小。
+
+- **块大小**: `*(DWORD * )buff = 1;`
+  
+  - 返回可同时擦除的扇区数（块大小）。
+
+- **状态更新**: `status = RES_OK;`
+  
+  - 如果操作成功，更新状态为 `RES_OK`。
+
+---
+
 - 时间戳获取
 
 ```c
 __weak DWORD get_fattime(void)
 {
     /* 返回当前时间戳 */
-    return    ((DWORD)(2015 - 1980) << 25)  /* Year 2015 */
-            | ((DWORD)1 << 21)        /* Month 1 */
-            | ((DWORD)1 << 16)        /* Mday 1 */
-            | ((DWORD)0 << 11)        /* Hour 0 */
-            | ((DWORD)0 << 5)         /* Min 0 */
-            | ((DWORD)0 >> 1);        /* Sec 0 */
+    return    ((DWORD)(2015 - 1980) << 25)  // Year 2015 
+            | ((DWORD)1 << 21)        // Month 1 
+            | ((DWORD)1 << 16)        // Mday 1 
+            | ((DWORD)0 << 11)        // Hour 0 
+            | ((DWORD)0 << 5)         // Min 0 
+            | ((DWORD)0 >> 1);        // Sec 0 
 }
 ```
 
@@ -294,7 +374,7 @@ ffconf.h文件是FatFs功能配置文件，我们可以对文件内容进行修�
 
 1) _USE_MKFS： 格式化功能选择，为使用FatFs格式化功能，需要把它设置为1。
 
-2) _CODE_PAGE： 语言功能选择，并要求把相关语言文件添加到工程宏。为支持简体中文文件名需要使用“936”， 正如在图 [添加FatFS文件到工程](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id13) 的操作，我们已经把cc936.c文件添加到工程中。
+2) _CODE_PAGE： 语言功能选择，并要求把相关语言文件添加到工程宏。为支持简体中文文件名需要使用“936”的操作，我们已经把cc936.c文件添加到工程中。
 
 3) _USE_LFN： 长文件名支持，默认不支持长文件名，这里配置为2，支持长文件名，并指定使用栈空间为缓冲区。
 
@@ -304,21 +384,20 @@ ffconf.h文件是FatFs功能配置文件，我们可以对文件内容进行修�
 
 ## 6. FatFs功能测试
 
-移植操作到此，就已经把FatFs全部添加到我们的工程了，这时我们编译功能，顺利编译通过，没有错误。接下来， 我们就可以使用编写图 [FatFs程序结构图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id9) 中用户应用程序了。
+移植操作到此，就已经把FatFs全部添加到我们的工程了，这时我们编译功能，顺利编译通过，没有错误。接下来， 我们就可以使用编写图中用户应用程序了。
 
 主要的测试包括格式化测试、文件写入测试和文件读取测试三个部分，主要程序都在main.c文件中实现。
 
 - 变量定义
 
 ```c
-FATFS fs;                         /* FatFs文件系统对象 */
-FIL fnew;                         /* 文件对象 */
-FRESULT res_flash;                /* 文件操作结果 */
-UINT fnum;                        /* 文件成功读写数量 */
-BYTE buffer[1024]= {0};           /* 读缓冲区 */
-BYTE textFileBuffer[] =           /* 写缓冲区*/
+FATFS fs;                         // FatFs文件系统对象 
+FIL fnew;                         // 文件对象 
+FRESULT res_flash;                // 文件操作结果 
+UINT fnum;                        // 文件成功读写数量
+BYTE buffer[1024]= {0};           // 读缓冲区 
+BYTE textFileBuffer[] =           // 写缓冲区
     "欢迎使用野火STM32开发板 今天是个好日子，新建文件系统测试文件\r\n";
-
 ```
 
 FATFS是在ff.h文件定义的一个结构体类型，针对的对象是物理设备，包含了物理设备的物理编号、扇区大小等等信息， 一般我们都需要为每个物理设备定义一个FATFS变量。
@@ -336,33 +415,33 @@ buffer和textFileBuffer分别对应读取和写入数据缓存区，都是8位�
 ```c
 int main(void)
 {
-    /* 初始化LED */
+    // 初始化LED
     LED_GPIO_Config();
     LED_BLUE;
 
-    /* 初始化调试串口，一般为串口1 */
+    // 初始化调试串口，一般为串口1 
     USART_Config();
     printf("****** 这是一个SPI FLASH 文件系统实验 ******\r\n");
 
-    //在外部SPI Flash挂载文件系统，文件系统挂载时会对SPI设备初始化
-    //初始化函数调用流程如下
-    //f_mount()->find_volume()->disk_initialize->SPI_FLASH_Init()
+    // 在外部SPI Flash挂载文件系统，文件系统挂载时会对SPI设备初始化
+    // 初始化函数调用流程如下
+    // f_mount()->find_volume()->disk_initialize->SPI_FLASH_Init()
     res_flash = f_mount(&fs,"1:",1);
 
     /*----------------------- 格式化测试 -----------------*/
-    /* 如果没有文件系统就格式化创建创建文件系统 */
+    // 如果没有文件系统就格式化创建创建文件系统 
     if (res_flash == FR_NO_FILESYSTEM)
     {
         printf("》FLASH还没有文件系统，即将进行格式化...\r\n");
-        /* 格式化 */
-        res_flash=f_mkfs("1:",0,0);
+        // 格式化 
+        res_flash  =f_mkfs("1:",0,0);
 
         if (res_flash == FR_OK)
         {
             printf("》FLASH已成功格式化文件系统。\r\n");
-            /* 格式化后，先取消挂载 */
+            // 格式化后，先取消挂载
             res_flash = f_mount(NULL,"1:",1);
-            /* 重新挂载 */
+            // 重新挂载 
             res_flash = f_mount(&fs,"1:",1);
         }
         else
@@ -384,16 +463,16 @@ int main(void)
     }
 
     /*----------------------- 文件系统测试：写测试 -------------------*/
-    /* 打开文件，每次都以新的形式打开，属性为可写 */
+    // 打开文件，每次都以新的形式打开，属性为可写 
     printf("\r\n****** 即将进行文件写入测试... ******\r\n");
     res_flash = f_open(&fnew, "1:FatFs读写测试文件.txt",
                     FA_CREATE_ALWAYS | FA_WRITE );
-    if ( res_flash == FR_OK )
+    if(res_flash == FR_OK )
     {
         printf("》打开/创建FatFs读写测试文件.txt文件成功，向文件写入数据。\r\n");
-        /* 将指定存储区内容写入到文件内 */
-        res_flash=f_write(&fnew,WriteBuffer,sizeof(WriteBuffer),&fnum);
-        if (res_flash==FR_OK)
+        // 将指定存储区内容写入到文件内
+        res_flash = f_write(&fnew,WriteBuffer,sizeof(WriteBuffer),&fnum);
+        if(res_flash == FR_OK)
         {
             printf("》文件写入成功，写入字节数据：%d\n",fnum);
             printf("》向文件写入的数据为：\r\n%s\r\n",WriteBuffer);
@@ -402,7 +481,7 @@ int main(void)
         {
             printf("！！文件写入失败：(%d)\n",res_flash);
         }
-        /* 不再读写，关闭文件 */
+        // 不再读写，关闭文件
         f_close(&fnew);
     }
     else
@@ -415,7 +494,7 @@ int main(void)
     printf("****** 即将进行文件读取测试... ******\r\n");
     res_flash = f_open(&fnew, "1:FatFs读写测试文件.txt",
                     FA_OPEN_EXISTING | FA_READ);
-    if (res_flash == FR_OK)
+    if(res_flash == FR_OK)
     {
         LED_GREEN;
         printf("》打开文件成功。\r\n");
@@ -435,13 +514,13 @@ int main(void)
         LED_RED;
         printf("！！打开文件失败。\r\n");
     }
-    /* 不再读写，关闭文件 */
+    // 不再读写，关闭文件
     f_close(&fnew);
 
-    /* 不再使用文件系统，取消挂载文件系统 */
+    // 不再使用文件系统，取消挂载文件系统 
     f_mount(NULL,"1:",1);
 
-    /* 操作完成，停机 */
+    // 操作完成，停机 
     while (1)
     {
     }
@@ -450,9 +529,9 @@ int main(void)
 
 首先，初始化RGB彩灯和调试串口，用来指示程序进程。
 
-FatFs的第一步工作就是使用f_mount函数挂载工作区。f_mount函数有三个形参，第一个参数是指向FATFS变量指针，如果赋值为NULL可以取消物理设备挂载。 第二个参数为逻辑设备编号，使用设备根路径表示，与物理设备编号挂钩，在 [代码清单:文件系统-1](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id17) 中我们定义SPI Flash芯片物理编号为1，所以这里使用“1：”。 第三个参数可选0或1，1表示立即挂载，0表示不立即挂载，延迟挂载。 f_mount函数会返回一个FRESULT类型值，指示运行情况。
+FatFs的第一步工作就是使用f_mount函数挂载工作区。f_mount函数有三个形参，第一个参数是指向FATFS变量指针，如果赋值为NULL可以取消物理设备挂载。 第二个参数为逻辑设备编号，使用设备根路径表示，与物理设备编号挂钩，我们定义SPI Flash芯片物理编号为1，所以这里使用“1：”。 第三个参数可选0或1，1表示立即挂载，0表示不立即挂载，延迟挂载。 f_mount函数会返回一个FRESULT类型值，指示运行情况。
 
-如果f_mount函数返回值为FR_NO_FILESYSTEM，说明没有FAT文件系统，比如新出厂的SPI Flash芯片就没有FAT文件系统。 我们就必须对物理设备进行格式化处理。使用f_mkfs函数可以实现格式化操作。f_mkfs函数有三个形参， 第一个参数为逻辑设备编号；第二参数可选0或者1，0表示设备为一般硬盘，1表示设备为软盘。第三个参数指定扇区大小，如果为0， 表示通过 [代码清单:文件系统-6](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/FLASH_FatFs.html#id22) 中disk_ioctl函数获取。格式化成功后需要先取消挂载原来设备，再重新挂载设备。
+如果f_mount函数返回值为FR_NO_FILESYSTEM，说明没有FAT文件系统，比如新出厂的SPI Flash芯片就没有FAT文件系统。 我们就必须对物理设备进行格式化处理。使用f_mkfs函数可以实现格式化操作。f_mkfs函数有三个形参， 第一个参数为逻辑设备编号；第二参数可选0或者1，0表示设备为一般硬盘，1表示设备为软盘。第三个参数指定扇区大小，如果为0， 表示通过disk_ioctl函数获取。格式化成功后需要先取消挂载原来设备，再重新挂载设备。
 
 在设备正常挂载后，就可以进行文件读写操作了。使用文件之前，必须使用f_open函数打开文件，不再使用文件必须使用f_close函数关闭文件， 这个跟电脑端操作文件步骤类似。f_open函数有三个形参，第一个参数为文件对象指针。第二参数为目标文件，包含绝对路径的文件名称和后缀名。 第三个参数为访问文件模式选择，可以是打开已经存在的文件模式、读模式、写模式、新建模式、总是新建模式等的或运行结果。比如对于写测试， 使用FA_CREATE_ALWAYS和FA_WRITE组合模式，就是总是新建文件并进行写模式。
 
@@ -467,3 +546,167 @@ f_close函数用于不再对文件进行读写操作关闭文件，f_close函数
 虽然我们通过RGB彩灯指示和串口调试助手信息打印方法来说明FatFs移植成功，并顺利通过测试，但心底总是很踏实，所谓眼见为实， 虽然我们创建了“FatFs读写测试文件.txt”这个文件，却完全看不到实体。这个确实是个问题，因为我们这里使用SPI Flash芯片作为物理设备， 并不像SD卡那么方便直接用读卡器就可以在电脑端打开验证。另外一个问题，就目前来说， 在SPI Flash芯片上挂载FatFs好像没有实际意义，无法发挥文件系统功能。
 
 实际上，这里归根到底就是我们目前没办法在电脑端查看SPI Flash芯片内FatFs的内容，没办法非常方便拷贝、删除文件。我们当然不会做无用功， STM32控制器还有一个硬件资源可以解决上面的问题，就是USB！我们可以通过编程把整个开发板变成一个U盘，而U盘存储空间就是SPI Flash芯片的空间。 这样非常方便实现文件读写。至于USB内容将在USB相关章节讲解。
+
+## 6. 流程小结
+
+### 1. 环境准备
+
+- **下载 FatFs 文件系统**: 从 [FatFs 官方网站](http://elm-chan.org/fsw/ff/00index_e.html) 下载 FatFs 的源代码。
+- **STM32F103 标准外设库**: 从 [STMicroelectronics 的官网](https://www.st.com/en/development-tools/stm32cubeide.html) 下载 STM32F1 标准外设库。
+
+### 2. 添加 FatFs 源代码
+
+将 FatFs 的源文件 (`ff.c`, `ff.h`, `diskio.c`, `diskio.h`) 添加到你的项目中。
+
+### 3. 配置 STM32F103 的 SPI 或 SD 接口
+
+假设我们使用 SPI 接口连接 SD 卡，这里是如何初始化 SPI 接口的基本步骤：
+
+#### SPI 初始化代码
+
+```c
+#include "stm32f10x.h"
+
+// SPI1 初始化函数
+void SPI1_Init(void)
+{
+    SPI_InitTypeDef SPI_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    
+    // 启用 SPI1 和 GPIOA 的时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1 | RCC_APB2Periph_GPIOA, ENABLE);
+    
+    // SPI1 SCK 和 MOSI 引脚配置
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7; // SCK 和 MOSI
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // SPI1 MISO 引脚配置
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6; // MISO
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // SPI1 配置
+    SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+    SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+    SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    SPI_InitStructure.SPI_CRCPolynomial = 10;
+    SPI_Init(SPI1, &SPI_InitStructure);
+    
+    // 启用 SPI1
+    SPI_Cmd(SPI1, ENABLE);
+}
+```
+
+### 4. 实现 `diskio.c`
+
+`diskio.c` 是 FatFs 的接口文件，它需要与硬件驱动进行绑定。这里是一个简化的 SPI 接口实现的示例：
+
+```c
+#include "diskio.h"
+#include "stm32f10x.h"
+
+// SPI 数据发送和接收函数
+static uint8_t SPI_SendReceive(uint8_t data)
+{
+    SPI_I2S_SendData(SPI1, data);
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+    return SPI_I2S_ReceiveData(SPI1);
+}
+
+// SPI 初始化和 SD 卡初始化代码省略
+DSTATUS disk_initialize(BYTE pdrv)
+{
+    // 省略初始化代码
+    return RES_OK;
+}
+
+DSTATUS disk_status(BYTE pdrv)
+{
+    // 省略状态检查代码
+    return RES_OK;
+}
+
+DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count)
+{
+    // 省略读取代码
+    return RES_OK;
+}
+
+DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count)
+{
+    // 省略写入代码
+    return RES_OK;
+}
+
+DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
+{
+    // 省略控制命令代码
+    return RES_OK;
+}
+```
+
+### 5. 配置 FatFs
+
+在你的 `ffconf.h` 配置文件中，确保正确设置以下参数以符合你的系统需求：
+
+```c
+#define FF_MAX_SS  4096
+#define FF_MIN_SS  512
+#define FF_FS_RPATH 0
+#define FF_FS_TINY 0
+#define FF_FS_EXFAT 0
+#define FF_FS_NORTC 1
+#define FF_FS_LOCK 0
+#define FF_FS_REENTRANT 0
+#define FF_FS_TIMEOUT 1000
+#define FF_FS_NOFSINFO 0
+```
+
+### 6. 集成 FatFs
+
+在你的主程序中，初始化 FatFs 并挂载文件系统：
+
+```c
+#include "ff.h"
+
+FATFS FatFs;
+FIL fil;
+FRESULT fr;
+
+int main(void)
+{
+    // 系统初始化代码
+    SPI1_Init(); // 初始化 SPI
+    
+    // 挂载文件系统
+    fr = f_mount(&FatFs, "", 1);
+    if (fr != FR_OK) {
+        // 处理错误
+    }
+    
+    // 打开文件
+    fr = f_open(&fil, "test.txt", FA_WRITE | FA_CREATE_ALWAYS);
+    if (fr == FR_OK) {
+        // 写入文件
+        f_write(&fil, "Hello World!", 12, NULL);
+        f_close(&fil);
+    } else {
+        // 处理错误
+    }
+    
+    while (1) {
+        // 主循环
+    }
+}
+```
+
+---
+
+2024.9.6 第一次修订，后期不再维护
