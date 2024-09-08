@@ -572,21 +572,21 @@ void SPI1_Init(void)
 {
     SPI_InitTypeDef SPI_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
-    
+
     // 启用 SPI1 和 GPIOA 的时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1 | RCC_APB2Periph_GPIOA, ENABLE);
-    
+
     // SPI1 SCK 和 MOSI 引脚配置
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7; // SCK 和 MOSI
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
+
     // SPI1 MISO 引脚配置
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6; // MISO
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
+
     // SPI1 配置
     SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -598,7 +598,7 @@ void SPI1_Init(void)
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_InitStructure.SPI_CRCPolynomial = 10;
     SPI_Init(SPI1, &SPI_InitStructure);
-    
+
     // 启用 SPI1
     SPI_Cmd(SPI1, ENABLE);
 }
@@ -684,13 +684,13 @@ int main(void)
 {
     // 系统初始化代码
     SPI1_Init(); // 初始化 SPI
-    
+
     // 挂载文件系统
     fr = f_mount(&FatFs, "", 1);
     if (fr != FR_OK) {
         // 处理错误
     }
-    
+
     // 打开文件
     fr = f_open(&fil, "test.txt", FA_WRITE | FA_CREATE_ALWAYS);
     if (fr == FR_OK) {
@@ -700,7 +700,7 @@ int main(void)
     } else {
         // 处理错误
     }
-    
+
     while (1) {
         // 主循环
     }
