@@ -2,17 +2,15 @@
 
 ## 1. 硬件设计
 
-本小节讲解如何使用FSMC外设控制实验板配套的3.2寸ILI9341液晶屏， 见图 [液晶屏实物图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id41) ，该液晶屏的分辨率为320x240，支持RGB565格式。
+本小节讲解如何使用FSMC外设控制实验板配套的3.2寸ILI9341液晶屏，该液晶屏的分辨率为320x240，支持RGB565格式。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD022.jpg)
 
-图 [屏幕PCB底板原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#pcb) 液晶屏背面的PCB电路对应图 [屏幕PCB底板原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#pcb) 、图 [屏幕PCB底板的触摸部分原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id42) 3、 图 [开发板与屏幕的连接的信号说明](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id44) 中的原理图，分别是屏幕PCB底板原理图、触摸部分原理图、液晶排针接口线序图。
-
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD023.jpeg)
+<img title="" src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD023.jpeg" alt="" width="750">
 
 屏幕的PCB底板引出的信号线会通过PCB底板上的FPC接口与液晶面板连接，这些信包括液晶控制相关的CS、RS等信号及DB0-DB15数据线， 其中RS引脚以高电平表示传输数据，低电平表示传输命令；另外还有引出LCD_BK引脚用于控制屏幕的背光供电，可以通过该引脚控制背光的强度， 该引脚为低电平时打开背光。图中的X+/X-/Y+/Y-引脚是液晶面板上触摸屏引出的信号线，它们会被连接到PCB底板的电阻触摸屏控制器，用于检测触摸信号， 其原理图见图 [屏幕PCB底板的触摸部分原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id42) 。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD024.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD024.jpeg" title="" alt="" width="775">
 
 触摸检测的主体是型号为XPT2046的芯片，它接收触摸屏的X+/X-/Y+/Y-信号进行处理，把触摸信息使用SPI接口输出到STM32等控制器， 在触摸屏章节将会详细讲解其检测原理。
 
@@ -20,7 +18,7 @@
 
 图 [液晶屏接口](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id43) 表示的是PCB底板引出的排针线序， 屏幕整体通过这些引出的排针与开发板或其它控制器连接。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD026.jpg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD026.jpg" title="" alt="" width="757">
 
 图 [开发板与屏幕的连接的信号说明](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id44) 是指南者开发板上的液晶排母接口原理图， 它说明了配套的3.2寸屏幕接入到开发板上时的信号连接关系。 其中请着重关注图中液晶屏LCD_CS及LCD_RS(即DC引脚)与FSMC存储区选择引脚FSMC_NE及地址信号FSMC_A的编号， 它们会决定STM32要使用什么内存地址来控制与液晶屏的通讯。
 
@@ -99,24 +97,24 @@ static void ILI9341_GPIO_Config ( void )
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    /* 使能FSMC对应相应管脚时钟*/
-    RCC_APB2PeriphClockCmd (
-        /*控制信号*/
-        ILI9341_CS_CLK|ILI9341_DC_CLK|ILI9341_WR_CLK|
-        ILI9341_RD_CLK  |ILI9341_BK_CLK|ILI9341_RST_CLK|
-        /*数据信号*/
-        ILI9341_D0_CLK|ILI9341_D1_CLK, ENABLE );
+    // 使能FSMC对应相应管脚时钟
+    RCC_APB2PeriphClockCmd(
+    // 控制信号
+    ILI9341_CS_CLK|ILI9341_DC_CLK|ILI9341_WR_CLK|
+    ILI9341_RD_CLK  |ILI9341_BK_CLK|ILI9341_RST_CLK|
+    // 数据信号
+    ILI9341_D0_CLK|ILI9341_D1_CLK, ENABLE );
     /*此处省略部分信号线*/
 
-    /* 配置FSMC相对应的数据线,FSMC-D0~D15 */
+    // 配置FSMC相对应的数据线,FSMC-D0~D15
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AF_PP;
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_D0_PIN;
-    GPIO_Init ( ILI9341_D0_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_D0_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_D1_PIN;
-    GPIO_Init ( ILI9341_D1_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_D1_PORT, &GPIO_InitStructure);
 
     /*此处省略部分数据信号线*/
 
@@ -130,30 +128,30 @@ static void ILI9341_GPIO_Config ( void )
     GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AF_PP;
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_RD_PIN;
-    GPIO_Init (ILI9341_RD_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_RD_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_WR_PIN;
-    GPIO_Init (ILI9341_WR_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_WR_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_CS_PIN;
-    GPIO_Init ( ILI9341_CS_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_CS_PORT, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_DC_PIN;
-    GPIO_Init ( ILI9341_DC_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_DC_PORT, &GPIO_InitStructure);
 
-    /* 配置LCD复位RST控制管脚*/
+    // 配置LCD复位RST控制管脚
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_RST_PIN;
-    GPIO_Init ( ILI9341_RST_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_RST_PORT, &GPIO_InitStructure);
 
-    /* 配置LCD背光控制管脚BK*/
+    // 配置LCD背光控制管脚BK
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
     GPIO_InitStructure.GPIO_Pin = ILI9341_BK_PIN;
-    GPIO_Init ( ILI9341_BK_PORT, & GPIO_InitStructure );
+    GPIO_Init(ILI9341_BK_PORT, &GPIO_InitStructure);
 }
 ```
 
@@ -167,25 +165,25 @@ static void ILI9341_FSMC_Config ( void )
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
     FSMC_NORSRAMTimingInitTypeDef  readWriteTiming;
 
-    /* 使能FSMC时钟*/
-    RCC_AHBPeriphClockCmd ( RCC_AHBPeriph_FSMC, ENABLE );
+    // 使能FSMC时钟
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_FSMC, ENABLE);
 
-    //地址建立时间（ADDSET）为1个HCLK 2/72M=28ns
-    readWriteTiming.FSMC_AddressSetupTime      = 0x01;   //地址建立时间
-    //数据保持时间（DATAST）+ 1个HCLK = 5/72M=70ns
-    readWriteTiming.FSMC_DataSetupTime         = 0x04;   //数据建立时间
-    //选择控制的模式
-    //模式B,异步NOR FLASH模式，与ILI9341的8080时序匹配
-    readWriteTiming.FSMC_AccessMode            = FSMC_AccessMode_B;
+    // 地址建立时间（ADDSET）为1个HCLK 2/72M=28ns
+    readWriteTiming.FSMC_AddressSetupTime = 0x01; // 地址建立时间
+    // 数据保持时间（DATAST）+ 1个HCLK = 5/72M=70ns
+    readWriteTiming.FSMC_DataSetupTime = 0x04;   // 数据建立时间
+    // 选择控制的模式
+    // 模式B,异步NOR FLASH模式，与ILI9341的8080时序匹配
+    readWriteTiming.FSMC_AccessMode = FSMC_AccessMode_B;
 
-    /*以下配置与模式B无关*/
-    //地址保持时间（ADDHLD）模式A未用到
-    readWriteTiming.FSMC_AddressHoldTime       = 0x00;   //地址保持时间
-    //设置总线转换周期，仅用于复用模式的NOR操作
+    // 以下配置与模式B无关
+    // 地址保持时间（ADDHLD）模式A未用到
+    readWriteTiming.FSMC_AddressHoldTime = 0x00; // 地址保持时间
+    // 设置总线转换周期，仅用于复用模式的NOR操作
     readWriteTiming.FSMC_BusTurnAroundDuration = 0x00;
-    //设置时钟分频，仅用于同步类型的存储器
+    // 设置时钟分频，仅用于同步类型的存储器
     readWriteTiming.FSMC_CLKDivision           = 0x00;
-    //数据保持时间，仅用于同步型的NOR
+    // 数据保持时间，仅用于同步型的NOR
     readWriteTiming.FSMC_DataLatency           = 0x00;
 
     FSMC_NORSRAMInitStructure.FSMC_Bank                  = FSMC_Bank1_NORSRAMx;
@@ -204,11 +202,10 @@ static void ILI9341_FSMC_Config ( void )
     FSMC_NORSRAMInitStructure.FSMC_ReadWriteTimingStruct = &readWriteTiming;
     FSMC_NORSRAMInitStructure.FSMC_WriteTimingStruct     = &readWriteTiming;
 
-    FSMC_NORSRAMInit ( & FSMC_NORSRAMInitStructure );
+    FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
 
-    /* 使能 FSMC_Bank1_NORSRAM4 */
-    FSMC_NORSRAMCmd ( FSMC_Bank1_NORSRAMx, ENABLE );
-
+    // 使能 FSMC_Bank1_NORSRAM4 
+    FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAMx, ENABLE);
 }
 ```
 
@@ -224,13 +221,13 @@ static void ILI9341_FSMC_Config ( void )
 
 由图 [ILI9341时序参数说明图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id51) 及图 [ILI9341的时序参数要求](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id52) 中的ILI9341时序参数说明及要求可大致得知ILI9341的写周期为最小twc = 66ns， 而读周期最小为trdl+trod=45+20=65ns。 （对于读周期表中有参数要一个要求为trcfm和trc分别为450ns及160ns， 但经过测试并不需要遵照它们的指标要求）
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD027.jpg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD027.jpg" title="" alt="" width="788">
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD028.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD028.jpeg" title="" alt="" width="786">
 
-在FSMC代码中使用结构体中的FSMC_AddressSetupTime（即ADDSET的值）及FSMC_DataSetupTime（即DATAST的值）成员控制FSMC的读写周期， 见图 [FSMC的读写时序](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id53) 。
+在FSMC代码中使用结构体中的FSMC_AddressSetupTime（即ADDSET的值）及FSMC_DataSetupTime（即DATAST的值）成员控制FSMC的读写周期
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD029.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD029.jpeg" title="" alt="" width="788">
 
 结合ILI9341的时序要求和FSMC的配置图，代码中按照读写时序周期均要求至少66ns来计算，配置结果为ADDSET = 1及DATST = 4， 把时间单位1/72微秒(即1000/72纳秒)代入，因此读写周期的时间被配置为：
 
@@ -343,7 +340,7 @@ RAM基地址 = 0X6002 0000 = 0X6000 0000+2^16*2 = 0X6000 0000 + 0x2 0000 = 0X600
 * @param  usCmd :要写入的命令（表寄存器地址）
 * @retval 无
 */
-__inline void ILI9341_Write_Cmd ( uint16_t usCmd )
+__inline void ILI9341_Write_Cmd (uint16_t usCmd )
 {
     * ( __IO uint16_t * ) ( FSMC_Addr_ILI9341_CMD ) = usCmd;
 
@@ -369,27 +366,23 @@ __inline void ILI9341_Write_Data ( uint16_t usData )
 利用上面的发送命令及数据操作，可以向液晶屏写入一些初始化配置
 
 ```c
-/**
-* @brief  初始化ILI9341寄存器
-* @param  无
-* @retval 无
-*/
+// 初始化ILI9341寄存器
 static void ILI9341_REG_Config ( void )
 {
-    /*  Power control B (CFh)  */
-    DEBUG_DELAY  ();
-    ILI9341_Write_Cmd ( 0xCF  );
-    ILI9341_Write_Data ( 0x00  );
-    ILI9341_Write_Data ( 0x81  );
-    ILI9341_Write_Data ( 0x30  );
+    //  Power control B (CFh)
+    DEBUG_DELAY();
+    ILI9341_Write_Cmd(0xCF);
+    ILI9341_Write_Data(0x00);
+    ILI9341_Write_Data (0x81);
+    ILI9341_Write_Data(0x30);
 
-    /*  Power on sequence control (EDh) */
-    DEBUG_DELAY ();
-    ILI9341_Write_Cmd ( 0xED );
-    ILI9341_Write_Data ( 0x64 );
-    ILI9341_Write_Data ( 0x03 );
-    ILI9341_Write_Data ( 0x12 );
-    ILI9341_Write_Data ( 0x81 );
+    //  Power on sequence control (EDh) 
+    DEBUG_DELAY();
+    ILI9341_Write_Cmd(0xED);
+    ILI9341_Write_Data(0x64);
+    ILI9341_Write_Data(0x03);
+    ILI9341_Write_Data(0x12);
+    ILI9341_Write_Data(0x81);
 
     /*以下省略大量配置内容*/
 
