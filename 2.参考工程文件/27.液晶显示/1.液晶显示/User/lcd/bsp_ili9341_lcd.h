@@ -29,7 +29,6 @@ RAM基地址 = 0X60020000 = 0X60000000+2^16*2 = 0X60000000 + 0X20000 = 0X60020000
 #define      FSMC_Bank1_NORSRAMx           FSMC_Bank1_NORSRAM1
 
 
-
 /******************************* ILI9341 显示屏8080通讯引脚定义 ***************************/
 /******控制信号线******/
 //片选，选择NOR/SRAM块
@@ -37,13 +36,13 @@ RAM基地址 = 0X60020000 = 0X60000000+2^16*2 = 0X60000000 + 0X20000 = 0X60020000
 #define      ILI9341_CS_PORT               GPIOD
 #define      ILI9341_CS_PIN                GPIO_Pin_7
 
-//DC引脚，使用FSMC的地址信号控制，本引脚决定了访问LCD时使用的地址
-//PD11为FSMC_A16
+// DC引脚，使用FSMC的地址信号控制，本引脚决定了访问LCD时使用的地址
+// PD11为FSMC_A16
 #define      ILI9341_DC_CLK                RCC_APB2Periph_GPIOD   
 #define      ILI9341_DC_PORT               GPIOD
 #define      ILI9341_DC_PIN                GPIO_Pin_11
 
-//写使能
+// 写使能
 #define      ILI9341_WR_CLK                RCC_APB2Periph_GPIOD   
 #define      ILI9341_WR_PORT               GPIOD
 #define      ILI9341_WR_PIN                GPIO_Pin_5
@@ -135,8 +134,8 @@ RAM基地址 = 0X60020000 = 0X60000000+2^16*2 = 0X60000000 + 0X20000 = 0X60020000
 #define      ILI9341_DispWindow_X_Star		    0     //起始点的X坐标
 #define      ILI9341_DispWindow_Y_Star		    0     //起始点的Y坐标
 
-#define 			ILI9341_LESS_PIXEL	  							240			//液晶屏较短方向的像素宽度
-#define 			ILI9341_MORE_PIXEL	 								320			//液晶屏较长方向的像素宽度
+#define 			ILI9341_LESS_PIXEL	  							240			// 液晶屏较短方向的像素宽度
+#define 			ILI9341_MORE_PIXEL	 						    320			// 液晶屏较长方向的像素宽度
 
 //根据液晶扫描方向而变化的XY像素宽度
 //调用ILI9341_GramScan函数设置方向时会自动更改
@@ -195,14 +194,13 @@ void                     ILI9341_DispStringLine_EN      ( uint16_t line, char * 
 void                     ILI9341_DispString_EN      			( uint16_t usX, uint16_t usY, char * pStr );
 void 					 ILI9341_DispString_EN_YDir 		(   uint16_t usX,uint16_t usY ,  char * pStr );
 
-void 											LCD_SetFont											(sFONT *fonts);
+void 										LCD_SetFont											(sFONT *fonts);
 sFONT 										*LCD_GetFont											(void);
-void 											LCD_ClearLine										(uint16_t Line);
-void 											LCD_SetBackColor								(uint16_t Color);
-void 											LCD_SetTextColor								(uint16_t Color)	;
-void 											LCD_SetColors										(uint16_t TextColor, uint16_t BackColor);
-void 											LCD_GetColors										(uint16_t *TextColor, uint16_t *BackColor);
+void 										LCD_ClearLine										(uint16_t Line);
+void 										LCD_SetBackColor								(uint16_t Color);
+void 										LCD_SetTextColor								(uint16_t Color)	;
+void 										LCD_SetColors										(uint16_t TextColor, uint16_t BackColor);
+void 										LCD_GetColors										(uint16_t *TextColor, uint16_t *BackColor);
 
 
-#endif /* __BSP_ILI9341_ILI9341_H */
-
+#endif 

@@ -5,26 +5,6 @@
         }
     ],
     "settings": {
-        "files.autoGuessEncoding": true,
-        "C_Cpp.default.configurationProvider": "cl.eide",
-        "C_Cpp.errorSquiggles": "disabled",
-        "files.associations": {
-            ".eideignore": "ignore",
-            "*.a51": "a51",
-            "*.h": "c",
-            "*.c": "c",
-            "*.hxx": "cpp",
-            "*.hpp": "cpp",
-            "*.c++": "cpp",
-            "*.cpp": "cpp",
-            "*.cxx": "cpp",
-            "*.cc": "cpp"
-        },
-        "[yaml]": {
-            "editor.insertSpaces": true,
-            "editor.tabSize": 4,
-            "editor.autoIndent": "advanced"
-        },
         "MicroPython.executeButton": [
             {
                 "text": "▶",
@@ -42,22 +22,11 @@
                 "command": "extension.execute",
                 "priority": 4
             }
-        ]
+        ],
+        "files.associations": {
+            "fonts.h": "c",
+            "bsp_ili9341_lcd.h": "c"
+        }
     },
-    "extensions": {
-        "recommendations": [
-            "cl.eide",
-            "keroc.hex-fmt",
-            "xiaoyongdong.srecord",
-            "hars.cppsnippets",
-            "zixuanwang.linkerscript",
-            "redhat.vscode-yaml",
-            "IBM.output-colorizer",
-            "cschlosser.doxdocgen",
-            "ms-vscode.vscode-serial-monitor",
-            "alefragnani.project-manager",
-            "dan-c-underwood.arm",
-            "marus25.cortex-debug"
-        ]
-    }
+    "extensions": {}
 }

@@ -283,7 +283,6 @@
           "../../Libraries/CMSIS",
           "../../User",
           "../../Libraries/FWlib/inc",
-          ".cmsis/include",
           "RTE/_LCD"
         ],
         "libList": [],
