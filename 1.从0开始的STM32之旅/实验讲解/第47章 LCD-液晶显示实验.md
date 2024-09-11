@@ -10,7 +10,7 @@
 
 屏幕的PCB底板引出的信号线会通过PCB底板上的FPC接口与液晶面板连接，这些信包括液晶控制相关的CS、RS等信号及DB0-DB15数据线， 其中RS引脚以高电平表示传输数据，低电平表示传输命令；另外还有引出LCD_BK引脚用于控制屏幕的背光供电，可以通过该引脚控制背光的强度， 该引脚为低电平时打开背光。图中的X+/X-/Y+/Y-引脚是液晶面板上触摸屏引出的信号线，它们会被连接到PCB底板的电阻触摸屏控制器，用于检测触摸信号， 其原理图见图 [屏幕PCB底板的触摸部分原理图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id42) 。
 
-<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD024.jpeg" title="" alt="" width="775">
+<img title="" src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD024.jpeg" alt="" width="733">
 
 触摸检测的主体是型号为XPT2046的芯片，它接收触摸屏的X+/X-/Y+/Y-信号进行处理，把触摸信息使用SPI接口输出到STM32等控制器， 在触摸屏章节将会详细讲解其检测原理。
 
