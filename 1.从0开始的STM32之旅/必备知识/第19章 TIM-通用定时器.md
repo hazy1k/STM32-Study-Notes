@@ -267,7 +267,6 @@ TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
 // 启用 TIM2
 TIM_Cmd(TIM2, ENABLE);
-
 ```
 
 3. **处理中断**（可选）：
