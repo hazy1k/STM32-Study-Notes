@@ -119,19 +119,22 @@
             "path": "../../User/main.c"
           },
           {
-            "path": "../../User/stm32f10x_conf.h"
-          },
-          {
             "path": "../../User/stm32f10x_it.c"
           },
           {
-            "path": "../../User/stm32f10x_it.h"
+            "path": "../../User/Key/bsp_exti.c"
           },
           {
             "path": "../../User/Led/bsp_led.c"
           },
           {
-            "path": "../../User/AdvanceTim/bsp_AdvanceTim.c"
+            "path": "../../User/usart/bsp_usart.c"
+          },
+          {
+            "path": "../../User/stm32f10x_conf.h"
+          },
+          {
+            "path": "../../User/stm32f10x_it.h"
           }
         ],
         "folders": []
@@ -151,10 +154,10 @@
   "deviceName": null,
   "packDir": null,
   "miscInfo": {
-    "uid": "fa42b967dd913227300828241775c226"
+    "uid": "9611c2d8724a9750492ce8f88ace9472"
   },
   "targets": {
-    "TIM—高级定时器-定时": {
+    "睡眠模式": {
       "excludeList": [],
       "toolchain": "AC5",
       "compileConfig": {
@@ -289,10 +292,8 @@
           "../../Libraries/CMSIS",
           "../../User",
           "../../Libraries/FWlib/inc",
-          "../../User/Led",
-          "../../User/AdvanceTim",
           ".cmsis/include",
-          "RTE/_TIM—高级定时器-定时"
+          "RTE/_睡眠模式"
         ],
         "libList": [],
         "defineList": [
@@ -304,14 +305,7 @@
         "AC5": {
           "version": 4,
           "beforeBuildTasks": [],
-          "afterBuildTasks": [
-            {
-              "name": "Copy linker output for Keil User Commands",
-              "command": "copy \".\\${OutDirBase}\\${ProjectName}.axf\" \".\\${OutDirBase}\\${KEIL_OUTPUT_NAME}.axf\"",
-              "disable": false,
-              "abortAfterFailed": true
-            }
-          ],
+          "afterBuildTasks": [],
           "global": {
             "use-microLIB": true,
             "output-debug-info": "enable"
@@ -329,8 +323,7 @@
             "output-format": "elf",
             "xo-base": "",
             "ro-base": "0x08000000",
-            "rw-base": "0x20000000",
-            "$disableOutputTask": true
+            "rw-base": "0x20000000"
           }
         }
       }
