@@ -238,5 +238,3 @@ int main(void)
 ```
 
 main函数中直接调用了COLOR_TIMx_LED_Init函数，而该函数内部又直接调用了前面讲解的GPIO和PWM配置函数：COLOR_TIMx_GPIO_Config和COLOR_TIMx_Mode_Config。 初始化完成后，在while循环中调用SetRGBColor和SetColorValue切换RGB灯显示的颜色。
-
-
