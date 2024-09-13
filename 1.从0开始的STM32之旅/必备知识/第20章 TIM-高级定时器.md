@@ -6,15 +6,15 @@
 
 高级控制定时器时基单元包含一个16位自动重装载寄存器ARR，一个16位的计数器CNT，可向上/下计数，一个16位可编程预分频器PSC， 预分频器时钟源有多种可选，有内部的时钟、外部时钟。还有一个8位的重复计数器RCR，这样最高可实现40位的可编程定时。
 
-STM32F103ZET6的高级/通用定时器的IO分配具体见表 [高级控制和通用定时器通道引脚分布](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#id2) 。配套开发板因为IO资源紧缺， 定时器的IO很多已经复用它途，故下表中的IO只有部分可用于定时器的实验。
+STM32F103ZET6的高级/通用定时器的IO分配具体见表 [高级控制和通用定时器通道引脚分布，配套开发板因为IO资源紧缺， 定时器的IO很多已经复用它途，故下表中的IO只有部分可用于定时器的实验。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen01.png)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen01.png" title="" alt="" width="753">
 
 ## 2. 高级控制定时器功能框图
 
-高级控制定时器功能框图包含了高级控制定时器最核心内容，掌握了功能框图，对高级控制定时器就有一个整体的把握，在编程时思路就非常清晰， 见，图中有些寄存器是带影子的，表示其有影子寄存器。
+高级控制定时器功能框图包含了高级控制定时器最核心内容，掌握了功能框图，对高级控制定时器就有一个整体的把握，在编程时思路就非常清晰，图中有些寄存器是带影子的，表示其有影子寄存器。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen002.png)
+<img title="" src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen002.png" alt="" width="864">
 
 ### 2.1 时钟源
 
@@ -102,7 +102,9 @@ STM32F103ZET6的高级/通用定时器的IO分配具体见表 [高级控制和�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen005.png)
 
-高级控制定时器时基单元功能包括四个寄存器，分别是计数器寄存器(CNT)、预分频器寄存器(PSC)、自动重载寄存器(ARR)和重复计数器寄存器(RCR)。 其中重复计数器RCR是高级定时器独有，通用和基本定时器没有。前面三个寄存器都是16位有效，TIMx_RCR寄存器是8位有效。
+高级控制定时器时基单元功能包括四个寄存器，分别是计数器寄存器(CNT)、预分频器寄存器(PSC)、自动重载寄存器(ARR)和重复计数器寄存器(RCR)。 其中重复计数器RCR是高级定时器独有，通用和基本定时器没有。
+
+前面三个寄存器都是16位有效，TIMx_RCR寄存器是8位有效。
 
 #### 2.3.1 预分频器PSC
 
@@ -178,7 +180,7 @@ ICx的输出信号会经过一个预分频器，用于决定发生多少个事�
 
 在这个半桥驱动电路中，Q1导通，Q2截止，此时我想让Q1截止Q2导通，肯定是要先让Q1截止一段时间之后，再等一段时间才让Q2导通， 那么这段等待的时间就称为死区时间，因为Q1关闭需要时间（由MOS管的工艺决定）。如果Q1关闭之后，马上打开Q2， 那么此时一段时间内相当于Q1和Q2都导通了，这样电路会短路。
 
-图 [带死区插入的互补输出](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#id26) 是针对上面的半桥驱动电路而画的带死区插入的PWM信号，图中的死区时间要根据MOS管的工艺来调节。
+图是针对上面的半桥驱动电路而画的带死区插入的PWM信号，图中的死区时间要根据MOS管的工艺来调节。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen009.png)
 
@@ -248,7 +250,7 @@ PWM信号由输入通道TI1进入，因为是PWM输入模式的缘故，信号�
 
 下面我们以一个更加具体的时序图来分析下PWM输入模式。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen013.png)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen013.png" title="" alt="" width="1097">
 
 PWM信号由输入通道TI1进入，配置TI1FP1为触发信号，上升沿捕获。当上升沿的时候IC1和IC2同时捕获，计数器CNT清零， 到了下降沿的时候，IC2捕获，此时计数器CNT的值被锁存到捕获寄存器CCR2中，到了下一个上升沿的时候，IC1捕获， 计数器CNT的值被锁存到捕获寄存器CCR1中。其中CCR2+1测量的是脉宽，CCR1+1测量的是周期。 这里要注意的是CCR2和CCR1的值在计算占空比和频率的时候都必须加1，因为计数器是从0开始计数的。
 
@@ -262,7 +264,7 @@ PWM信号由输入通道TI1进入，配置TI1FP1为触发信号，上升沿捕�
 
 PWM输出就是对外输出脉宽（即占空比）可调的方波信号，信号频率由自动重装寄存器ARR的值决定，占空比由比较寄存器CCR的值决定。
 
-PWM模式分为两种，PWM1和PWM2，总得来说是差不多，就看你怎么用而已， 具体的区别见表格 [PWM1与PWM2模式的区别](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#pwm1pwm2) 。
+PWM模式分为两种，PWM1和PWM2，总得来说是差不多，就看你怎么用而已， 具体的区别见表格：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen02.png)
 
@@ -282,7 +284,9 @@ PWM模式分为两种，PWM1和PWM2，总得来说是差不多，就看你怎么
 
 在中心对齐模式下，计数器CNT是工作做递增/递减模式下。开始的时候，计数器CNT从 0 开始计数到自动重载值减1(ARR-1)， 生成计数器上溢事件；然后从自动重载值开始向下计数到 1 并生成计数器下溢事件。之后从0 开始重新计数。
 
-图 [PWM1模式的中心对齐波形](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#id42) 是PWM1模式的中心对齐波形，ARR=8，CCR=4。 第一阶段计数器CNT工作在递增模式下，从0开始计数，当CNT<CCR的值时，OCxREF为有效的高电平， 当CCR=<CNT<<ARR时，OCxREF为无效的低电平。第二阶段计数器CNT工作在递减模式，从ARR的值开始递减， 当CNT>CCR时，OCxREF为无效的低电平，当CCR=>CNT>=1时，OCxREF为有效的高电平。
+图是PWM1模式的中心对齐波形，ARR=8，CCR=4。 第一阶段计数器CNT工作在递增模式下，从0开始计数，当CNT<CCR的值时，OCxREF为有效的高电平， 当CCR=<CNT<<ARR时，OCxREF为无效的低电平。
+
+第二阶段计数器CNT工作在递减模式，从ARR的值开始递减， 当CNT>CCR时，OCxREF为无效的低电平，当CCR=>CNT>=1时，OCxREF为有效的高电平。
 
 在波形图上我们把波形分为两个阶段，第一个阶段是计数器CNT工作在递增模式的波形，这个阶段我们又分为①和②两个阶段， 第二个阶段是计数器CNT工作在递减模式的波形，这个阶段我们又分为③和④两个阶段。要说中心对齐模式下的波形有什么特征的话， 那就是①和③阶段的时间相等，②和④阶段的时间相等。
 
@@ -298,11 +302,11 @@ PWM模式分为两种，PWM1和PWM2，总得来说是差不多，就看你怎么
 
 ```c
 typedef struct {
-    uint16_t TIM_Prescaler;          // 预分频器
-    uint16_t TIM_CounterMode;        // 计数模式
-    uint32_t TIM_Period;             // 定时器周期
-    uint16_t TIM_ClockDivision;      // 时钟分频
-    uint8_t TIM_RepetitionCounter;   // 重复计算器
+    uint16_t TIM_Prescaler;       // 预分频器
+    uint16_t TIM_CounterMode;     // 计数模式
+    uint32_t TIM_Period;          // 定时器周期
+    uint16_t TIM_ClockDivision;   // 时钟分频
+    uint8_t TIM_RepetitionCounter;// 重复计算器
 } TIM_TimeBaseInitTypeDef;
 ```
 
@@ -322,14 +326,14 @@ typedef struct {
 
 ```c
 typedef struct {
-    uint16_t TIM_OCMode;        // 比较输出模式
-    uint16_t TIM_OutputState;   // 比较输出使能
-    uint16_t TIM_OutputNState;  // 比较互补输出使能
-    uint32_t TIM_Pulse;         // 脉冲宽度
-    uint16_t TIM_OCPolarity;    // 输出极性
-    uint16_t TIM_OCNPolarity;   // 互补输出极性
-    uint16_t TIM_OCIdleState;   // 空闲状态下比较输出状态
-    uint16_t TIM_OCNIdleState;  // 空闲状态下比较互补输出状态
+    uint16_t TIM_OCMode;       // 比较输出模式
+    uint16_t TIM_OutputState;  // 比较输出使能
+    uint16_t TIM_OutputNState; // 比较互补输出使能
+    uint32_t TIM_Pulse;        // 脉冲宽度
+    uint16_t TIM_OCPolarity;   // 输出极性
+    uint16_t TIM_OCNPolarity;  // 互补输出极性
+    uint16_t TIM_OCIdleState;  // 空闲状态下比较输出状态
+    uint16_t TIM_OCNIdleState; // 空闲状态下比较互补输出状态
 } TIM_OCInitTypeDef;
 ```
 
@@ -355,11 +359,11 @@ typedef struct {
 
 ```c
 typedef struct {
-    uint16_t TIM_Channel;      // 输入通道选择
-    uint16_t TIM_ICPolarity;   // 输入捕获触发选择
-    uint16_t TIM_ICSelection;  // 输入捕获选择
-    uint16_t TIM_ICPrescaler;  // 输入捕获预分频器
-    uint16_t TIM_ICFilter;     // 输入捕获滤波器
+    uint16_t TIM_Channel;     // 输入通道选择
+    uint16_t TIM_ICPolarity;  // 输入捕获触发选择
+    uint16_t TIM_ICSelection; // 输入捕获选择
+    uint16_t TIM_ICPrescaler; // 输入捕获预分频器
+    uint16_t TIM_ICFilter;    // 输入捕获滤波器
 } TIM_ICInitTypeDef;
 ```
 
@@ -367,7 +371,7 @@ typedef struct {
 
 - TIM_ICPolarity： 输入捕获边沿触发选择，可选上升沿触发、 下降沿触发或边沿跳变触发。它设定CCER寄存器CCxP位和CCxNP位的值。
 
-- TIM_ICSelection： 输入通道选择，捕获通道ICx的信号可来自三个输入通道，分别为TIM_ICSelection_DirectTI、 TIM_ICSelection_IndirectTI或TIM_ICSelection_TRC，具体的区别见图 [输入通道与捕获通道IC的映射图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#ic) 。 如果是普通的输入捕获，4个通道都可以使用，如果是PWM输入则只能使用通道1和通道2。它设定CCRMx寄存器的CCxS[1:0]位的值。
+- TIM_ICSelection： 输入通道选择，捕获通道ICx的信号可来自三个输入通道，分别为TIM_ICSelection_DirectTI、 TIM_ICSelection_IndirectTI或TIM_ICSelection_TRC，具体的区别见图，如果是普通的输入捕获，4个通道都可以使用，如果是PWM输入则只能使用通道1和通道2。它设定CCRMx寄存器的CCxS[1:0]位的值。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen016.png)
 
@@ -381,13 +385,13 @@ typedef struct {
 
 ```c
 typedef struct {
-    uint16_t TIM_OSSRState;        // 运行模式下的关闭状态选择
-    uint16_t TIM_OSSIState;        // 空闲模式下的关闭状态选择
-    uint16_t TIM_LOCKLevel;        // 锁定配置
-    uint16_t TIM_DeadTime;         // 死区时间
-    uint16_t TIM_Break;            // 断路输入使能控制
-    uint16_t TIM_BreakPolarity;    // 断路输入极性
-    uint16_t TIM_AutomaticOutput;  // 自动输出使能
+    uint16_t TIM_OSSRState;       // 运行模式下的关闭状态选择
+    uint16_t TIM_OSSIState;       // 空闲模式下的关闭状态选择
+    uint16_t TIM_LOCKLevel;       // 锁定配置
+    uint16_t TIM_DeadTime;        // 死区时间
+    uint16_t TIM_Break;           // 断路输入使能控制
+    uint16_t TIM_BreakPolarity;   // 断路输入极性
+    uint16_t TIM_AutomaticOutput; // 自动输出使能
 } TIM_BDTRInitTypeDef;
 ```
 
@@ -405,4 +409,145 @@ typedef struct {
 
 - TIM_AutomaticOutput： 自动输出使能，可选使能或禁止，它设定BDTR寄存器AOE位的值。
 
+## 6. 三种定时器之区别（高级、通用、基本）
 
+### 1. **高级定时器 (Advanced-control Timers)**
+
+**示例**：TIM1、TIM8（在STM32F103中）
+
+**功能特点**：
+
+- **复杂PWM生成**：支持中心对齐PWM模式和边沿对齐PWM模式，并且可以生成死区时间（Dead-time），这是驱动电机或H桥电路时保护功率开关的重要功能。
+- **高级控制功能**：支持复杂的输出比较配置、单脉冲模式、重复计数模式等，适用于需要复杂控制信号的场合。
+- **输入捕获和输出比较**：提供多通道输入捕获和输出比较功能，适用于高精度的时间测量和复杂的信号调节。
+- **同步和触发功能**：支持多个定时器之间的同步操作，能够实现复杂的触发和同步功能。
+- **死区时间生成**：能够生成死区时间，用于防止功率转换器的两个开关同时导通，避免短路。
+
+**应用场景**：
+
+- 电机控制（如三相电机的PWM驱动）
+- 高精度的时间测量和事件捕获
+- 高级的波形生成和控制
+
+### 2. **通用定时器 (General-purpose Timers)**
+
+**示例**：TIM2、TIM3、TIM4（在STM32F103中）
+
+**功能特点**：
+
+- **PWM生成**：支持边沿对齐PWM模式，用于简单的频率和占空比调节。
+- **计数功能**：可以作为基本的计数器，支持计数、定时和延迟功能。
+- **输入捕获和输出比较**：提供基本的输入捕获和输出比较功能，适用于标准的时间测量和简单的事件处理。
+- **同步功能**：支持与其他定时器进行基本的同步操作，但不如高级定时器复杂。
+
+**应用场景**：
+
+- 基本的PWM信号生成（如LED调光）
+- 基本的计时和延迟
+- 简单的时间测量和事件捕获
+
+### 3. **基本定时器 (Basic Timers)**
+
+**示例**：TIM6、TIM7（在STM32F103中）
+
+**功能特点**：
+
+- **计数功能**：主要用于计数和生成定时中断，不具备PWM生成和复杂的输出比较功能。
+- **简单的操作**：配置和操作相对简单，适用于基本的时间延迟和定时任务。
+- **不支持输入捕获和输出比较**：不具备输入捕获和输出比较功能，因此不适用于需要复杂时间处理的场合。
+
+**应用场景**：
+
+- 简单的定时器任务（如定时中断）
+- 基本的延迟生成
+- 简单的定时事件
+
+### 总结
+
+- **高级定时器**：功能强大，适用于需要复杂PWM生成、精确同步和高级控制功能的应用。适合电机控制、高级波形生成等。
+- **通用定时器**：提供标准的PWM生成和计数功能，适用于较为简单的时间控制和信号生成任务。
+- **基本定时器**：用于简单的计时和定时任务，功能有限，适合基础的延迟和计时操作。
+
+## 7. 理解死区
+
+死区时间（Dead-Time）是指在一个PWM信号的高电平和低电平之间插入的一段时间间隔。在驱动电机或其他功率转换器（如H桥电路）时，死区时间是非常重要的，因为它可以防止两个开关同时导通，从而避免短路和潜在的设备损坏。
+
+### **为什么需要死区时间？**
+
+在很多功率转换器设计中，特别是在H桥驱动电机的场合，通常会用到四个开关（晶体管或MOSFET）来控制电流的流动方向。如果这四个开关同时打开或关闭，会产生短路，损坏电路或电源。因此，通常在两个开关切换状态之间需要插入一段时间间隔，即死区时间，以确保两个开关不会同时导通。
+
+### **如何实现死区时间？**
+
+在STM32系列微控制器中，死区时间通常由高级定时器（如TIM1、TIM8）提供的功能来实现。以下是一个如何在STM32中配置死区时间的示例代码：
+
+#### **示例代码：STM32高级定时器配置死区时间**
+
+下面的代码片段是使用STM32 HAL库配置TIM1定时器以生成PWM信号并设置死区时间。假设你已经配置了HAL库和相关的STM32 HAL驱动。
+
+```c
+#include "stm32f4xx_hal.h"
+
+// 定时器句柄
+TIM_HandleTypeDef htim1;
+
+void MX_TIM1_Init(void)
+{
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_OC_InitTypeDef sConfigOC = {0};
+    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+    // 定时器基本配置
+    htim1.Instance = TIM1;
+    htim1.Init.Prescaler = 0;
+    htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim1.Init.Period = 1999;  // PWM周期
+    htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim1.Init.RepetitionCounter = 0;
+    HAL_TIM_PWM_Init(&htim1);
+
+    // 配置PWM通道
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.Pulse = 999;  // PWM占空比
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1);
+    HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2);
+
+    // 配置死区时间
+    sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+    sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+    sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+    sBreakDeadTimeConfig.DeadTime = 50;  // 死区时间设置（单位：时钟周期）
+    sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+    sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_ENABLE;
+    HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig);
+
+    // 配置定时器主模式
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig);
+
+    // 启动PWM
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+}
+
+```
+
+### **代码解析**
+
+1. **定时器初始化**：`MX_TIM1_Init` 函数初始化了TIM1定时器，设置了基本的PWM配置，包括计数器模式、周期、占空比等。
+
+2. **PWM配置**：使用 `HAL_TIM_PWM_ConfigChannel` 函数配置PWM信号的模式和占空比。
+
+3. **死区时间配置**：`TIM_BreakDeadTimeConfigTypeDef` 结构体用于配置死区时间。`DeadTime` 字段指定了死区时间的长度（单位是时钟周期）。
+
+4. **主模式配置**：使用 `HAL_TIMEx_MasterConfigSynchronization` 函数配置定时器的主模式。
+
+5. **启动PWM**：通过 `HAL_TIM_PWM_Start` 函数启动PWM信号。
+
+---
+
+2024.9.13 第一次修订，后期不再维护
