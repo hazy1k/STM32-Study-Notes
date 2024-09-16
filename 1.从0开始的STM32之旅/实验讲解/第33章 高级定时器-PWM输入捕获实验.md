@@ -25,7 +25,7 @@
 - 通用定时器宏定义
 
 ```c
-/************通用定时器TIM参数定义，只限TIM2、3、4、5************/
+// 通用定时器TIM参数定义，只限TIM2、3、4、5
 // 当使用不同的定时器的时候，对应的GPIO是不一样的，这点要注意
 // 我们这里默认使用TIM3
 #define GENERAL_TIM               TIM3
@@ -106,23 +106,23 @@ void GENERAL_TIM_Init(void)
 - 高级定时器宏定义
 
 ```c
-#define            ADVANCE_TIM                   TIM1
-#define            ADVANCE_TIM_APBxClock_FUN     RCC_APB2PeriphClockCmd
-#define            ADVANCE_TIM_CLK               RCC_APB2Periph_TIM1
+#define ADVANCE_TIM               TIM1
+#define ADVANCE_TIM_APBxClock_FUN RCC_APB2PeriphClockCmd
+#define ADVANCE_TIM_CLK           RCC_APB2Periph_TIM1
 // 输入捕获能捕获到的最小的频率为 72M/{(ARR+1)*(PSC+1)}
-#define            ADVANCE_TIM_Period            (1000-1)
-#define            ADVANCE_TIM_Prescaler         (72-1)
+#define ADVANCE_TIM_Period        (1000-1)
+#define ADVANCE_TIM_Prescaler     (72-1)
 // 中断相关宏定义
-#define            ADVANCE_TIM_IRQ               TIM1_CC_IRQn
-#define            ADVANCE_TIM_IRQHandler        TIM1_CC_IRQHandler
+#define ADVANCE_TIM_IRQ           TIM1_CC_IRQn
+#define ADVANCE_TIM_IRQHandler    TIM1_CC_IRQHandler
 // TIM1 输入捕获通道1（PA8）
-#define            ADVANCE_TIM_CH1_GPIO_CLK      RCC_APB2Periph_GPIOA
-#define            ADVANCE_TIM_CH1_PORT          GPIOA
-#define            ADVANCE_TIM_CH1_PIN           GPIO_Pin_8
-#define            ADVANCE_TIM_IC1PWM_CHANNEL    TIM_Channel_1 // 使用通道1
+#define ADVANCE_TIM_CH1_GPIO_CLK   RCC_APB2Periph_GPIOA
+#define ADVANCE_TIM_CH1_PORT       GPIOA
+#define ADVANCE_TIM_CH1_PIN        GPIO_Pin_8
+#define ADVANCE_TIM_IC1PWM_CHANNEL TIM_Channel_1 // 使用通道1
 ```
 
-在上面的宏定义里面，我们可以算出计数器的计数周期为T = 72M/(1000*72) = 1MS，这个是定时器在不溢出的情况下的最大计数周期， 也就是说周期小于1ms的PWM信号都可以被捕获到，转换成频率就是能捕获到的最小的频率为1KHZ。 所以我们要根据捕获的PWM信号来调节ADVANCE_TIM_PERIOD和ADVANCE_TIM_PSC这两个宏。
+在上面的宏定义里面，我们可以算出计数器的计数周期为T = 72M/(1000*72) = 1ms，这个是定时器在不溢出的情况下的最大计数周期， 也就是说周期小于1ms的PWM信号都可以被捕获到，转换成频率就是能捕获到的最小的频率为1KHZ。 所以我们要根据捕获的PWM信号来调节ADVANCE_TIM_PERIOD和ADVANCE_TIM_PSC这两个宏。
 
 - 高级定时器PWM输入捕获模式
 
@@ -270,3 +270,129 @@ int main(void)
 ```
 
 main函数非常简单，通用定时器初始化完之后用于输出PWM信号，高级定时器初始化完之后用于捕获通用定时器输出的PWM信号。
+
+## 3. 小结
+
+下面我们来简单回顾一下流程吧：
+
+### 实验流程
+
+1. **硬件连接**
+   
+   - 将通用定时器的PWM输出引脚（例如`TIM2_CH1`）连接到高级定时器的捕获输入引脚（例如`TIM1_CH1`）。
+   - 确保STM32F103的时钟设置正确，以便定时器能正常工作。
+
+2. **软件配置**
+   
+   - 配置系统时钟，以确保定时器工作在预期频率。
+   - 配置通用定时器（例如`TIM2`）以生成PWM信号。
+   - 配置高级定时器（例如`TIM1`）以捕获PWM信号。
+   - 配置相应的GPIO引脚作为定时器的输入和输出。
+   - 配置NVIC中断处理程序（如果需要）。
+
+### 代码示例
+
+以下是一个基于STM32标准外设库的代码示例，展示了如何配置`TIM2`生成PWM信号，并使用`TIM1`捕获该信号。
+
+```c
+#include "stm32f10x.h"
+
+// Function prototypes
+void TIM2_PWM_Init(void);
+void TIM1_IC_Init(void);
+void GPIO_Config(void);
+
+int main(void) {
+    // Initialize GPIO for PWM output and IC input
+    GPIO_Config();
+    
+    // Initialize TIM2 for PWM output
+    TIM2_PWM_Init();
+    
+    // Initialize TIM1 for input capture
+    TIM1_IC_Init();
+    
+    while (1) {
+        // Main loop
+    }
+}
+
+void GPIO_Config(void) {
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    // Enable GPIO clocks
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+    // Configure PA0 (TIM2 CH1) as alternate function push-pull
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    // Configure PA8 (TIM1 CH1) as alternate function push-pull
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+
+void TIM2_PWM_Init(void) {
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+
+    // Enable TIM2 clock
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+    // Time base configuration
+    TIM_TimeBaseStructure.TIM_Period = 999; // Auto-reload register
+    TIM_TimeBaseStructure.TIM_Prescaler = 71; // Prescaler value
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+
+    // PWM mode configuration
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_Pulse = 499; // Compare value (duty cycle)
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+
+    // Enable TIM2
+    TIM_Cmd(TIM2, ENABLE);
+}
+
+void TIM1_IC_Init(void) {
+    TIM_ICInitTypeDef TIM_ICInitStructure;
+
+    // Enable TIM1 clock
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+
+    // Time base configuration (you may adjust this as needed)
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+    TIM_TimeBaseStructure.TIM_Prescaler = 0;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+
+    // Input capture configuration
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+    TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+    TIM_ICInitStructure.TIM_ICFilter = 0;
+    TIM_ICInit(TIM1, &TIM_ICInitStructure);
+
+    // Enable TIM1
+    TIM_Cmd(TIM1, ENABLE);
+}
+```
+
+### 代码说明
+
+1. **`GPIO_Config()`**: 配置`PA0`为`TIM2_CH1`输出，`PA8`为`TIM1_CH1`输入。
+2. **`TIM2_PWM_Init()`**: 配置`TIM2`为PWM模式，设置周期和占空比。
+3. **`TIM1_IC_Init()`**: 配置`TIM1`为输入捕获模式，捕获`TIM2`输出的PWM信号。
+
+---
+
+2024.9.16 第一次修订，后期不再修订
