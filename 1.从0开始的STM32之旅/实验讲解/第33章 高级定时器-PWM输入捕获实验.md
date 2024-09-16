@@ -28,21 +28,19 @@
 /************通用定时器TIM参数定义，只限TIM2、3、4、5************/
 // 当使用不同的定时器的时候，对应的GPIO是不一样的，这点要注意
 // 我们这里默认使用TIM3
+#define GENERAL_TIM               TIM3
+#define GENERAL_TIM_APBxClock_FUN RCC_APB1PeriphClockCmd
+#define GENERAL_TIM_CLK           RCC_APB1Periph_TIM3
 
-#define            GENERAL_TIM                   TIM3
-#define            GENERAL_TIM_APBxClock_FUN     RCC_APB1PeriphClockCmd
-#define            GENERAL_TIM_CLK               RCC_APB1Periph_TIM3
-// 输出PWM的频率为 72M/{ (ARR+1)*(PSC+1) }
-#define            GENERAL_TIM_PERIOD            (10-1)
-#define            GENERAL_TIM_PSC               (72-1)
+// 输出PWM的频率为 72M/{(ARR+1)*(PSC+1)}
+#define GENERAL_TIM_PERIOD       (10-1)
+#define GENERAL_TIM_PSC          (72-1)
+#define GENERAL_TIM_CCR1          5     // 占空比
 
-#define            GENERAL_TIM_CCR1              5
-
-// TIM3 输出比较通道1
-#define            GENERAL_TIM_CH1_GPIO_CLK      RCC_APB2Periph_GPIOA
-#define            GENERAL_TIM_CH1_PORT          GPIOA
-#define            GENERAL_TIM_CH1_PIN           GPIO_Pin_6
-
+// TIM3 输出比较通道（PA6）
+#define GENERAL_TIM_CH1_GPIO_CLK RCC_APB2Periph_GPIOA
+#define GENERAL_TIM_CH1_PORT     GPIOA
+#define GENERAL_TIM_CH1_PIN      GPIO_Pin_6
 ```
 
 使用宏定义非常方便程序升级、移植。通过上面的宏，我们可以算出PWM信号的频率F为：72M/( 10*72 )=100KHZ， 占空比为GENERAL_TIM_CCR1/ （GENERAL_TIM_PERIOD+1）= 50%。
@@ -54,21 +52,19 @@ static void GENERAL_TIM_Mode_Config(void)
 {
     // 开启定时器时钟,即内部时钟CK_INT=72M
     GENERAL_TIM_APBxClock_FUN(GENERAL_TIM_CLK,ENABLE);
-
     /*--------------------时基结构体初始化-------------------------*/
     // 配置周期，这里配置为100K
-
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     // 自动重装载寄存器的值，累计TIM_Period+1个频率后产生一个更新或者中断
-    TIM_TimeBaseStructure.TIM_Period=GENERAL_TIM_PERIOD;
+    TIM_TimeBaseStructure.TIM_Period = GENERAL_TIM_PERIOD;
     // 驱动CNT计数器的时钟 = Fck_int/(psc+1)
-    TIM_TimeBaseStructure.TIM_Prescaler= GENERAL_TIM_PSC;
+    TIM_TimeBaseStructure.TIM_Prescaler = GENERAL_TIM_PSC;
     // 时钟分频因子 ，配置死区时间时需要用到
-    TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     // 计数器计数模式，设置为向上计数
-    TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     // 重复计数器的值，没用到不用管
-    TIM_TimeBaseStructure.TIM_RepetitionCounter=0;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     // 初始化定时器
     TIM_TimeBaseInit(GENERAL_TIM, &TIM_TimeBaseStructure);
 
@@ -113,59 +109,52 @@ void GENERAL_TIM_Init(void)
 #define            ADVANCE_TIM                   TIM1
 #define            ADVANCE_TIM_APBxClock_FUN     RCC_APB2PeriphClockCmd
 #define            ADVANCE_TIM_CLK               RCC_APB2Periph_TIM1
-
-// 输入捕获能捕获到的最小的频率为 72M/{ (ARR+1)*(PSC+1) }
+// 输入捕获能捕获到的最小的频率为 72M/{(ARR+1)*(PSC+1)}
 #define            ADVANCE_TIM_Period            (1000-1)
 #define            ADVANCE_TIM_Prescaler         (72-1)
-
 // 中断相关宏定义
 #define            ADVANCE_TIM_IRQ               TIM1_CC_IRQn
 #define            ADVANCE_TIM_IRQHandler        TIM1_CC_IRQHandler
-
-// TIM1 输入捕获通道1
+// TIM1 输入捕获通道1（PA8）
 #define            ADVANCE_TIM_CH1_GPIO_CLK      RCC_APB2Periph_GPIOA
 #define            ADVANCE_TIM_CH1_PORT          GPIOA
 #define            ADVANCE_TIM_CH1_PIN           GPIO_Pin_8
-
-#define            ADVANCE_TIM_IC1PWM_CHANNEL    TIM_Channel_1
+#define            ADVANCE_TIM_IC1PWM_CHANNEL    TIM_Channel_1 // 使用通道1
 ```
 
-在上面的宏定义里面，我们可以算出计数器的计数周期为T=72M/(1000*72)=1MS，这个是定时器在不溢出的情况下的最大计数周期， 也就是说周期小于1ms的PWM信号都可以被捕获到，转换成频率就是能捕获到的最小的频率为1KHZ。 所以我们要根据捕获的PWM信号来调节ADVANCE_TIM_PERIOD和ADVANCE_TIM_PSC这两个宏。
+在上面的宏定义里面，我们可以算出计数器的计数周期为T = 72M/(1000*72) = 1MS，这个是定时器在不溢出的情况下的最大计数周期， 也就是说周期小于1ms的PWM信号都可以被捕获到，转换成频率就是能捕获到的最小的频率为1KHZ。 所以我们要根据捕获的PWM信号来调节ADVANCE_TIM_PERIOD和ADVANCE_TIM_PSC这两个宏。
 
-- 高级定时器PWM输入模式
+- 高级定时器PWM输入捕获模式
 
 ```c
 static void ADVANCE_TIM_Mode_Config(void)
 {
     // 开启定时器时钟,即内部时钟CK_INT=72M
     ADVANCE_TIM_APBxClock_FUN(ADVANCE_TIM_CLK,ENABLE);
-
     /*--------------------时基结构体初始化-------------------------*/
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     // 自动重装载寄存器的值，累计TIM_Period+1个频率后产生一个更新或者中断
-    TIM_TimeBaseStructure.TIM_Period=ADVANCE_TIM_PERIOD;
+    TIM_TimeBaseStructure.TIM_Period = ADVANCE_TIM_PERIOD;
     // 驱动CNT计数器的时钟 = Fck_int/(psc+1)
-    TIM_TimeBaseStructure.TIM_Prescaler= ADVANCE_TIM_PSC;
+    TIM_TimeBaseStructure.TIM_Prescaler = ADVANCE_TIM_PSC;
     // 时钟分频因子 ，配置死区时间时需要用到
-    TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     // 计数器计数模式，设置为向上计数
-    TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     // 重复计数器的值，没用到不用管
-    TIM_TimeBaseStructure.TIM_RepetitionCounter=0;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     // 初始化定时器
     TIM_TimeBaseInit(ADVANCE_TIM, &TIM_TimeBaseStructure);
-
     /*--------------------输入捕获结构体初始化-------------------*/
     // 使用PWM输入模式时，需要占用两个捕获寄存器，一个测周期，另外一个测占空比
-
     TIM_ICInitTypeDef  TIM_ICInitStructure;
     // 捕获通道IC1配置
     // 选择捕获通道
     TIM_ICInitStructure.TIM_Channel = ADVANCE_TIM_IC1PWM_CHANNEL;
     // 设置捕获的边沿
-    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; // 上升沿捕获
     // 设置捕获通道的信号来自于哪个输入通道，有直连和非直连两种
-    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; // 这里我们选择直连
     // 1分频，即捕获信号的每个有效边沿都捕获
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
     // 不滤波
@@ -204,7 +193,7 @@ static void ADVANCE_TIM_Mode_Config(void)
 
 ADVANCE_TIM_Mode_Config()函数中初始化了两个结构体，有关这两个结构体成员的具体含义可参考“定时器初始化结构体详解”小节，剩下的程序参考注释阅读即可。
 
-因为是PWM输入模式，只能使用通道1和通道2 ，假如我们使用的是通道1，即TI1，输入的PWM信号会被分成两路，分别是TI1FP1和TI1FP2， 两路都可以是触发信号。如果选择TI1FP1为触发信号，那么IC1捕获到的是PWM信号的周期， IC2捕获到的是占空比， 这种输入通道TI和捕获通道IC的映射关系叫直连，输入捕获结构体的TIM_ICSelection要配置为TIM_ICSelection_DirectTI。如果选择TI1FP2为触发信号， 则IC2捕获到的是周期，IC1捕获到的是占空比，这种输入通道TI和捕获通道IC的映射关系叫非直连， 输入捕获结构体的TIM_ICSelection要配置为TIM_ICSelection_IndirectTI。 有关输入通道TI和捕获通道IC的具体映射关系见图 [输入通道TI和捕获通道IC的映射图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#tiic) ，有直连和非直连两种。
+因为是PWM输入模式，只能使用通道1和通道2 ，假如我们使用的是通道1，即TI1，输入的PWM信号会被分成两路，分别是TI1FP1和TI1FP2， 两路都可以是触发信号。如果选择TI1FP1为触发信号，那么IC1捕获到的是PWM信号的周期， IC2捕获到的是占空比， 这种输入通道TI和捕获通道IC的映射关系叫直连，输入捕获结构体的TIM_ICSelection要配置为TIM_ICSelection_DirectTI。如果选择TI1FP2为触发信号， 则IC2捕获到的是周期，IC1捕获到的是占空比，这种输入通道TI和捕获通道IC的映射关系叫非直连， 输入捕获结构体的TIM_ICSelection要配置为TIM_ICSelection_IndirectTI。 有关输入通道TI和捕获通道IC的具体映射关系见图，有直连和非直连两种。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen012.png)
 
@@ -234,21 +223,20 @@ static void ADVANCE_TIM_NVIC_Config(void)
 ```c
 void ADVANCE_TIM_IRQHandler(void)
 {
-    /* 清除中断标志位 */
+    // 清除中断标志位
     TIM_ClearITPendingBit(ADVANCE_TIM, TIM_IT_CC1);
 
-    /* 获取输入捕获值 */
-    IC1Value = TIM_GetCapture1(ADVANCE_TIM);
-    IC2Value = TIM_GetCapture2(ADVANCE_TIM);
+    // 获取输入捕获
+    IC1Value = TIM_GetCapture1(ADVANCE_TIM); // 周期
+    IC2Value = TIM_GetCapture2(ADVANCE_TIM); // 占空比
 
     // 注意：捕获寄存器CCR1和CCR2的值在计算占空比和频率的时候必须加1
     if (IC1Value != 0) {
-        /* 占空比计算 */
+        // 占空比计算
         DutyCycle = (float)((IC2Value+1) * 100) / (IC1Value+1);
-
-        /* 频率计算 */
+        // 频率计算
         Frequency = (72000000/(ADVANCE_TIM_PSC+1))/(float)(IC1Value+1);
-        printf("占空比：%0.2f%%   频率：%0.2fHz\n",DutyCycle,Frequency);
+        printf("占空比：%0.2f%%   频率：%0.2fHz\n",DutyCycle, Frequency);
     } else {
         DutyCycle = 0;
         Frequency = 0;
@@ -256,27 +244,27 @@ void ADVANCE_TIM_IRQHandler(void)
 }
 ```
 
-当捕获到PWM信号的第一个上升沿时，产生中断，计数器被复位，锁存到捕获寄存器IC1和IC2的值都为0。当下降沿到来时， IC2会捕获，对应的是占空比，但是会产生中断。当捕获到第二个下降沿时，IC1会捕获，对应的是周期，而且会再次进入中断， 这个时间就可以根据IC1和IC2的值计算出频率和占空比。有关PWM输入的时序见图 [PWM输入模式时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/TIM_senior.html#id83) 。
+当捕获到PWM信号的第一个上升沿时，产生中断，计数器被复位，锁存到捕获寄存器IC1和IC2的值都为0。当下降沿到来时， IC2会捕获，对应的是占空比，但是会产生中断。当捕获到第二个下降沿时，IC1会捕获，对应的是周期，而且会再次进入中断， 这个时间就可以根据IC1和IC2的值计算出频率和占空比。有关PWM输入的时序见图
 
 中断复位函数中，我们获取输入捕获寄存器CCR1和CCR2寄存器中的值，当CCR1的值不为0时，说明有效捕获到了一个周期， 然后计算出频率和占空比。在计算的时候CCR1和CCR2的值都必须要加1，因为计数器是从0开始计数的。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen013.png)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMsen013.png" title="" alt="" width="1000">
 
 - 主函数
 
 ```c
 int main(void)
 {
-    /* 串口初始化 */
+    // 串口初始化
     USART_Config();
-
-    /* 通用定时器初始化，用于生成PWM信号 */
+    // 通用定时器初始化，用于生成PWM信号
     GENERAL_TIM_Init();
-
-    /* 高级定时器初始化 ，用户捕获PWM信号*/
+    // 高级定时器初始化 ，用户捕获PWM信号
     ADVANCE_TIM_Init();
 
-    while (1) {
+    while (1) 
+    {
+
     }
 }
 ```

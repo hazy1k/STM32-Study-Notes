@@ -30,4 +30,77 @@
 
 - 编写PVD中断服务函数，处理紧急任务。
 
+### 2.2 代码分析
+
+- 初始化PVD
+
+```c
+// 配置PCD
+void PVD_Config(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+  EXTI_InitTypeDef EXTI_InitStructure;
+
+  // 使能 PWR 时钟
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+  
+  // 使能 PVD 中断
+  NVIC_InitStructure.NVIC_IRQChannel = PVD_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+      
+  // 配置 EXTI16线(PVD 输出) 来产生上升下降沿中断
+  EXTI_ClearITPendingBit(EXTI_Line16); // 清除中断标志位
+  EXTI_InitStructure.EXTI_Line = EXTI_Line16; // 选择 EXTI 线
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; // 中断模式
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling; // 上升沿和下降沿触发中断
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE; // 使能中断线
+  EXTI_Init(&EXTI_InitStructure);
+
+  // 配置PVD级别PWR_PVDLevel_2V6 (PVD检测电压的阈值为2.6V，VDD电压低于2.6V时产生PVD中断)
+	// 具体级别根据自己的实际应用要求配置
+  PWR_PVDLevelConfig(PWR_PVDLevel_2V6); // 配置PVD检测电压阈值
+
+  // 使能PVD输出
+  PWR_PVDCmd(ENABLE);
+}
+```
+
+在这段代码中，执行的流程如下：
+
+1. 配置PVD的中断优先级。 由于电压下降是非常危急的状态，所以请尽量把它配置成最高优先级。
+
+2. 配置了EXTI16线的中断源， 设置EXTI16是因为PVD中断是通过EXTI16产生中断的(GPIO的中断是EXTI0-EXTI15)。
+
+3. 使用库函数PWR_PVDLevelConfig设置PVD监控的电压阈值等级， 各个阈值等级表示的电压值请查阅表 [PVD的阈值等级](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/Power.html#id4) 或STM32的数据手册。
+
+4. 最后使用库函数PWR_PVDCmd使能PVD功能。
+- PVD中断服务函数
+
+```c
+void PVD_IRQHandler(void)
+{
+		// 检测是否产生了PVD警告信号
+		if(PWR_GetFlagStatus (PWR_FLAG_PVDO)==SET)			
+		{
+			// 亮红灯，实际应用中应进入紧急状态处理
+			LED_RED; 	
+	  }
+    // 清除中断信号
+    EXTI_ClearITPendingBit(EXTI_Line16);
+}
+```
+
+- 主函数
+
+```c
+
+```
+
+本电源监控实验的main函数执行流程比较简单，仅调用了PVD_Config配置监控功能，当VDD供电电压正常时，板子亮绿灯， 当电压低于阈值时，会跳转到中断服务函数中， 板子亮红灯
+
 
