@@ -155,16 +155,14 @@ void SysTick_Handler(void)
   */
 void PVD_IRQHandler(void)
 {
-		/*检测是否产生了PVD警告信号*/
+		// 检测是否产生了PVD警告信号
 		if(PWR_GetFlagStatus (PWR_FLAG_PVDO)==SET)			
 		{
-			/* 亮红灯，实际应用中应进入紧急状态处理 */
-			LED_RED; 
-			
-		}
-    /* 清除中断信号*/
+			// 亮红灯，实际应用中应进入紧急状态处理
+			LED_RED; 	
+	  }
+    // 清除中断信号
     EXTI_ClearITPendingBit(EXTI_Line16);
-
 }
 /**
   * @brief  This function handles PPP interrupt request.
