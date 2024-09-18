@@ -187,13 +187,13 @@ void TIM3_Config(void)
 
     // 配置 GPIO 引脚（假设为 GPIOA 的 PA6）
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-    
+
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
+
     // 配置 TIM3 时间基数
     TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;
     TIM_TimeBaseStructure.TIM_Prescaler = 0;
@@ -224,7 +224,7 @@ int main(void)
 {
     // 系统初始化
     SystemInit();
-    
+
     // 配置 TIM3
     TIM3_Config();
 
@@ -248,7 +248,6 @@ int main(void)
         }
     }
 }
-
 ```
 
 ### 代码说明
