@@ -6,7 +6,7 @@ STM32f103 系列有3个ADC，精度为12位，每个ADC最多有16个外部通�
 
 ## 2. ADC功能框图剖析
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/ADC002.png)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/ADC002.png" title="" alt="" width="413">
 
 掌握了ADC的功能框图，就可以对ADC有一个整体的把握，在编程的时候可以做到了然如胸，不会一知半解。 框图讲解采用从左到右的方式，跟ADC采集数据，转换数据，传输数据的方向大概一致。
 
@@ -131,8 +131,71 @@ ScanConvMode：可选参数为ENABLE和DISABLE，配置是否使用扫描。如�
 
 ADC_ContinuousConvMode：可选参数为ENABLE和DISABLE，配置是启动自动连续转换还是单次转换。使用ENABLE配置为使能自动连续转换； 使用DISABLE配置为单次转换，转换一次后停止需要手动控制才重新启动转换。一般设置为连续转换。
 
-ADC_ExternalTrigConv：外部触发选择，图 [单个ADC功能框图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/ADC.html#id3) 中列举了很多外部触发条件， 可根据项目需求配置触发来源。实际上，我们一般使用软件自动触发。
+ADC_ExternalTrigConv：外部触发选择，框图图中列举了很多外部触发条件， 可根据项目需求配置触发来源。实际上，我们一般使用软件自动触发。
 
 ADC_DataAlign：转换结果数据对齐模式，可选右对齐ADC_DataAlign_Right或者左对齐ADC_DataAlign_Left。一般我们选择右对齐模式。
 
 ADC_NbrOfChannel：AD转换通道数目，根据实际设置即可。
+
+---
+
+### 例子：配置 ADC 进行多通道扫描转换
+
+假设我们需要采集两个通道（例如，PA0 和 PA1），以连续模式运行，并使用定时器作为触发信号。
+
+```c
+#include "stm32f4xx.h"
+
+void ADC_Config(void) {
+    ADC_InitTypeDef ADC_InitStruct;
+
+    // 使能 ADC 时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+
+    // 配置 ADC 初始化结构体
+    ADC_InitStruct.ADC_Mode = ADC_Mode_Independent; // 独立模式
+    ADC_InitStruct.ADC_ScanConvMode = ENABLE;      // 启用扫描模式
+    ADC_InitStruct.ADC_ContinuousConvMode = ENABLE; // 启用连续转换模式
+    ADC_InitStruct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1; // 定时器1触发
+    ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right; // 右对齐
+    ADC_InitStruct.ADC_NbrOfChannel = 2; // 采集两个通道
+
+    // 初始化 ADC
+    ADC_Init(ADC1, &ADC_InitStruct);
+
+    // 配置通道
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_3Cycles);
+
+    // 启动 ADC
+    ADC_Cmd(ADC1, ENABLE);
+    
+    // 启动定时器（假设已配置好）
+    TIM_Cmd(TIM1, ENABLE);
+}
+
+int main(void) {
+    ADC_Config();
+
+    while (1) {
+        // 主循环中可以读取 ADC 数据
+        uint16_t value1 = ADC_GetConversionValue(ADC1); // 获取通道0的值
+        uint16_t value2 = ADC_GetConversionValue(ADC1); // 获取通道1的值
+        // 处理数据...
+    }
+}
+```
+
+### 说明
+
+- **ADC_Mode** 设置为独立模式，表示该 ADC 独立工作。
+- **ADC_ScanConvMode** 和 **ADC_ContinuousConvMode** 启用扫描和连续模式，使 ADC 自动切换并持续读取通道。
+- **ADC_ExternalTrigConv** 使用定时器1的比较匹配事件作为转换触发源。
+- **ADC_DataAlign** 设置数据右对齐，以便于后续数据处理。
+- **ADC_NbrOfChannel** 设置为2，表示我们将采集两个通道。
+
+这样配置后，ADC 将根据定时器的触发信号，自动读取 PA0 和 PA1 的值。
+
+---
+
+2024.9.19 第一次修订，后期不再维护
