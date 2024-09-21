@@ -169,7 +169,7 @@ void ADC_Config(void) {
 
     // 启动 ADC
     ADC_Cmd(ADC1, ENABLE);
-    
+
     // 启动定时器（假设已配置好）
     TIM_Cmd(TIM1, ENABLE);
 }
