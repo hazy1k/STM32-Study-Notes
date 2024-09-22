@@ -25,43 +25,36 @@ ADC转换结果数据使用DMA方式传输至指定的存储区，这样取代�
 ```c
 // 注意：用作ADC采集的IO必须没有复用，否则采集电压会有影响
 /********************ADC1输入通道（引脚）配置**************************/
-#define    ADC_APBxClock_FUN             RCC_APB2PeriphClockCmd
-#define    ADC_CLK                       RCC_APB2Periph_ADC1
-
-#define    ADC_GPIO_APBxClock_FUN        RCC_APB2PeriphClockCmd
-#define    ADC_GPIO_CLK                  RCC_APB2Periph_GPIOC  
-#define    ADC_PORT                      GPIOC
-
+#define ADC_APBxClock_FUN      RCC_APB2PeriphClockCmd
+#define ADC_CLK                RCC_APB2Periph_ADC1
+#define ADC_GPIO_APBxClock_FUN RCC_APB2PeriphClockCmd
+#define ADC_GPIO_CLK           RCC_APB2Periph_GPIOC  
+#define ADC_PORT               GPIOC
 // 注意
 // 1-PC0 在霸道里面接的是蜂鸣器，默认被拉低
 // 2-PC0 在指南者里面接的是SPI FLASH的 片选，默认被拉高
 // 所以 PC0 做 ADC 转换通道的时候，结果可能会有误差
 
-// 转换通道个数
-#define    NOFCHANEL					6
+// 转换通道个数-6
+#define NOFCHANEL 6
 
-#define    ADC_PIN1                     GPIO_Pin_0
-#define    ADC_CHANNEL1                 ADC_Channel_10
-
-#define    ADC_PIN2                     GPIO_Pin_1
-#define    ADC_CHANNEL2                 ADC_Channel_11
-
-#define    ADC_PIN3                     GPIO_Pin_2
-#define    ADC_CHANNEL3                 ADC_Channel_12
-
-#define    ADC_PIN4                     GPIO_Pin_3
-#define    ADC_CHANNEL4                 ADC_Channel_13
-
-#define    ADC_PIN5                     GPIO_Pin_4
-#define    ADC_CHANNEL5                 ADC_Channel_14
-
-#define    ADC_PIN6                     GPIO_Pin_5
-#define    ADC_CHANNEL6                 ADC_Channel_15
-
+// 通道宏定义
+#define ADC_PIN1     GPIO_Pin_0
+#define ADC_CHANNEL1 ADC_Channel_10
+#define ADC_PIN2     GPIO_Pin_1
+#define ADC_CHANNEL2 ADC_Channel_11
+#define ADC_PIN3     GPIO_Pin_2
+#define ADC_CHANNEL3 ADC_Channel_12
+#define ADC_PIN4     GPIO_Pin_3
+#define ADC_CHANNEL4 ADC_Channel_13
+#define ADC_PIN5     GPIO_Pin_4
+#define ADC_CHANNEL5 ADC_Channel_14
+#define ADC_PIN6     GPIO_Pin_5
+#define ADC_CHANNEL6 ADC_Channel_15
 // ADC1 对应 DMA1通道1，ADC3对应DMA2通道5，ADC2没有DMA功能
-#define    ADC_x                         ADC1
-#define    ADC_DMA_CHANNEL               DMA1_Channel1
-#define    ADC_DMA_CLK                   RCC_AHBPeriph_DMA1
+#define ADC_x           ADC1
+#define ADC_DMA_CHANNEL DMA1_Channel1
+#define ADC_DMA_CLK     RCC_AHBPeriph_DMA1
 ```
 
 定义NOFCHANEL个通道进行多通道ADC实验，并且定义DMA相关配置。
@@ -72,14 +65,14 @@ ADC转换结果数据使用DMA方式传输至指定的存储区，这样取代�
 // ADC GPIO 初始化
 static void ADCx_GPIO_Config(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	// 打开 ADC IO端口时钟
-	ADC_GPIO_APBxClock_FUN(ADC_GPIO_CLK, ENABLE );
-	// 配置 ADC IO 引脚模式
-	GPIO_InitStructure.GPIO_Pin = ADC_PIN1|	ADC_PIN2|ADC_PIN3|ADC_PIN4|ADC_PIN5|ADC_PIN6;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; // 模拟输入模式
-	// 初始化 ADC IO
-	GPIO_Init(ADC_PORT, &GPIO_InitStructure);				
+    GPIO_InitTypeDef GPIO_InitStructure;
+    // 打开 ADC IO端口时钟
+    ADC_GPIO_APBxClock_FUN(ADC_GPIO_CLK, ENABLE);
+    // 配置 ADC IO 引脚模式
+    GPIO_InitStructure.GPIO_Pin = ADC_PIN1|ADC_PIN2|ADC_PIN3|ADC_PIN4|ADC_PIN5|ADC_PIN6;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; // 模拟输入模式
+    // 初始化 ADC IO
+    GPIO_Init(ADC_PORT, &GPIO_InitStructure);                
 }
 ```
 
@@ -91,85 +84,80 @@ static void ADCx_GPIO_Config(void)
 // 配置ADC模式
 static void ADCx_Mode_Config(void)
 {
-	DMA_InitTypeDef DMA_InitStructure;
-	ADC_InitTypeDef ADC_InitStructure;
-	
-	// 打开DMA时钟
-	RCC_AHBPeriphClockCmd(ADC_DMA_CLK, ENABLE);
-	// 打开ADC时钟
-	ADC_APBxClock_FUN ( ADC_CLK, ENABLE );
-	
-	// 复位DMA控制器
-	DMA_DeInit(ADC_DMA_CHANNEL);
-	
-	// 配置 DMA 初始化结构体
-	// 外设基址为：ADC 数据寄存器地址
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)(&(ADC_x->DR));
-	// 存储器地址
-	DMA_InitStructure.DMA_MemoryBaseAddr = (u32)ADC_ConvertedValue;
-	// 数据源来自外设
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-	// 缓冲区大小，应该等于数据目的地的大小
-	DMA_InitStructure.DMA_BufferSize = NOFCHANEL;
-	// 外设寄存器只有一个，地址不用递增
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	// 存储器地址递增
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 
-	// 外设数据大小为半字，即两个字节
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-	// 内存数据大小也为半字，跟外设数据大小相同
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-	// 循环传输模式
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;	
-	// DMA 传输通道优先级为高，当使用一个DMA通道时，优先级设置不影响
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-	// 禁止存储器到存储器模式，因为是从外设到存储器
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;	
-	// 初始化DMA
-	DMA_Init(ADC_DMA_CHANNEL, &DMA_InitStructure);
-	// 使能 DMA 通道
-	DMA_Cmd(ADC_DMA_CHANNEL , ENABLE);
+    DMA_InitTypeDef DMA_InitStructure;
+    ADC_InitTypeDef ADC_InitStructure;
+    // 打开DMA时钟
+    RCC_AHBPeriphClockCmd(ADC_DMA_CLK, ENABLE);
+    // 打开ADC时钟
+    ADC_APBxClock_FUN(ADC_CLK, ENABLE);
+    // 复位DMA控制器
+    DMA_DeInit(ADC_DMA_CHANNEL);
+    // 配置 DMA 初始化结构体
+    // 外设基址为：ADC 数据寄存器地址
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)(&(ADC_x->DR));
+    // 存储器地址
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32)ADC_ConvertedValue;
+    // 数据源来自外设
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    // 缓冲区大小，应该等于数据目的地的大小
+    DMA_InitStructure.DMA_BufferSize = NOFCHANEL;
+    // 外设寄存器只有一个，地址不用递增
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    // 存储器地址递增
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 
+    // 外设数据大小为半字，即两个字节
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    // 内存数据大小也为半字，跟外设数据大小相同
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    // 循环传输模式
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;    
+    // DMA 传输通道优先级为高，当使用一个DMA通道时，优先级设置不影响
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    // 禁止存储器到存储器模式，因为是从外设到存储器
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;    
+    // 初始化DMA
+    DMA_Init(ADC_DMA_CHANNEL, &DMA_InitStructure);
+    // 使能 DMA 通道
+    DMA_Cmd(ADC_DMA_CHANNEL , ENABLE);
+    // ADC 模式配置
+    // 只使用一个ADC，属于单模式
+    ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+    // 扫描模式
+    ADC_InitStructure.ADC_ScanConvMode = ENABLE ; 
+    // 连续转换模式
+    ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+    // 不用外部触发转换，软件开启即可
+    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+    // 转换结果右对齐
+    ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+    // 转换通道个数
+    ADC_InitStructure.ADC_NbrOfChannel = NOFCHANEL;    
+    // 初始化ADC
+    ADC_Init(ADC_x, &ADC_InitStructure);
+    // 配置ADC时钟Ｎ狿CLK2的8分频，即9MHz
+    RCC_ADCCLKConfig(RCC_PCLK2_Div8); 
+    // 配置ADC 通道的转换顺序和采样时间
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL1, 1, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL2, 2, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL3, 3, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL4, 4, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL5, 5, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL6, 6, ADC_SampleTime_55Cycles5);
 
-	// ADC 模式配置
-	// 只使用一个ADC，属于单模式
-	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
-	// 扫描模式
-	ADC_InitStructure.ADC_ScanConvMode = ENABLE ; 
-	// 连续转换模式
-	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-	// 不用外部触发转换，软件开启即可
-	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-	// 转换结果右对齐
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	// 转换通道个数
-	ADC_InitStructure.ADC_NbrOfChannel = NOFCHANEL;	
-	// 初始化ADC
-	ADC_Init(ADC_x, &ADC_InitStructure);
-	// 配置ADC时钟Ｎ狿CLK2的8分频，即9MHz
-	RCC_ADCCLKConfig(RCC_PCLK2_Div8); 
-	
-	// 配置ADC 通道的转换顺序和采样时间
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL1, 1, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL2, 2, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL3, 3, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL4, 4, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL5, 5, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC_x, ADC_CHANNEL6, 6, ADC_SampleTime_55Cycles5);
-	
-	// 使能ADC DMA 请求
-	ADC_DMACmd(ADC_x, ENABLE);
-	// 开启ADC ，并开始转换
-	ADC_Cmd(ADC_x, ENABLE);
-	// 初始化ADC 校准寄存器  
-	ADC_ResetCalibration(ADC_x);
-	// 等待校准寄存器初始化完成
-	while(ADC_GetResetCalibrationStatus(ADC_x));
-	// ADC开始校准
-	ADC_StartCalibration(ADC_x);
-	// 等待校准完成
-	while(ADC_GetCalibrationStatus(ADC_x));
-	// 由于没有采用外部触发，所以使用软件触发ADC转换 
-	ADC_SoftwareStartConvCmd(ADC_x, ENABLE);
+    // 使能ADC DMA 请求
+    ADC_DMACmd(ADC_x, ENABLE);
+    // 开启ADC ，并开始转换
+    ADC_Cmd(ADC_x, ENABLE);
+    // 初始化ADC 校准寄存器  
+    ADC_ResetCalibration(ADC_x);
+    // 等待校准寄存器初始化完成
+    while(ADC_GetResetCalibrationStatus(ADC_x));
+    // ADC开始校准
+    ADC_StartCalibration(ADC_x);
+    // 等待校准完成
+    while(ADC_GetCalibrationStatus(ADC_x));
+    // 由于没有采用外部触发，所以使用软件触发ADC转换 
+    ADC_SoftwareStartConvCmd(ADC_x, ENABLE);
 }
 ```
 
@@ -223,4 +211,117 @@ int main(void)
 
 主函数中我们配置好串口，初始化好ADC之后，把采集到的电压经过转换之后通过串口打印到电脑的调试助手显示， 要注意的是在做实验时需要给每个ADC通道提供模拟电源，可以用杜邦线从开发板的GND或者3V3取信号来做实验。
 
+## 3. 小结
 
+这一章就是比上一章多了几个通道而已，把宏定义一加就行了
+
+### 实验目的
+
+使用STM32F103的ADC模块，通过DMA实现6个通道的数据采集。
+
+### 硬件连接
+
+- 将6个模拟信号源连接到STM32F103的ADC引脚（PA0~PA5）。
+
+### 代码示例
+
+```c
+#include "stm32f10x.h"
+
+uint16_t adc_values[6]; // 存储ADC采集的6个通道的数据
+
+void ADC_Init(void) {
+    ADC_InitTypeDef ADC_InitStruct; // ADC配置结构体
+    GPIO_InitTypeDef GPIO_InitStruct; // GPIO配置结构体
+
+    // 启用ADC和GPIO的时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+
+    // 配置PA0~PA5为模拟输入
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AIN; // 模拟输入模式
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    // ADC配置
+    ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b; // 12位分辨率
+    ADC_InitStruct.ADC_ScanConvMode = ENABLE; // 启用扫描转换模式
+    ADC_InitStruct.ADC_ContinuousConvMode = ENABLE; // 启用连续转换模式
+    ADC_InitStruct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; // 无外部触发
+    ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right; // 右对齐数据
+    ADC_InitStruct.ADC_NbrOfChannel = 6; // 6个通道
+    ADC_Init(ADC1, &ADC_InitStruct);
+
+    // 配置各ADC通道及其采样时间
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_1_5Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_1_5Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_1_5Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_1_5Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 5, ADC_SampleTime_1_5Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 6, ADC_SampleTime_1_5Cycles);
+
+    // 启用ADC
+    ADC_Cmd(ADC1, ENABLE);
+
+    // 启动ADC转换
+    ADC_StartOfConversion(ADC1);
+}
+
+void DMA_Init(void) {
+    DMA_InitTypeDef DMA_InitStruct; // DMA配置结构体
+
+    // 启用DMA时钟
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+    // 配置DMA1通道1
+    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR; // ADC数据寄存器地址
+    DMA_InitStruct.DMA_MemoryBaseAddr = (uint32_t)adc_values; // 存储ADC数据的数组地址
+    DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralSRC; // 从外设到内存传输
+    DMA_InitStruct.DMA_BufferSize = 6; // 缓冲区大小
+    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable; // 外设地址不递增
+    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable; // 内存地址递增
+    DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word; // 外设数据大小为字
+    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Word; // 内存数据大小为字
+    DMA_InitStruct.DMA_Mode = DMA_Mode_Circular; // 循环模式
+    DMA_InitStruct.DMA_Priority = DMA_Priority_High; // 高优先级
+    DMA_InitStruct.DMA_M2M = DMA_M2M_Disable; // 禁用内存到内存传输
+    DMA_Init(DMA1_Channel1, &DMA_InitStruct);
+
+    // 启用DMA1通道1
+    DMA_Cmd(DMA1_Channel1, ENABLE);
+}
+
+int main(void) {
+    ADC_Init(); // 初始化ADC
+    DMA_Init(); // 初始化DMA
+
+    while (1) {
+        // 主循环，ADC数据自动存储在adc_values数组中
+    }
+}
+```
+
+### 代码详细说明
+
+1. **ADC初始化**：
+   
+   - 启用GPIOA和ADC1的时钟。
+   - 将PA0~PA5设置为模拟输入模式。
+   - 配置ADC的工作模式，启用DMA和ADC。
+
+2. **DMA初始化**：
+   
+   - 启用DMA1的时钟。
+   - 配置DMA通道1，设置为从外设到内存的模式，并使能循环模式。
+
+3. **中断处理**：
+   
+   - DMA的中断处理函数在传输完成后清除标志位，你可以在这里处理数据。
+
+4. **主循环**：
+   
+   - 主循环保持运行，ADC数据将自动存储在`adc_values`数组中。
+
+---
+
+2024.9.22 第一次修订，后期不再维护
