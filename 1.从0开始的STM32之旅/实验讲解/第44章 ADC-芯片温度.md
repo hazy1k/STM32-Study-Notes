@@ -87,7 +87,7 @@ static void ADC1_Mode_Config(void)
 // ADC1转换的电压值通过MDA方式传到sram
 extern __IO u16 ADC_ConvertedValue;
 //计算后的温度值
-u16 Current_Temp;	 
+u16 Current_Temp;     
 
 void Delay(__IO u32 nCount)
 {
@@ -95,25 +95,24 @@ void Delay(__IO u32 nCount)
 } 
 
 int main(void)
-{		 
-	USART_Config();
-	Temp_ADC1_Init();
-	printf("\r\n 这是一个内部温度传感器实验 \r\n");
-	printf( "\r\n Print current Temperature  \r\n");	
+{         
+    USART_Config();
+    Temp_ADC1_Init();
+    printf("\r\n 这是一个内部温度传感器实验 \r\n");
+    printf( "\r\n Print current Temperature  \r\n");    
   while (1)
   { 
-	Delay(0xffffee);      // 延时 
-	// 计算方法1            	                 									  
- 	// Current_Temp= (1.43- ADC_ConvertedValue*3.3/4096)*1000 / 4.3+ 25 ;
-	//计算方法2
-	Current_Temp = (V25-ADC_ConvertedValue)/AVG_SLOPE+25;	
-	//10进制显示
-	printf("\r\n The IC current tem= %3d ℃\r\n", Current_Temp);	      
-	//16进制显示 						 
- 	// printf("\r\n The current temperature= %04x \r\n", Current_Temp);		 
+    Delay(0xffffee);      // 延时 
+    // 计算方法1                                                                       
+     // Current_Temp= (1.43- ADC_ConvertedValue*3.3/4096)*1000 / 4.3+ 25 ;
+    //计算方法2
+    Current_Temp = (V25-ADC_ConvertedValue)/AVG_SLOPE+25;    
+    //10进制显示
+    printf("\r\n The IC current tem= %3d ℃\r\n", Current_Temp);          
+    //16进制显示                          
+     // printf("\r\n The current temperature= %04x \r\n", Current_Temp);         
   }
 }
-
 ```
 
 ## 3. 小结
@@ -225,7 +224,6 @@ void DMA1_Channel1_IRQHandler(void) {
     // 在这里处理DMA中断
     // 例如，可以处理接收到的数据
 }
-
 ```
 
 ### 代码解释

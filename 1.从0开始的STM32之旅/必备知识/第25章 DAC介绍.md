@@ -8,7 +8,7 @@ STM32具有片上DAC外设，它的分辨率可配置为8位或12位的数字输
 
 ## 2. DAC功能框图
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC002.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC002.jpeg" title="" alt="" width="833">
 
 整个DAC模块围绕框图下方的“数字至模拟转换器x”展开，它的左边分别是参考电源的引脚：V<sub>DDA、 V<sub>SSA及V<sub>ref+， 其中STM32的DAC规定了它的参考电压:math:V_{ref +}输入范围为2.4——3.3V。 “数字至模拟转换器x”的输入为DAC的数据寄存器“DORx”的数字编码，经过它转换得的模拟信号由图中右侧的“DAC_OUTx”输出。 而数据寄存器“DORx”又受“控制逻辑”支配，它可以控制数据寄存器加入一些伪噪声信号或配置产生三角波信号。图中的左上角为DAC的触发源， DAC根据触发源的信号来进行DAC转换，其作用就相当于DAC转换器的开关，它可以配置的触发源为外部中断源触发、定时器触发或软件控制触发。 如本章实验中需要控制正弦波的频率，就需要定时器定时触发DAC进行数据转换。
 
@@ -34,18 +34,14 @@ STM32具有片上DAC外设，它的分辨率可配置为8位或12位的数字输
 
 ```c
 typedef struct {
-    /*DAC触发方式 */
+    // DAC触发方式 
     uint32_t DAC_Trigger;
-
-    /*是否自动输出噪声或三角波 */
+    // 是否自动输出噪声或三角波
     uint32_t DAC_WaveGeneration;
-
-    /*选择噪声生成器的低通滤波或三角波的幅值 */
+    // 选择噪声生成器的低通滤波或三角波的幅值
     uint32_t DAC_LFSRUnmask_TriangleAmplitude;
-
-    /*选择是否使能输出缓冲器 */
+    // 选择是否使能输出缓冲器
     uint32_t DAC_OutputBuffer;
-
 } DAC_InitTypeDef;
 ```
 
@@ -61,7 +57,7 @@ typedef struct {
 
 (3) DAC_LFSRUnmask_TriangleAmplitude
 
-> 本成员通过控制DAC_CR的MAMP2位设置LFSR寄存器位的数据，即当使用伪噪声或三角波输出时要叠加到DHRx的值，非噪声或三角波输出模式下， 本配置无效。使用伪噪声输出时LFSR=0xAAA，MAMP2寄存器位可以屏蔽LFSR的某些位， 这时把本结构体成员赋值为DAC_LFSRUnmask_Bit0~DAC_LFSRUnmask_Bit11_0等宏即可；使用三角波输出时，本结构体设置三角波的最大幅值， 可选择为DAC_TriangleAmplitude_1~ DAC_TriangleAmplitude_4096等宏，见图 [DAC输出三角波](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/DAC.html#id7) ， DAC在DHRx值的基础上升，幅值达到MAMPx设置的最大幅度时下降，形成三角波的输出。
+> 本成员通过控制DAC_CR的MAMP2位设置LFSR寄存器位的数据，即当使用伪噪声或三角波输出时要叠加到DHRx的值，非噪声或三角波输出模式下， 本配置无效。使用伪噪声输出时LFSR=0xAAA，MAMP2寄存器位可以屏蔽LFSR的某些位， 这时把本结构体成员赋值为DAC_LFSRUnmask_Bit0~DAC_LFSRUnmask_Bit11_0等宏即可；使用三角波输出时，本结构体设置三角波的最大幅值， 可选择为DAC_TriangleAmplitude_1~ DAC_TriangleAmplitude_4096等宏，见图， DAC在DHRx值的基础上升，幅值达到MAMPx设置的最大幅度时下降，形成三角波的输出。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC003.png)
 
@@ -69,4 +65,114 @@ typedef struct {
 
 > 本结构体成员用于控制是否使能DAC的输出缓冲（DAC_OutputBuffer_Enable/Disable）， 使能了DAC的输出缓冲后可以减小输出阻抗，适合直接驱动一些外部负载。
 
+## 4. 实例
 
+### 示例：输出三角波信号
+
+#### 1. 包含头文件
+
+确保你包含了所需的头文件
+
+```c
+#include "stm32f4xx.h"  // 根据你的具体STM32型号调整
+```
+
+#### 2. DAC初始化函数
+
+我们需要一个函数来初始化DAC：
+
+```c
+void DAC_Init(void) {
+    // 启用DAC时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+    
+    // DAC配置
+    DAC_InitTypeDef DAC_InitStruct;
+    
+    DAC_InitStruct.DAC_Trigger = DAC_Trigger_T6_TRGO; // 定时器6触发
+    DAC_InitStruct.DAC_WaveGeneration = DAC_WaveGeneration_Triangle; // 生成三角波
+    DAC_InitStruct.DAC_LFSRUnmask_TriangleAmplitude = DAC_TriangleAmplitude_2047; // 三角波幅值
+    DAC_InitStruct.DAC_OutputBuffer = DAC_OutputBuffer_Enable; // 启用输出缓冲器
+
+    // 初始化DAC
+    DAC_Init(DAC_Channel_1, &DAC_InitStruct);
+
+    // 启用DAC通道
+    DAC_Cmd(DAC_Channel_1, ENABLE);
+}
+```
+
+#### 3. 定时器配置
+
+为了生成三角波，需要配置一个定时器作为DAC的触发源：
+
+```c
+void Timer_Config(void) {
+    // 启用定时器6时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+
+    // 定时器基本配置
+    TIM_TimeBaseInitTypeDef TIM_InitStruct;
+    TIM_InitStruct.TIM_Period = 1000; // 设置计数周期
+    TIM_InitStruct.TIM_Prescaler = 84 - 1; // 设置预分频
+    TIM_InitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_InitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+
+    // 初始化定时器
+    TIM_TimeBaseInit(TIM6, &TIM_InitStruct);
+    
+    // 启用定时器更新中断
+    TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+    
+    // 启动定时器
+    TIM_Cmd(TIM6, ENABLE);
+}
+```
+
+#### 4. 主函数
+
+将上述函数在主函数中调用：
+
+```c
+int main(void) {
+    // 系统初始化
+    SystemInit();
+
+    // DAC和定时器初始化
+    DAC_Init();
+    Timer_Config();
+
+    while (1) {
+        // 主循环内容
+    }
+}
+```
+
+#### 5. 处理中断
+
+如果需要在定时器溢出时更新DAC输出，可以实现一个中断服务程序：
+
+```c
+void TIM6_DAC_IRQHandler(void) {
+    // 检查更新中断标志
+    if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET) {
+        // 清除中断标志
+        TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
+        
+        // 更新DAC输出值（简单的例子，实际中可能需要更复杂的波形计算）
+        static uint32_t triangle_value = 0;
+        triangle_value = (triangle_value + 1) % 4096; // 更新值范围0-4095
+        DAC_SetChannel1Data(DAC_Align_12b_R, triangle_value); // 输出到DAC通道
+    }
+}
+```
+
+### 说明
+
+- **DAC_Init**：初始化DAC的参数，包括触发方式和波形生成。
+- **Timer_Config**：配置定时器，作为DAC的触发源。
+- **TIM6_DAC_IRQHandler**：在定时器溢出时更新DAC的输出值，从而生成三角波。
+
+---
+
+2024.9.22 第一次修订，后期不再维护
