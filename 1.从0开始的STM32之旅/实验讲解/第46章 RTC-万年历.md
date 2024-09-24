@@ -1,10 +1,12 @@
 # 第四十六章 RTC-万年历
 
+RTC外设是个连续计数的计数器，利用它提供的时间戳，可通过程序转换输出实时时钟和日历的功能， 修改计数器的值则可以重新设置系统当前的时间和日期。由于它的时钟配置系统(RCC_BDCR寄存器)是在备份域，在系统复位或从待机模式唤醒后RTC的设置维持不变， 而且使用备份域电源可以使RTC计时器在主电源关掉的情况下仍然运行，保证时间的正确。
+
 ## 1. 硬件设计
 
-开发板中与RTC相关的硬件设计见图 [RTC硬件电路](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/RTC.html#id12) 。
+开发板中与RTC相关的硬件设计见图
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/RTC004.jpg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/RTC004.jpg" title="" alt="" width="511">
 
 原理图中的右上角是备份域的供电电路，在本开发板中提供了一个钮扣电池插槽，可以接入型号为CR1220的钮扣电池，该型号的钮扣电池电压为3.2V， 图中的BAT54C双向二极管可切换输入到STM32备份域电源引脚VBAT的供电，当主电源正常供电时，由稳压器输出的3.3V供电，当主电源掉电时，由钮扣电池供电 。
 
@@ -27,18 +29,16 @@
 - RTC宏定义设置
 
 ```c
-//是否使用LCD显示日期
+// 是否使用LCD显示日期
 #define USE_LCD_DISPLAY
-
-//使用LSE外部时钟 或 LSI内部时钟
-//#define RTC_CLOCK_SOURCE_LSE
+// 使用 LSE 外部时钟或 LSI 内部时钟
+// #define RTC_CLOCK_SOURCE_LSE
 #define RTC_CLOCK_SOURCE_LSI
-
-#define RTC_BKP_DRX          BKP_DR1
+#define RTC_BKP_DRX BKP_DR1
 // 写入到备份寄存器的数据宏定义
-#define RTC_BKP_DATA         0xA5A5
+#define RTC_BKP_DATA 0xA5A5
 //北京时间的时区秒数差
-#define TIME_ZOOM       (8*60*60)
+#define TIME_ZOOM    8*60*60)
 ```
 
 以上代码定义的宏介绍如下：
@@ -58,87 +58,63 @@
 ```c
 void RTC_Configuration(void)
 {
-    /* 使能 PWR 和 Backup 时钟 */
+    // 使能 PWR 和 Backup 时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-
-    /* 允许访问 Backup 区域 */
+    // 允许访问 Backup 区域 
     PWR_BackupAccessCmd(ENABLE);
-
-    /* 复位 Backup 区域 */
+    // 复位 Backup 区域
     BKP_DeInit();
 
-//使用外部时钟还是内部时钟（在bsp_rtc.h文件定义）
-//使用外部时钟时，在有些情况下晶振不起振
-//批量产品的时候，很容易出现外部晶振不起振的情况，不太可靠
+// 使用外部时钟还是内部时钟（在bsp_rtc.h文件定义）
+// 使用外部时钟时，在有些情况下晶振不起振
+// 批量产品的时候，很容易出现外部晶振不起振的情况，不太可靠
 #ifdef  RTC_CLOCK_SOURCE_LSE
-    /* 使能 LSE */
+    // 使能 LSE
     RCC_LSEConfig(RCC_LSE_ON);
-
-    /* 等待 LSE 准备好 */
+    // 等待 LSE 准备好
     while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {
     }
-
-    /* 选择 LSE 作为 RTC 时钟源 */
+    // 选择 LSE 作为 RTC 时钟源 
     RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
-
-    /* 使能 RTC 时钟 */
+    // 使能 RTC 时钟
     RCC_RTCCLKCmd(ENABLE);
-
-    /* 等待 RTC 寄存器 同步
-    * 因为RTC时钟是低速的，内环时钟是高速的，所以要同步
-    */
+    // 等待 RTC 寄存器 同步
+    // 因为RTC时钟是低速的，内环时钟是高速的，所以要同步
     RTC_WaitForSynchro();
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成
     RTC_WaitForLastTask();
-
-    /* 使能 RTC 秒中断 */
+    // 使能 RTC 秒中断 
     RTC_ITConfig(RTC_IT_SEC, ENABLE);
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成
     RTC_WaitForLastTask();
-
-    /* 设置 RTC 分频: 使 RTC 周期为1s  */
-    /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) = 1HZ */
+    // 设置 RTC 分频: 使 RTC 周期为1s  
+    // RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) = 1HZ */
     RTC_SetPrescaler(32767);
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成 
     RTC_WaitForLastTask();
-
 #else
-
-    /* 使能 LSI */
+    // 使能 LSI 
     RCC_LSICmd(ENABLE);
-
-    /* 等待 LSI 准备好 */
+    // 等待 LSI 准备好
     while (RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {
     }
-
-    /* 选择 LSI 作为 RTC 时钟源 */
+    // 选择 LSI 作为 RTC 时钟源 
     RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
-
-    /* 使能 RTC 时钟 */
+    // 使能 RTC 时钟 
     RCC_RTCCLKCmd(ENABLE);
-
-    /* 等待 RTC 寄存器 同步
-    * 因为RTC时钟是低速的，内环时钟是高速的，所以要同步
-    */
+    // 等待 RTC 寄存器 同步
+    // 因为RTC时钟是低速的，内环时钟是高速的，所以要同步
     RTC_WaitForSynchro();
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成 
     RTC_WaitForLastTask();
-
-    /* 使能 RTC 秒中断 */
+    // 使能 RTC 秒中断 
     RTC_ITConfig(RTC_IT_SEC, ENABLE);
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成 
     RTC_WaitForLastTask();
-
-    /* 设置 RTC 分频: 使 RTC 周期为1s ,LSI约为40KHz */
-    /* RTC period = RTCCLK/RTC_PR = (40 KHz)/(40000-1+1) = 1HZ */
+    // 设置 RTC 分频: 使 RTC 周期为1s ,LSI约为40KHz 
+    // RTC period = RTCCLK/RTC_PR = (40 KHz)/(40000-1+1) = 1HZ 
     RTC_SetPrescaler(40000-1);
-
-    /* 确保上一次 RTC 的操作完成 */
+    // 确保上一次 RTC 的操作完成
     RTC_WaitForLastTask();
 #endif
 
@@ -150,6 +126,59 @@ void RTC_Configuration(void)
 这个初始化的流程如下：使用RCC_APB1PeriphClockCmd使能PWR和BKP区域（即备份域）的时钟系统，使用PWR_BackupAccessCmd设置允许对BKP区域的访问，使能LSE时钟或LSI时钟，选择LSE或LSI作为RTC的时钟源并使能RTC时钟，利用库函数RTC_WaitFor Synchro对备份域和APB进行同步，用RTC_ITConfig使能秒中断，使用RTC_SetPrescaler分频配置把RTC时钟频率设置为1Hz。那么RTC每个时钟周期都会产生一次中断对RTC的每一个初始化参数都是使用相应的库函数来配置的。
 
 经过这样的配置后，RTC每秒产生一次中断事件，实验中在中断设置标志位以便更新时间。
+
+---
+
+当然了，出现了新的库函数，我们还是要介绍一下：
+
+### 1. `RCC_LSICmd(ENABLE)`
+
+- **功能**：使能低速内部振荡器（LSI）。
+- **参数**：`ENABLE`表示开启LSI；`DISABLE`表示关闭LSI。
+- **作用**：启动LSI振荡器，使其可以用作RTC时钟源。
+
+### 2. `Rcc_GetFlagStatus(uint32_t RCC_FLAG)`
+
+- **功能**：检查指定的RCC标志位状态。
+- **参数**：`RCC_FLAG`是要检查的标志，如`RCC_FLAG_LSIRDY`表示LSI是否准备就绪。
+- **返回值**：返回标志位的状态，`SET`表示标志位被置位，`RESET`表示未被置位。
+- **作用**：在启用LSI后，通过此函数检查LSI是否已准备好，确保后续操作的稳定性。
+
+### 3. `RCC_RTCCLKConfig(uint32_t RCC_RTCCLKSource)`
+
+- **功能**：选择RTC时钟源。
+- **参数**：`RCC_RTCCLKSource_LSI` 或 `RCC_RTCCLKSource_LSE`等，选择LSI或外部低速晶振（LSE）作为RTC的时钟源。
+- **作用**：设定RTC使用LSI作为时钟源，以便进行时间计量。
+
+### 4. `RCC_RTCCLKCmd(ENABLE)`
+
+- **功能**：使能或禁用RTC时钟。
+- **参数**：`ENABLE`表示启用RTC时钟；`DISABLE`表示禁用。
+- **作用**：启用RTC模块，开始其时钟工作。
+
+### 5. `RTC_WaitForSynchro()`
+
+- **功能**：等待RTC寄存器同步。
+- **作用**：确保RTC的设置在进行下一次操作之前已经完成，防止因操作不当导致数据不一致。
+
+### 6. `RTC_WaitForLastTask()`
+
+- **功能**：等待上一次RTC操作完成。
+- **作用**：确保当前任务之前的所有RTC操作都已完成，这对于避免数据竞争和状态错误是必要的。
+
+### 7. `RTC_ITConfig(FunctionalState NewState, uint32_t RTC_IT)`
+
+- **功能**：配置RTC中断。
+- **参数**：`RTC_IT`指定要使能的中断类型，例如`RTC_IT_SEC`表示秒中断；`NewState`为`ENABLE`或`DISABLE`。
+- **作用**：启用RTC秒中断，允许在每秒产生一次中断请求，这对于需要定时操作的应用非常重要。
+
+### 8. `RTC_SetPrescaler(uint32_t Prescaler)`
+
+- **功能**：设置RTC的分频器。
+- **参数**：`Prescaler`是RTC的分频值。根据选定的时钟源，设定分频器以实现所需的RTC周期。
+- **作用**：通过配置分频器来设置RTC的更新频率，例如将LSI的频率从40kHz分频到1Hz，以便每秒更新一次时间。
+
+---
 
 - 时间管理结构
 
@@ -244,16 +273,13 @@ void to_tm(u32 tim, struct rtc_time * tm)
 void Time_Adjust(struct rtc_time *tm)
 {
 
-    /* RTC 配置 */
+    // RTC 配置 
     RTC_Configuration();
-
-    /* 等待确保上一次操作完成 */
+    // 等待确保上一次操作完成 
     RTC_WaitForLastTask();
-
-    /* 由日期计算时间戳并写入到RTC计数寄存器 */
+    // 由日期计算时间戳并写入到RTC计数寄存器 
     RTC_SetCounter(mktimev(tm)-TIME_ZOOM);
-
-    /* 等待确保上一次操作完成 */
+    // 等待确保上一次操作完成 
     RTC_WaitForLastTask();
 }
 ```
@@ -272,65 +298,49 @@ void RTC_CheckAndConfig(struct rtc_time *tm)
     if (BKP_ReadBackupRegister(RTC_BKP_DRX) != RTC_BKP_DATA) {
         printf("\r\n\r\n RTC not yet configured....");
         printf("\r\n\r\n RTC configured....");
-
-        /* 使用tm的时间配置RTC寄存器 */
+        // 使用tm的时间配置RTC寄存器 
         Time_Adjust(tm);
-
-        /*向BKP_DR1寄存器写入标志，说明RTC已在运行*/
+        //向BKP_DR1寄存器写入标志，说明RTC已在运行
         BKP_WriteBackupRegister(RTC_BKP_DRX, RTC_BKP_DATA);
     } else {
-
-        /* 使能 PWR 和 Backup 时钟 */
+        // 使能 PWR 和 Backup 时钟 
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-
-        /* 允许访问 Backup 区域 */
+        // 允许访问 Backup 区域 
         PWR_BackupAccessCmd(ENABLE);
-
         /*LSE启动无需设置新时钟*/
-
 #ifdef RTC_CLOCK_SOURCE_LSI
-        /* 使能 LSI */
+        // 使能 LSI 
         RCC_LSICmd(ENABLE);
-
-        /* 等待 LSI 准备好 */
+        // 等待 LSI 准备好 
         while (RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {
         }
 #endif
-
-        /*检查是否掉电重启*/
+        // 检查是否掉电重启
         if (RCC_GetFlagStatus(RCC_FLAG_PORRST) != RESET) {
             printf("\r\n\r\n Power On Reset occurred....");
         }
-        /*检查是否Reset复位*/
+        // 检查是否Reset复位
         else if (RCC_GetFlagStatus(RCC_FLAG_PINRST) != RESET) {
             printf("\r\n\r\n External Reset occurred....");
         }
-
         printf("\r\n No need to configure RTC....");
-
-        /*等待寄存器同步*/
+        // 等待寄存器同步
         RTC_WaitForSynchro();
-
-        /*允许RTC秒中断*/
+        // 允许RTC秒中断
         RTC_ITConfig(RTC_IT_SEC|RTC_IT_ALR, ENABLE);
-
-        /*等待上次RTC寄存器写操作完成*/
+        // 等待上次RTC寄存器写操作完成
         RTC_WaitForLastTask();
     }
     /*定义了时钟输出宏，则配置校正时钟输出到PC13*/
 #ifdef RTCClockOutput_Enable
-
-    /* 禁止 Tamper 引脚 */
-    /* 要输出 RTCCLK/64 到 Tamper 引脚,  tamper 功能必须禁止 */
+    // 禁止 Tamper 引脚 
+    // 要输出 RTCCLK/64 到 Tamper 引脚,  tamper 功能必须禁止 
     BKP_TamperPinCmd(DISABLE);
-
-    /* 使能 RTC 时钟输出到 Tamper 引脚 */
+    // 使能 RTC 时钟输出到 Tamper 引脚 
     BKP_RTCOutputConfig(BKP_RTCOutputSource_CalibClock);
 #endif
-
-    /* 清除复位标志 flags */
+    // 清除复位标志 flags 
     RCC_ClearFlag();
-
 }
 ```
 
@@ -350,11 +360,9 @@ void Time_Display(uint32_t TimeVar,struct rtc_time *tm)
     static uint32_t FirstDisplay = 1;
     uint32_t BJ_TimeVar;
     uint8_t str[200]; // 字符串暂存
-
-    /*  把标准时间转换为北京时间*/
-    BJ_TimeVar =TimeVar + TIME_ZOOM;
-
-    to_tm(BJ_TimeVar, tm);/*把定时器的值转换为北京时间*/
+    // 把标准时间转换为北京时间
+    BJ_TimeVar = TimeVar + TIME_ZOOM;
+    to_tm(BJ_TimeVar, tm); // 把定时器的值转换为北京时间
 
     if ((!tm->tm_hour && !tm->tm_min && !tm->tm_sec)  || (FirstDisplay)) {
         GetChinaCalendar((u16)tm->tm_year, (u8)tm->tm_mon, (u8)tm->tm_mday, str);
@@ -369,45 +377,36 @@ void Time_Display(uint32_t TimeVar,struct rtc_time *tm)
         FirstDisplay = 0;
     }
 
-    /* 输出时间戳，公历时间 */
+    // 输出时间戳，公历时间 
     rintf(" UNIX时间戳 = %d 当前时间为: %d年(%s年) %d月 %d日 (星期%s)  %0.2d:%0.2d:%0.2d\r",TimeVar,
     tm->tm_year, zodiac_sign[(tm->tm_year-3)%12], tm->tm_mon, tm->tm_mday,
         WEEK_STR[tm->tm_wday], tm->tm_hour,
         tm->tm_min, tm->tm_sec);
 
 #ifdef  USE_LCD_DISPLAY
-
-    //时间戳
+    // 时间戳
     sprintf((char *)str," UNIX TimeStamp = %d ",TimeVar);
-
     ILI9341_DispStringLine_EN(LINE(3),(char*)str);
-
-    //日期
+    // 日期
     sprintf((char *)str," Date: %d-%d-%d       ",
             tm->tm_year,
             tm->tm_mon,
             tm->tm_mday);
     ILI9341_DispStringLine_EN(LINE(5),(char*)str);
-
-    //生肖
+    // 生肖
     sprintf((char *)str," Chinese %s year      ",en_zodiac_sign[(tm->tm_year-3)%12]);
 
     ILI9341_DispStringLine_EN(LINE(6),(char*)str);
-
-    //星期
+    // 星期
     sprintf((char *)str," %s                  ",en_WEEK_STR[tm->tm_wday]);
-
     ILI9341_DispStringLine_EN(LINE(7),(char*)str);
-
-    //时间
+    // 时间
     sprintf((char *)str," Time:  %0.2d:%0.2d:%0.2d",
             tm->tm_hour,
             tm->tm_min,
             tm->tm_sec);
-
     ILI9341_DispStringLine_EN(LINE(8),(char*)str);
 #endif
-
 }
 ```
 
@@ -423,7 +422,7 @@ void Time_Display(uint32_t TimeVar,struct rtc_time *tm)
 void RTC_IRQHandler(void)
 {
     if (RTC_GetITStatus(RTC_IT_SEC) != RESET) {
-        /* Clear the RTC Second interrupt */
+        // Clear the RTC Second interrupt 
         RTC_ClearITPendingBit(RTC_IT_SEC);
 
         /* Enable time update */
@@ -446,51 +445,36 @@ struct rtc_time systmtime= {
 };
 
 extern __IO uint32_t TimeDisplay ;
-/**
-* @brief  主函数
-* @param  无
-* @retval 无
-*/
 int main()
 {
-//可使用该宏设置是否使用液晶显示
+// 可使用该宏设置是否使用液晶显示
 #ifdef  USE_LCD_DISPLAY
-
-    ILI9341_Init ();         //LCD 初始化
+    ILI9341_Init(); // LCD 初始化
     LCD_SetFont(&Font8x16);
     LCD_SetColors(RED,BLACK);
-
     ILI9341_Clear(0,0,LCD_X_LENGTH,LCD_Y_LENGTH);
-
     ILI9341_DispStringLine_EN(LINE(0),"        BH RTC demo");
 #endif
-
     USART_Config();
-
     Key_GPIO_Config();
-
-    /* 配置RTC秒中断优先级 */
+    // 配置RTC秒中断优先级
     RTC_NVIC_Config();
     RTC_CheckAndConfig(&systmtime);
-
     while (1) {
-        /* 每过1s 更新一次时间*/
+        // 每过1s 更新一次时间
         if (TimeDisplay == 1) {
-            /* 当前时间 */
-            Time_Display( RTC_GetCounter(),&systmtime);
+            // 当前时间 
+            Time_Display(RTC_GetCounter(),&systmtime);
             TimeDisplay = 0;
         }
-
-        //按下按键，通过串口修改时间
+        // 按下按键，通过串口修改时间
         if ( Key_Scan(KEY1_GPIO_PORT,KEY1_GPIO_PIN) == KEY_ON  ) {
             struct rtc_time set_time;
-
-            /*使用串口接收设置的时间，输入数字时注意末尾要加回车*/
+            // 使用串口接收设置的时间，输入数字时注意末尾要加回车
             Time_Regulate_Get(&set_time);
-            /*用接收到的时间设置RTC*/
+            // 用接收到的时间设置RTC*/
             Time_Adjust(&set_time);
-
-            //向备份寄存器写入标志
+            // 向备份寄存器写入标志
             BKP_WriteBackupRegister(RTC_BKP_DRX, RTC_BKP_DATA);
         }
     }
@@ -547,3 +531,144 @@ void Time_Regulate_Get(struct rtc_time *tm)
 Time_Regulate_Get函数的本质是利用重定向到串口的C标准数据流输入函数scanf获取用户输入，若获取得的数据符合范围， 则赋值到tm结构体中，在main函数中再调用Time_Adjust函数把tm存储的时间写入到RTC计数器中。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/RTC005.jpg)
+
+## 3. 小结
+
+实际上使用RTC设置万年历还算比较简单，单色我们结合了LCD，所以代码有点多，下面我们简单回顾一下整个流程（使用串口）
+
+### 实验目的
+
+1. 学习如何使用RTC设置万年历。
+2. 通过串口接收输入，能够动态修改RTC的时间和日期。
+
+### 硬件准备
+
+- STM32开发板（如STM32F4系列）
+- 串口调试工具（如Tera Term或PuTTY）
+
+### 实验步骤
+
+#### 1. RTC初始化
+
+```c
+#include "stm32f4xx.h"
+#include "stm32f4xx_rtc.h"
+#include "stm32f4xx_usart.h"
+#include "stm32f4xx_gpio.h"
+#include "stm32f4xx_rcc.h"
+
+void RTC_Config(void) {
+    // 使能PWR时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+    // 允许备份区域访问
+    PWR_BackupAccessCmd(ENABLE);
+
+    // 使能LSE（低速外部晶振）并等待就绪
+    RCC_LSICmd(ENABLE);
+    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET);
+
+    // 选择LSE作为RTC时钟源
+    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+    RCC_RTCCLKCmd(ENABLE); // 使能RTC时钟
+
+    // 配置RTC
+    RTC_InitTypeDef RTC_InitStructure;
+    RTC_StructInit(&RTC_InitStructure);
+    RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;
+    RTC_Init(&RTC_InitStructure);
+
+    // 设置初始时间和日期
+    RTC_TimeTypeDef RTC_TimeStructure;
+    RTC_DateTypeDef RTC_DateStructure;
+
+    RTC_TimeStructure.RTC_Hours = 12;
+    RTC_TimeStructure.RTC_Minutes = 0;
+    RTC_TimeStructure.RTC_Seconds = 0;
+    RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);
+
+    RTC_DateStructure.RTC_Year = 23; // 2023
+    RTC_DateStructure.RTC_Month = RTC_Month_9; // 9月
+    RTC_DateStructure.RTC_Date = 24; // 24日
+    RTC_SetDate(RTC_Format_BCD, &RTC_DateStructure);
+}
+```
+
+#### 2. 串口初始化
+
+```c
+void USART_Config(void) {
+    // 使能USART2时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE); // 使能GPIOA时钟
+
+    // 配置GPIOA的引脚为复用功能（PA2为TX, PA3为RX）
+    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    // 连接PA2到USART2_Tx和PA3到USART2_Rx
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+
+    // 配置USART参数
+    USART_InitTypeDef USART_InitStructure;
+    USART_InitStructure.USART_BaudRate = 9600;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_Init(USART2, &USART_InitStructure);
+    USART_Cmd(USART2, ENABLE); // 使能USART
+}
+```
+
+#### 3. 主循环与时间修改逻辑
+
+在主循环中，我们会定期读取RTC的时间，并通过串口输出。同时，监听串口输入以修改时间。
+
+```c
+void USART_SendString(char *str) {
+    while (*str) {
+        while (!(USART_GetFlagStatus(USART2, USART_FLAG_TXE))); // 等待发送缓冲区空
+        USART_SendData(USART2, *str++); // 发送字符
+    }
+}
+
+void getTimeAndDate(void) {
+    char buffer[50];
+    RTC_TimeTypeDef RTC_TimeStructure;
+    RTC_DateTypeDef RTC_DateStructure;
+
+    // 读取当前时间和日期
+    RTC_GetTime(RTC_Format_BCD, &RTC_TimeStructure);
+    RTC_GetDate(RTC_Format_BCD, &RTC_DateStructure);
+
+    // 将时间和日期格式化为字符串
+    sprintf(buffer, "当前时间: %02d:%02d:%02d, 当前日期: %04d-%02d-%02d\r\n",
+            RTC_TimeStructure.RTC_Hours, RTC_TimeStructure.RTC_Minutes, RTC_TimeStructure.RTC_Seconds,
+            2000 + RTC_DateStructure.RTC_Year, RTC_DateStructure.RTC_Month, RTC_DateStructure.RTC_Date);
+    
+    USART_SendString(buffer); // 发送时间和日期
+}
+
+int main(void) {
+    SystemInit(); // 系统初始化
+    RTC_Config(); // RTC初始化
+    USART_Config(); // 串口初始化
+
+    while (1) {
+        getTimeAndDate(); // 获取时间和日期并发送
+        for (volatile int i = 0; i < 1000000; i++); // 延时
+    }
+}
+
+```
+
+---
+
+2024.9.24 第一次修订，后期不再维护

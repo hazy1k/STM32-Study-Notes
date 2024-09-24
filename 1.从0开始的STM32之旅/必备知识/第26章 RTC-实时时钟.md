@@ -36,7 +36,7 @@ STM32的RTC外设（Real Time Clock），实质是一个掉电后还继续运行
 
 N = 2^32/365/24/60/60 ≈136年
 
-假如某个时刻读取到计数器的数值为X = 60*60*24*2，即两天时间的秒数，而假设又知道计数器是在2011年1月1日的0时0分0秒置0的， 那么就可以根据计数器的这个相对时间数值，计算得这个X时刻是2011年1月3日的0时0分0秒了。而计数器则会在(2011+136)年左右溢出， 也就是说到了（2011+136）年时，如果我们还在使用这个计数器提供时间的话就会出现问题。在这个例子中，定时器被置0的这个时间被称为计时元年， 相对计时元年经过的秒数称为时间戳，也就是计数器中的值。
+假如某个时刻读取到计数器的数值为X = 60x60x24x2，即两天时间的秒数，而假设又知道计数器是在2011年1月1日的0时0分0秒置0的， 那么就可以根据计数器的这个相对时间数值，计算得这个X时刻是2011年1月3日的0时0分0秒了。而计数器则会在(2011+136)年左右溢出， 也就是说到了（2011+136）年时，如果我们还在使用这个计数器提供时间的话就会出现问题。在这个例子中，定时器被置0的这个时间被称为计时元年， 相对计时元年经过的秒数称为时间戳，也就是计数器中的值。
 
 大多数操作系统都是利用时间戳和计时元年来计算当前时间的，而这个时间戳和计时元年大家都取了同一个标准——UNIX时间戳和UNIX计时元年。 UNIX计时元年被设置为格林威治时间1970年1月1日0时0分0秒，大概是为了纪念UNIX的诞生的时代吧， 而UNIX时间戳即为当前时间相对于UNIX计时元年经过的秒数。因为unix时间戳主要用来表示当前时间或者和电脑有关的日志时间（如文件创立时间，log发生时间等）， 考虑到所有电脑文件不可能在1970年前创立，所以用unix时间戳很少用来表示1970前的时间。
 
@@ -49,30 +49,21 @@ N = 2^32/365/24/60/60 ≈136年
 RTC区域的时钟比APB时钟慢，访问前需要进行时钟同步，只要调用库函数RTC_WaitForSynchro即可，而如果修改了RTC的寄存器， 又需要调用RTC_WaitForLastTask函数确保数据已写入
 
 ```c
-/**
-* @brief  等待RTC寄存器与APB时钟同步 (RTC_CNT, RTC_ALR and RTC_PRL)
-* @note   在APB时钟复位或停止后，在对RTC寄存器的任何操作前，必须调用本函数
-* @param  None
-* @retval None
-*/
+// 等待RTC寄存器与APB时钟同步 (RTC_CNT, RTC_ALR and RTC_PRL)
+// 在APB时钟复位或停止后，在对RTC寄存器的任何操作前，必须调用本函数
 void RTC_WaitForSynchro(void)
 {
-    /* 清除 RSF 寄存器位 */
+    // 清除 RSF 寄存器位 
     RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;
-    /* 等待至 RSF 寄存器位为SET */
+    // 等待至 RSF 寄存器位为SET 
     while ((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET) {
     }
 }
-
-/**
-* @brief  等待上一次对 RTC寄存器的操作完成
-* @note   修改RTC寄存器后，必须调用本函数
-* @param  None
-* @retval None
-*/
+//  等待上一次对 RTC寄存器的操作完成
+// 修改RTC寄存器后，必须调用本函数
 void RTC_WaitForLastTask(void)
 {
-    /* 等待至 RTOFF 寄存器位为SET*/
+    // 等待至 RTOFF 寄存器位为SET
     while ((RTC->CRL & RTC_FLAG_RTOFF) == (uint16_t)RESET) {
     }
 }
@@ -85,11 +76,7 @@ void RTC_WaitForLastTask(void)
 默认情况下，RTC所属的备份域禁止访问，可使用库函数PWR_BackupAccessCmd使能访问
 
 ```c
-/**
-* @brief  使能对 RTC 和 backup 寄存器的访问.
-* @param   ENABLE 或 DISABLE.
-* @retval None
-*/
+// 使能对 RTC 和 backup 寄存器的访问.
 void PWR_BackupAccessCmd(FunctionalState NewState)
 {
     *(__IO uint32_t *) CR_DBP_BB = (uint32_t)NewState;
@@ -99,22 +86,13 @@ void PWR_BackupAccessCmd(FunctionalState NewState)
 该函数通过PWR_CR寄存器的DBP位使能访问，使能后才可以访问RTC相关的寄存器，然而若希望修改RTC的寄存器， 还需要进一步使能RTC控制寄存器的CNF位使能寄存器配置
 
 ```c
-/**
-* @brief  进入 RTC 配置模式 .
-* @param  None
-* @retval None
-*/
+// 进入 RTC 配置模式
 void RTC_EnterConfigMode(void)
 {
-    /* 设置 CNF 位进入配置模式 */
+    // 设置 CNF 位进入配置模式 
     RTC->CRL |= RTC_CRL_CNF;
 }
-
-/**
-* @brief  退出 RTC 配置模式 .
-* @param  None
-* @retval None
-*/
+// 退出 RTC 配置模式 .
 void RTC_ExitConfigMode(void)
 {
     /* 清空  CNF 位退出配置模式 */
@@ -129,17 +107,13 @@ void RTC_ExitConfigMode(void)
 使用RCC相关的库函数选择RTC使用的时钟后，可以使用库RTC_SetPrescaler进行分频， 一般会把RTC时钟分频得到1Hz的时钟
 
 ```c
-/**
-* @brief  设置RTC分频配置
-* @param  PrescalerValue: RTC 分频值.
-* @retval None
-*/
-void RTC_SetPrescaler(uint32_t PrescalerValue)
+// 设置RTC分频配置
+void RTC_SetPrescaler(uint32_t PrescalerValue) // 函数参数：分频值
 {
     RTC_EnterConfigMode();
-    /* 设置 RTC 分频值的 MSB  */
+    // 设置 RTC 分频值的 MSB
     RTC->PRLH = (PrescalerValue & PRLH_MSB_MASK) >> 16;
-    /* 设置 RTC 分频值的 LSB  */
+    // 设置 RTC 分频值的 LSB 
     RTC->PRLL = (PrescalerValue & RTC_LSB_MASK);
     RTC_ExitConfigMode();
 }
@@ -152,44 +126,30 @@ void RTC_SetPrescaler(uint32_t PrescalerValue)
 RTC外设中最重要的就是计数器以及闹钟寄存器了，它们可以使用RTC_SetCounter、 RTC_GetCounter以及RTC_SetAlarm库函数操作
 
 ```c
-/**
-* @brief  设置 RTC 计数器的值 .
-* @param  CounterValue: 要设置的RTC计数器值.
-* @retval None
-*/
-void RTC_SetCounter(uint32_t CounterValue)
+// 设置 RTC 计数器的值 .
+void RTC_SetCounter(uint32_t CounterValue) // 函数参数：要设置的RTC计数器值
 {
     RTC_EnterConfigMode();
-    /* 设置 RTC 计数器的 MSB  */
+    // 设置 RTC 计数器的 MSB  
     RTC->CNTH = CounterValue >> 16;
-    /* 设置 RTC 计数器的 LSB  */
+    // 设置 RTC 计数器的 LSB  
     RTC->CNTL = (CounterValue & RTC_LSB_MASK);
     RTC_ExitConfigMode();
 }
-
-/**
-* @brief  获取 RTC 计数器的值 .
-* @param  None
-* @retval 返回RTC计数器的值
-*/
+// 获取 RTC 计数器的值 .
 uint32_t RTC_GetCounter(void)
 {
     uint16_t tmp = 0;
     tmp = RTC->CNTL;
     return (((uint32_t)RTC->CNTH << 16 ) | tmp) ;
 }
-
-/**
-* @brief  设置 RTC 闹钟的值 .
-* @param  AlarmValue: 要设置的RTC闹钟值.
-* @retval None
-*/
-void RTC_SetAlarm(uint32_t AlarmValue)
+// 设置 RTC 闹钟的值 
+void RTC_SetAlarm(uint32_t AlarmValue) // 函数参数：要设置的RTC闹钟值
 {
     RTC_EnterConfigMode();
-    /* 设置 RTC 闹钟的 MSB  */
+    // 设置 RTC 闹钟的 MSB  
     RTC->ALRH = AlarmValue >> 16;
-    /* 设置 RTC 闹钟的 LSB  */
+    // 设置 RTC 闹钟的 LSB  
     RTC->ALRL = (AlarmValue & RTC_LSB_MASK);
     RTC_ExitConfigMode();
 }
@@ -200,3 +160,168 @@ void RTC_SetAlarm(uint32_t AlarmValue)
 RTC_GetCounter函数则用于在RTC正常运行时获取当前计数器的值以获取当前时间。
 
 RTC_SetAlarm函数用于配置闹钟时间，当计数器的值与闹钟寄存器的值相等时， 可产生闹钟事件或中断，该事件可以把睡眠、停止和待机模式的STM32芯片唤醒。
+
+## 5. 简单运用
+
+### 1. 硬件准备
+
+- **STM32开发板**：确保你有一块带RTC模块的STM32开发板。
+- **电源**：RTC通常需要一个外部电池（如CR2032），以便在MCU断电时保持时间。
+
+### 2. 环境搭建
+
+- **开发工具**：使用STM32CubeIDE或Keil等集成开发环境。
+- **库**：确保你已经安装了STM32的标准外设库或HAL库。
+
+### 3. 配置工程
+
+#### 创建新工程
+
+1. 打开STM32CubeIDE或Keil，创建一个新的STM32项目。
+2. 选择你的STM32微控制器型号。
+
+#### 配置时钟
+
+1. 在CubeMX中，打开“Clock Configuration”选项，确保LSE（低速外部晶振）已启用。如果使用内部RC振荡器，也要进行相应配置。
+
+#### 启用RTC
+
+1. 在“Peripherals”列表中找到“RTC”，并将其启用。
+2. 配置RTC模式为“Calendar”模式。
+
+### 4. 编写代码
+
+接下来，我们将编写代码来配置RTC并操作时间和日期。以下是详细的代码分解及其解释。
+
+```c
+#include "stm32f10x.h"  // 根据你的具体系列选择相应的头文件
+
+void RCC_Config(void);
+void RTC_Config(void);
+void RTC_SetTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
+void RTC_SetDate(uint8_t day, uint8_t month, uint8_t year);
+void RTC_GetTime(uint8_t* hours, uint8_t* minutes, uint8_t* seconds);
+void RTC_GetDate(uint8_t* day, uint8_t* month, uint8_t* year);
+
+int main(void) {
+    // 初始化时钟和RTC
+    RCC_Config();
+    RTC_Config();
+
+    // 设置时间和日期
+    RTC_SetTime(10, 0, 0);   // 设置时间为10:00:00
+    RTC_SetDate(24, 9, 23);  // 设置日期为2023年9月24日
+
+    while (1) {
+        uint8_t hours, minutes, seconds;
+        uint8_t day, month, year;
+
+        // 获取当前时间和日期
+        RTC_GetTime(&hours, &minutes, &seconds);
+        RTC_GetDate(&day, &month, &year);
+
+        // 输出时间到串口（假设已经配置好USART）
+        printf("%02d:%02d:%02d %02d/%02d/%02d\n", hours, minutes, seconds, day, month, year + 2000);
+
+        // 延时1秒
+        for (volatile int i = 0; i < 1000000; i++);
+    }
+}
+
+void RCC_Config(void) {
+    // 使能PWR和BKP时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+
+    // 启动外部低速晶振（LSE）
+    RCC_LSEConfig(RCC_LSE_ON);
+    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET);  // 等待LSE就绪
+
+    // 选择RTC时钟源为LSE
+    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);  
+    RCC_RTCCLKCmd(ENABLE);  // 使能RTC时钟
+}
+
+void RTC_Config(void) {
+    // 使能备份区访问
+    PWR_BackupAccessCmd(ENABLE);  
+
+    // 等待RTC同步
+    RTC_WaitForSynchro();          
+    
+    // RTC初始化
+    RTC_InitTypeDef RTC_InitStructure;
+    RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;  // 设置24小时制
+    RTC_InitStructure.RTC_AsynchPrediv = 127;  // 异步预分频
+    RTC_InitStructure.RTC_SynchPrediv = 255;    // 同步预分频
+    RTC_Init(&RTC_InitStructure);  // 初始化RTC
+}
+
+void RTC_SetTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
+    RTC_TimeTypeDef RTC_TimeStructure;
+    RTC_TimeStructure.RTC_Hours = hours;
+    RTC_TimeStructure.RTC_Minutes = minutes;
+    RTC_TimeStructure.RTC_Seconds = seconds;
+    RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);  // 设置时间
+}
+
+void RTC_SetDate(uint8_t day, uint8_t month, uint8_t year) {
+    RTC_DateTypeDef RTC_DateStructure;
+    RTC_DateStructure.RTC_Day = day;
+    RTC_DateStructure.RTC_Month = month;
+    RTC_DateStructure.RTC_Year = year;
+    RTC_SetDate(RTC_Format_BCD, &RTC_DateStructure);  // 设置日期
+}
+
+void RTC_GetTime(uint8_t* hours, uint8_t* minutes, uint8_t* seconds) {
+    RTC_TimeTypeDef RTC_TimeStructure;
+    RTC_GetTime(RTC_Format_BCD, &RTC_TimeStructure);  // 获取当前时间
+    *hours = RTC_TimeStructure.RTC_Hours;
+    *minutes = RTC_TimeStructure.RTC_Minutes;
+    *seconds = RTC_TimeStructure.RTC_Seconds;
+}
+
+void RTC_GetDate(uint8_t* day, uint8_t* month, uint8_t* year) {
+    RTC_DateTypeDef RTC_DateStructure;
+    RTC_GetDate(RTC_Format_BCD, &RTC_DateStructure);  // 获取当前日期
+    *day = RTC_DateStructure.RTC_Day;
+    *month = RTC_DateStructure.RTC_Month;
+    *year = RTC_DateStructure.RTC_Year;
+}
+
+```
+
+### 代码详解
+
+1. **头文件引入**：
+   
+   - `#include "stm32f10x.h"`：根据你的具体STM32系列，包含相应的头文件。
+
+2. **函数声明**：
+   
+   - 声明了多个函数，用于配置时钟、RTC以及设置和获取时间和日期。
+
+3. **主函数**：
+   
+   - `main()`函数中首先调用`RCC_Config()`和`RTC_Config()`初始化时钟和RTC。
+   - 然后设置时间为10:00:00，日期为2023年9月24日。
+   - 进入无限循环，通过调用`RTC_GetTime()`和`RTC_GetDate()`获取当前时间和日期并打印。
+
+4. **RCC_Config()**：
+   
+   - 使能PWR和BKP时钟，配置RTC使用LSE作为时钟源。
+
+5. **RTC_Config()**：
+   
+   - 使能备份区访问，并初始化RTC。
+
+6. **时间和日期设置函数**：
+   
+   - `RTC_SetTime()`和`RTC_SetDate()`用于设置RTC的时间和日期。
+
+7. **时间和日期获取函数**：
+   
+   - `RTC_GetTime()`和`RTC_GetDate()`用于获取当前的时间和日期。
+
+---
+
+2024.9.24 第一次修订，后期不再维护
