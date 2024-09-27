@@ -2,39 +2,39 @@
 
 ## 1. LED和OLED显示器简介
 
-LED点阵彩色显示器的单个像素点内包含红绿蓝三色LED灯，显示原理类似我们实验板上的LED彩灯， 通过控制红绿蓝颜色的强度进行混色，实现全彩颜色输出，多个像素点构成一个屏幕。由于每个像素点都是LED灯自发光的， 所以在户外白天也显示得非常清晰，但由于LED灯体积较大，导致屏幕的像素密度低，所以它一般只适合用于广场上的巨型显示器。 相对来说，单色的LED点阵显示器应用得更广泛，如公交车上的信息展示牌、店招等，见图 [LED点阵彩屏有LED单色显示屏](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#ledled) 。
+LED点阵彩色显示器的单个像素点内包含红绿蓝三色LED灯，显示原理类似我们实验板上的LED彩灯， 通过控制红绿蓝颜色的强度进行混色，实现全彩颜色输出，多个像素点构成一个屏幕。由于每个像素点都是LED灯自发光的， 所以在户外白天也显示得非常清晰，但由于LED灯体积较大，导致屏幕的像素密度低，所以它一般只适合用于广场上的巨型显示器。 相对来说，单色的LED点阵显示器应用得更广泛，如公交车上的信息展示牌、店招等，见图：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD004.jpg)
 
-新一代的OLED显示器与LED点阵彩色显示器的原理类似， 但由于它采用的像素单元是“有机发光二极管”(Organic Light Emitting Diode)， 所以像素密度比普通LED点阵显示器高得多，见图 [OLED像素结构](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#oled) 。
+新一代的OLED显示器与LED点阵彩色显示器的原理类似， 但由于它采用的像素单元是“有机发光二极管”(Organic Light Emitting Diode)， 所以像素密度比普通LED点阵显示器高得多
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD005.jpg)
 
-OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速度快等优点。待到生产工艺更加成熟时， 必将取代现在液晶显示器的地位，见图 [采用OLED屏幕的电视及智能手表](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id4) 。
+OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速度快等优点。待到生产工艺更加成熟时， 必将取代现在液晶显示器的地位
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD006.jpg)
 
 ## 2. 液晶控制原理
 
-图 [适合STM32控制的显示屏实物图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#stm32) 是两种适合于STM32芯片使用的显示屏，我们以它为例讲解控制液晶屏的基本原理。
+图是两种适合于STM32芯片使用的显示屏，我们以它为例讲解控制液晶屏的基本原理。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD007.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD007.jpeg" title="" alt="" width="770">
 
 这个完整的显示屏由液晶显示面板、电容触摸面板以及PCB底板构成。图中的触摸面板带有触摸控制芯片，该芯片处理触摸信号并通过引出的信号线与外部器件通讯， 触摸面板中间是透明的，它贴在液晶面板上面，一起构成屏幕的主体，触摸面板与液晶面板引出的排线连接到PCB底板上，根据实际需要， PCB底板上可能会带有“液晶控制器芯片”，图中右侧的液晶屏PCB上带有RA8875液晶控制器。因为控制液晶面板需要比较多的资源， 所以大部分低级微控制器都不能直接控制液晶面板，需要额外配套一个专用液晶控制器来处理显示过程，外部微控制器只要把它希望显示的数据直接交给液晶控制器即可。 而不带液晶控制器的PCB底板 ，只有小部分的电源管理电路，液晶面板的信号线与外部微控制器相连，直接控制。STM32F429系列的芯片不需要额外的液晶控制器， 也就是说它把专用液晶控制器的功能集成到STM32F429芯片内部了，可以理解为电脑的CPU集成显卡，它节约了额外的控制器成本。 而STM32F1系列的芯片由于没有集成液晶控制器到芯片内部，所以它只能驱动自带控制器的屏幕，可以理解为电脑的外置显卡。
 
-总的来说，这两类屏幕的控制框图如图 [两类液晶屏控制框图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id7) 所示。
+总的来说，这两类屏幕的控制框图如图所示。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD008.jpg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD008.jpg" title="" alt="" width="851">
 
 ### 2.1 液晶面板的控制信号
 
-本章我们主要讲解如何控制液晶面板，液晶面板的控制信号线即图 [适合STM32控制的显示屏实物图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#stm32) 中液晶面板引出的FPC排线， 其说明见表 [液晶面板的信号线](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id9) ， 液晶面板通过这些信号线与液晶控制器通讯，使用这种通讯信号的被称为RGB接口(RGB Interface)。
+本章我们主要讲解如何控制液晶面板，液晶面板的控制信号线即图中液晶面板引出的FPC排线， 其说明见表， 液晶面板通过这些信号线与液晶控制器通讯，使用这种通讯信号的被称为RGB接口(RGB Interface)。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD01.png)
 
 (1) RGB信号线
 
-> RGB信号线各有8根，分别用于表示液晶屏一个像素点的红、绿、蓝颜色分量。使用红绿蓝颜色分量来表示颜色是一种通用的做法， 打开Windows系统自带的画板调色工具，可看到颜色的红绿蓝分量值，见图 [颜色表示法](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id10) 。 常见的颜色表示会在“RGB”后面附带各个颜色分量值的数据位数，如RGB565表示红绿蓝的数据线数分别为5、6、5根， 一共为16个数据位，可表示216种颜色；而这个液晶屏的种颜色分量的数据线都有8根， 所以它支持RGB888格式，一共24位数据线，可表示的颜色为224种。
+> RGB信号线各有8根，分别用于表示液晶屏一个像素点的红、绿、蓝颜色分量。使用红绿蓝颜色分量来表示颜色是一种通用的做法， 打开Windows系统自带的画板调色工具，可看到颜色的红绿蓝分量值。 常见的颜色表示会在“RGB”后面附带各个颜色分量值的数据位数，如RGB565表示红绿蓝的数据线数分别为5、6、5根， 一共为16个数据位，可表示216种颜色；而这个液晶屏的种颜色分量的数据线都有8根， 所以它支持RGB888格式，一共24位数据线，可表示的颜色为224种。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD009.png)
 
@@ -56,15 +56,15 @@ OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速�
 
 ### 2.2 液晶数据传输时序
 
-通过上述信号线向液晶屏传输像素数据时，各信号线的时序见图 [液晶时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id12) 。图中表示的是向液晶屏传输一帧图像数据的时序，中间省略了多行及多个像素点。
+通过上述信号线向液晶屏传输像素数据时，各信号线的时序见图。图中表示的是向液晶屏传输一帧图像数据的时序，中间省略了多行及多个像素点。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD010.jpg)
 
-液晶屏显示的图像可看作一个矩形，结合图 [液晶数据传输图解](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id13) 来理解。液晶屏有一个显示指针，它指向将要显示的像素。 显示指针的扫描方向方向从左到右、从上到下，一个像素点一个像素点地描绘图形。这些像素点的数据通过RGB数据线传输至液晶屏， 它们在同步时钟CLK的驱动下一个一个地传输到液晶屏中，交给显示指针，传输完成一行时，水平同步信号HSYNC电平跳变一次，而传输完一帧时VSYNC电平跳变一次。
+液晶屏显示的图像可看作一个矩形，结合图来理解。液晶屏有一个显示指针，它指向将要显示的像素。 显示指针的扫描方向方向从左到右、从上到下，一个像素点一个像素点地描绘图形。这些像素点的数据通过RGB数据线传输至液晶屏， 它们在同步时钟CLK的驱动下一个一个地传输到液晶屏中，交给显示指针，传输完成一行时，水平同步信号HSYNC电平跳变一次，而传输完一帧时VSYNC电平跳变一次。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD011.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD011.jpeg" title="" alt="" width="881">
 
-但是，液晶显示指针在行与行之间，帧与帧之间切换时需要延时，而且HSYNC及VSYNC信号本身也有宽度， 这些时间参数说明见表 [液晶通讯中的时间参数](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id14) 。
+但是，液晶显示指针在行与行之间，帧与帧之间切换时需要延时，而且HSYNC及VSYNC信号本身也有宽度， 这些时间参数说明见表
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD02.png)
 
@@ -88,13 +88,13 @@ STM32F1系列芯片使用FSMC外设来管理扩展的存储器， FSMC是Flexibl
 
 FSMC外设的结构见图：
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD016.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD016.jpeg" title="" alt="" width="1078">
 
 #### 4.1.1 通讯引脚
 
 在框图的右侧是FSMC外设相关的控制引脚，由于控制不同类型存储器的时候会有一些不同的引脚，看起来有非常多， 其中地址线FSMC_A和数据线FSMC_D是所有控制器都共用的。这些FSMC引脚具体对应的GPIO端口及引脚号可在《STM32F103规格书》中搜索查找到，不在此列出。
 
-在本章示例中，控制LCD时，是使用FSMC的NORPSRAM模式的，而且控制LCD时使用的是NOR FLASH类型的模式B， 所以我们重点分析框图中NOR FLASH控制信号线部分，控制NOR FLASH主要使用到表 [FSMC控制NOR_FLASH的信号线](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#fsmcnor-flash) 的信号线：
+在本章示例中，控制LCD时，是使用FSMC的NORPSRAM模式的，而且控制LCD时使用的是NOR FLASH类型的模式B， 所以我们重点分析框图中NOR FLASH控制信号线部分，控制NOR FLASH主要使用到表中的信号线：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD04.png)
 
@@ -120,38 +120,36 @@ FSMC外设挂载在AHB总线上，时钟信号来自于HCLK(默认72MHz)，控�
 
 ## 5. FSMC的地址映射
 
-FSMC连接好外部的存储器并初始化后，就可以直接通过访问地址来读写数据，这种地址访问与I2C EEPROM、SPI FLASH的不一样， 后两种方式都需要控制I2C或SPI总线给存储器发送地址，然后获取数据；在程序里，这个地址和数据都需要分开使用不同的变量存储， 并且访问时还需要使用代码控制发送读写命令。而使用FSMC外接存储器时，其存储单元是映射到STM32的内部寻址空间的；在程序里， 定义一个指向这些地址的指针，然后就可以通过指针直接修改该存储单元的内容，FSMC外设会自动完成数据访问过程， 读写命令之类的操作不需要程序控制，访问示例代码见 [代码清单:液晶显示-1](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id29) 。
+FSMC连接好外部的存储器并初始化后，就可以直接通过访问地址来读写数据，这种地址访问与I2C EEPROM、SPI FLASH的不一样， 后两种方式都需要控制I2C或SPI总线给存储器发送地址，然后获取数据；在程序里，这个地址和数据都需要分开使用不同的变量存储， 并且访问时还需要使用代码控制发送读写命令。而使用FSMC外接存储器时，其存储单元是映射到STM32的内部寻址空间的；在程序里， 定义一个指向这些地址的指针，然后就可以通过指针直接修改该存储单元的内容，FSMC外设会自动完成数据访问过程， 读写命令之类的操作不需要程序控制，访问示例代码：
 
 ```c
 #define Bank1_SRAM3_ADDR    ((uint32_t)(0x68000000))
-
-/*写/读 16位数据*/
-*( uint16_t*) (Bank1_SRAM3_ADDR+10 ) = (uint16_t)0xBBBB;
+// 写/读 16位数据*/
+*( uint16_t*) (Bank1_SRAM3_ADDR+10) = (uint16_t)0xBBBB;
 printf("指针访问SRAM，写入数据0xBBBB \r\n");
-
-temp =  *( uint16_t*) (Bank1_SRAM3_ADDR+10 );
+temp =  *( uint16_t*) (Bank1_SRAM3_ADDR+10);
 printf("读取数据：0x%X \r\n",temp);
 ```
 
 以上代码实际上就是标准的C语言对特定地址的指针式访问，只是由于该地址被STM32映射到FSMC外设，所以访问这些地址时，FSMC会自动输出地址、数据等访问时序。
 
-FSMC的地址映射见图 [FSMC的地址映射](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id30) 。
+FSMC的地址映射见图。
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD017.jpeg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD017.jpeg" title="" alt="" width="844">
 
 图中左侧的是Cortex-M3内核的存储空间分配，右侧是STM32 FSMC外设的地址映射。 可以看到FSMC的NOR/PSRAM/SRAM/NAND FLASH以及PC卡的地址都在External RAM地址空间内。正是因为存在这样的地址映射，使得访问FSMC控制的存储器时，就跟访问STM32的片上外设寄存器一样(片上外设的地址映射即图中左侧的“Peripheral”区域)。
 
-FSMC把整个External RAM存储区域分成了4个Bank区域，并分配了地址范围及适用的存储器类型，如NOR及SRAM存储器只能使用Bank1的地址。 在每个Bank的内部又分成了4个小块，每个小块有相应的控制引脚用于连接片选信号，如FSMC_NE[4:1]信号线可用于选择BANK1内部的4小块地址区域， 见图 [Bank1内部的小块地址分配](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#bank1) ， 当STM32访问0x6C000000-0x6FFFFFFF地址空间时，会访问到Bank1的第1小块区域，相应的FSMC_NE1信号线会输出控制信号。
+FSMC把整个External RAM存储区域分成了4个Bank区域，并分配了地址范围及适用的存储器类型，如NOR及SRAM存储器只能使用Bank1的地址。 在每个Bank的内部又分成了4个小块，每个小块有相应的控制引脚用于连接片选信号，如FSMC_NE[4:1]信号线可用于选择BANK1内部的4小块地址区域， 见图。 当STM32访问0x6C000000-0x6FFFFFFF地址空间时，会访问到Bank1的第1小块区域，相应的FSMC_NE1信号线会输出控制信号。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD018.jpg)
 
 ## 6. FSMC控制异步NOR FLASH的时序
 
-FSMC外设支持输出多种不同的时序以便于控制不同的存储器，它具有ABCD四种模式，下面我们仅针对控制异步NOR FLASH使用的模式B进行讲解， 见图 [FSMC写NOR_FLASH的时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id33) 。
+FSMC外设支持输出多种不同的时序以便于控制不同的存储器，它具有ABCD四种模式，下面我们仅针对控制异步NOR FLASH使用的模式B进行讲解， 见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD019.jpg)
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD020.jpg)
+<img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD020.jpg" title="" alt="" width="857">
 
 当内核发出访问某个指向外部存储器地址时，FSMC外设会根据配置控制信号线产生时序访问存储器， 上图中的是访问外部异步NOR FLASH（模式B）时FSMC外设的读写时序。
 
@@ -167,7 +165,7 @@ FSMC外设支持输出多种不同的时序以便于控制不同的存储器，�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD021.jpeg)
 
-见表 [FSMC的NOR与8080信号线对比](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#fsmcnor8080) ，对比FSMC NOR/PSRAM中的模式B时序与ILI9341液晶控制器芯片使用的8080时序可发现， 这两个时序是十分相似的(除了FSMC的地址线A和8080的D/CX线，可以说是完全一样)。
+见表对比FSMC NOR/PSRAM中的模式B时序与ILI9341液晶控制器芯片使用的8080时序可发现， 这两个时序是十分相似的(除了FSMC的地址线A和8080的D/CX线，可以说是完全一样)。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD05.png)
 
@@ -175,7 +173,7 @@ FSMC外设支持输出多种不同的时序以便于控制不同的存储器，�
 
 为了模拟出8080时序，我们可以把FSMC的A0地址线(也可以使用其它A1/A2等地址线)与ILI9341芯片8080接口的D/CX信号线连接， 那么当A0为高电平时(即D/CX为高电平)，数据线D[15:0]的信号会被ILI9341理解为数值，若A0为低电平时(即D/CX为低电平)， 传输的信号则会被理解为命令。
 
-由于FSMC会自动产生地址信号，当使用FSMC向0x6xxx xxx1、0x6xxx xxx3、 0x6xxx xxx5…这些奇数地址写入数据时，地址最低位的值均为1， 所以它会控制地址线A0(D/CX)输出高电平，那么这时通过数据线传输的信号会被理解为数值； 若向0x6xxx xxx0 、0x6xxx xxx2、0x6xxx xxx4…这些偶数地址写入数据时， 地址最低位的值均为0，所以它会控制地址线A0(D/CX)输出低电平， 因此这时通过数据线传输的信号会被理解为命令，见表 [使用FSMC输出地址示例](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id34) 。
+由于FSMC会自动产生地址信号，当使用FSMC向0x6xxx xxx1、0x6xxx xxx3、 0x6xxx xxx5…这些奇数地址写入数据时，地址最低位的值均为1， 所以它会控制地址线A0(D/CX)输出高电平，那么这时通过数据线传输的信号会被理解为数值； 若向0x6xxx xxx0 、0x6xxx xxx2、0x6xxx xxx4…这些偶数地址写入数据时， 地址最低位的值均为0，所以它会控制地址线A0(D/CX)输出低电平， 因此这时通过数据线传输的信号会被理解为命令，见表
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD06.png)
 
@@ -189,139 +187,304 @@ FSMC外设支持输出多种不同的时序以便于控制不同的存储器，�
 
 控制FSMC使用NOR FLASH存储器时主要是配置时序寄存器以及控制寄存器，利用ST标准库的时序结构体以及初始化结构体可以很方便地写入参数。
 
-NOR FLASH时序结构体的成员见 [代码清单:液晶显示-2](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id35) 。
+NOR FLASH时序结构体的成员见下：
 
 ```c
 typedef struct
 {
-uint32_t FSMC_AddressSetupTime;       /*地址建立时间，0-0xF个HCLK周期*/
-uint32_t FSMC_AddressHoldTime;        /*地址保持时间，0-0xF个HCLK周期*/
-uint32_t FSMC_DataSetupTime;           /*地址建立时间，0-0xF个HCLK周期*/
-uint32_t FSMC_BusTurnAroundDuration;/*总线转换周期,0-0xF个HCLK周期，在NOR FLASH */
-uint32_t FSMC_CLKDivision;/*时钟分频因子,1-0xF，若控制异步存储器，本参数无效 */
-uint32_t FSMC_DataLatency;    /*数据延迟时间，若控制异步存储器，本参数无效 */
-uint32_t FSMC_AccessMode;             /*设置访问模式 */
+uint32_t FSMC_AddressSetupTime;     // 地址建立时间，0-0xF个HCLK周期
+uint32_t FSMC_AddressHoldTime;      // 地址保持时间，0-0xF个HCLK周期
+uint32_t FSMC_DataSetupTime;        // 地址建立时间，0-0xF个HCLK周期
+uint32_t FSMC_BusTurnAroundDuration;// 总线转换周期,0-0xF个HCLK周期，在NOR FLASH 
+uint32_t FSMC_CLKDivision;          // 时钟分频因子,1-0xF，若控制异步存储器，本参数无效 
+uint32_t FSMC_DataLatency;          // 数据延迟时间，若控制异步存储器，本参数无效 
+uint32_t FSMC_AccessMode;           // 设置访问模式
 }FSMC_NORSRAMTimingInitTypeDef;
 ```
 
-这个结构体与SRAM中的时序结构体完全一样，以下仅列出控制NOR FLASH时使用模式B用到的结构体成员说明：
+下面我们详细介绍一下这个结构体：
 
-(1) FSMC_AddressSetupTime
+**FSMC_BusWidth**
 
-> 本成员设置地址建立时间，即FSMC读写时序图 [FSMC写NOR_FLASH的时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id33) 中的ADDSET值，它可以被设置为0-0xF个HCLK周期数， 按STM32标准库的默认配置，HCLK的时钟频率为72MHz，即一个HCLK周期为1/72微秒。
+- **类型**: `uint32_t`
+- **描述**: 这用于设置总线宽度，通常有 8 位、16 位和 32 位可选。选择合适的总线宽度可以提高数据传输速度。
+- **示例**:
 
-(2) FSMC_DataSetupTime
+```c
+FSMC_BusWidth = FSMC_DataWidth_16b; // 设置数据总线宽度为16位
+```
 
-> 本成员设置数据建立时间，即FSMC读写时序图 [FSMC写NOR_FLASH的时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id33) 中的DATAST值，它可以被设置为0-0xF个HCLK周期数。
+**FSMC_WaitSignalPolarity**
 
-(3) FSMC_DataSetupTime
+- **类型**: `uint32_t`
+- **描述**: 设置等待信号的极性，通常有高电平和低电平两种选择。这个参数影响外部存储器在等待信号时的行为。
+- **示例**:
 
-> 本成员设置数据建立时间，即FSMC读写时序图 [FSMC写NOR_FLASH的时序图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id33) 中的DATAST值，它可以被设置为0-0xF个HCLK周期数。
+```c
+FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_High; // 设置等待信号为高电平
+```
 
-(4) FSMC_BusTurnAroundDuration
+**FSMC_WaitSignalActive**
 
-> 本成员设置总线转换周期，在NOR FLASH存储器中，地址线与数据线可以分时复用，总线转换周期就是指总线在这两种状态间切换需要的延时， 防止冲突。控制其它存储器时这个参数无效，配置为0即可。
+- **类型**: `uint32_t`
+- **描述**: 表示在访问期间，等待信号的活动状态（在读或写操作时）。
+- **示例**:
 
-(5) FSMC_CLKDivision
+```c
+FSMC_WaitSignalActive = FSMC_WaitSignalActive_LastCycle; // 等待信号在最后一个周期有效
+```
 
-> 本成员用于设置时钟分频，它以HCLK时钟作为输入，经过FSMC_CLKDivision分频后输出到FSMC_CLK引脚作为通讯使用的同步时钟。 控制其它异步通讯的存储器时这个参数无效，配置为0即可。
+**FSMC_WriteOperation**
 
-(6) FSMC_DataLatency
+- **类型**: `uint32_t`
+- **描述**: 设置写操作的配置，指明是否启用写操作。
+- **示例**:
 
-> 本成员设置数据保持时间，它表示在读取第一个数据之前要等待的周期数，该周期指同步时钟的周期，本参数仅用于同步NOR FLASH类型的存储器， 控制其它类型的存储器时，本参数无效。
+```c
+FSMC_WriteOperation = FSMC_WriteOperation_Enable; // 启用写操作
+```
 
-(7) FSMC_AccessMode ..
+**FSMC_ReadWriteTiming**
 
-> 本成员设置存储器访问模式，不同的模式下FSMC访问存储器地址时引脚输出的时序不一样，可选FSMC_AccessMode_A/B/C/D模式。 控制异步NOR FLASH时使用B模式。
+- **类型**: `FSMC_NORSRAMTimingInitTypeDef`
+- **描述**: 用于分别配置读和写的时序参数。允许对读写操作进行独立配置，以优化性能。
+- **示例**:
 
-这个FSMC_NORSRAMTimingInitTypeDef时序结构体配置的延时参数，将作为下一节的FSMC NOR FLASH初始化结构体的一个成员。
+```c
+FSMC_ReadWriteTiming.FSMC_AddressSetupTime = 2; // 读操作地址建立时间
+FSMC_ReadWriteTiming.FSMC_DataSetupTime = 3; // 读操作数据建立时间
+```
+
+完整配置示例代码：
+
+```c
+// 定义 FSMC 时序结构体
+FSMC_NORSRAMTimingInitTypeDef FSMC_Timing;
+
+// 配置地址建立时间
+FSMC_Timing.FSMC_AddressSetupTime = 2; // 地址建立时间设置为2个时钟周期
+// 配置地址保持时间
+FSMC_Timing.FSMC_AddressHoldTime = 1; // 地址保持时间设置为1个时钟周期
+// 配置数据建立时间
+FSMC_Timing.FSMC_DataSetupTime = 3; // 数据建立时间设置为3个时钟周期
+// 配置总线转移持续时间
+FSMC_Timing.FSMC_BusTurnAroundDuration = 1; // 总线转移时间设置为1个时钟周期
+// 配置时钟分频
+FSMC_Timing.FSMC_CLKDivision = 1; // 时钟分频设置为1
+// 配置数据延迟
+FSMC_Timing.FSMC_DataLatency = 0; // 数据延迟设置为0
+// 配置访问模式
+FSMC_Timing.FSMC_AccessMode = FSMC_AccessMode_A; // 设置访问模式为A
+
+// 定义 FSMC 初始化结构体
+FSMC_NORSRAMInitTypeDef FSMC_Init;
+
+// 选择银行
+FSMC_Init.FSMC_Bank = FSMC_Bank1_NORSRAM1; // 选择第1个NORSRAM银行
+// 启用地址数据复用
+FSMC_Init.FSMC_DataAddressMux = FSMC_DataAddressMux_Enable; // 启用地址和数据复用
+// 配置存储器类型为NOR
+FSMC_Init.FSMC_MemoryType = FSMC_MemoryType_NOR; // 设置存储器类型为NOR
+// 配置数据宽度为16位
+FSMC_Init.FSMC_MemoryDataWidth = FSMC_DataWidth_16b; // 设置数据总线宽度为16位
+// 启用写操作
+FSMC_Init.FSMC_WriteOperation = FSMC_WriteOperation_Enable; // 启用写操作
+// 配置等待信号极性
+FSMC_Init.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_High; // 设置等待信号为高电平
+// 配置等待信号活动状态
+FSMC_Init.FSMC_WaitSignalActive = FSMC_WaitSignalActive_LastCycle; // 等待信号在最后一个周期有效
+// 配置读写时序
+FSMC_Init.FSMC_ReadWriteTiming = &FSMC_Timing; // 设置读写时序为上面配置的时序
+FSMC_Init.FSMC_WriteTiming = &FSMC_Timing; // 设置写时序为上面配置的时序
+
+// 调用初始化函数以完成配置
+FSMC_NORSRAMInit(&FSMC_Init);
+```
 
 ## 9. FSMC初始化结构体
 
 ```c
-/**
-* @brief  FSMC NOR/SRAM Init structure definition
-*/
 typedef struct
 {
-uint32_t FSMC_Bank;                /*设置要控制的Bank区域 */
-uint32_t FSMC_DataAddressMux;      /*设置地址总线与数据总线是否复用 */
-uint32_t FSMC_MemoryType;          /*设置存储器的类型 */
-uint32_t FSMC_MemoryDataWidth;     /*设置存储器的数据宽度*/
-uint32_t FSMC_BurstAccessMode; /*设置是否支持突发访问模式，只支持同步类型的存储器 */
-uint32_t FSMC_AsynchronousWait;     /*设置是否使能在同步传输时的等待信号，*/
-uint32_t FSMC_WaitSignalPolarity;  /*设置等待信号的极性*/
-uint32_t FSMC_WrapMode;            /*设置是否支持对齐的突发模式 */
-uint32_t FSMC_WaitSignalActive; /*配置等待信号在等待前有效还是等待期间有效 */
-uint32_t FSMC_WriteOperation;      /*设置是否写使能 */
-uint32_t FSMC_WaitSignal;          /*设置是否使能等待状态插入 */
-uint32_t FSMC_ExtendedMode;        /*设置是否使能扩展模式 */
-uint32_t FSMC_WriteBurst;          /*设置是否使能写突发操作*/
-/*当不使用扩展模式时，本参数用于配置读写时序，否则用于配置读时序*/
+uint32_t FSMC_Bank;              // 设置要控制的Bank区域 
+uint32_t FSMC_DataAddressMux;    // 设置地址总线与数据总线是否复用 
+uint32_t FSMC_MemoryType;        // 设置存储器的类型 
+uint32_t FSMC_MemoryDataWidth;   // 设置存储器的数据宽度
+uint32_t FSMC_BurstAccessMode;   // 设置是否支持突发访问模式，只支持同步类型的存储器 
+uint32_t FSMC_AsynchronousWait;  //设置是否使能在同步传输时的等待信号，
+uint32_t FSMC_WaitSignalPolarity;// 设置等待信号的极性
+uint32_t FSMC_WrapMode;          // 设置是否支持对齐的突发模式 
+uint32_t FSMC_WaitSignalActive;  // 配置等待信号在等待前有效还是等待期间有效 
+uint32_t FSMC_WriteOperation;    // 设置是否写使能
+uint32_t FSMC_WaitSignal;        // 设置是否使能等待状态插入 
+uint32_t FSMC_ExtendedMode;      // 设置是否使能扩展模式 
+uint32_t FSMC_WriteBurst;        // 设置是否使能写突发操作
+// 当不使用扩展模式时，本参数用于配置读写时序，否则用于配置读时序
 FSMC_NORSRAMTimingInitTypeDef* FSMC_ReadWriteTimingStruct;
-/*当使用扩展模式时，本参数用于配置写时序*/
+// 当使用扩展模式时，本参数用于配置写时序
 FSMC_NORSRAMTimingInitTypeDef* FSMC_WriteTimingStruct;
 }FSMC_NORSRAMInitTypeDef;
 ```
 
-这个结构体，除最后两个成员是上一小节讲解的时序配置外，其它结构体成员的配置都对应到FSMC_BCR中的寄存器位。各个成员意义介绍如下， 括号中的是STM32标准库定义的宏：
+这个结构体，除最后两个成员是上一小节讲解的时序配置外，其它结构体成员的配置都对应到FSMC_BCR中的寄存器位。各个成员意义介绍如下：
 
-(1) FSMC_Bank
+**FSMC_Bank**
 
-> 本成员用于选择FSMC映射的存储区域，它的可选参数以及相应的内核地址映射范围见表 [可以选择的存储器区域及区域对应的地址范围](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/LCD.html#id38) 。
+- **意义**: 选择要使用的 FSMC 区域块。
+- **示例**：
 
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD07.png)
+```c
+FSMC_Bank1;  // 选择 FSMC 
+```
 
-(2) FSMC_DataAddressMux
+**FSMC_DataAddressMux**
 
-> 本成员用于设置地址总线与数据总线是否复用(FSMC_DataAddressMux_Enable /Disable)，在控制NOR FLASH时， 可以地址总线与数据总线可以分时复用，以减少使用STM32信号线的数量。
+- **意义**: 确定地址总线和数据总线是否复用。
+- **示例**:
 
-(3) FSMC_MemoryType
+```c
+FSMC_DataAddressMux_Enable;  // 启用地址和数据复用
+FSMC_DataAddressMux_Disable; // 禁用地址和数据复用
+```
 
-> 本成员用于设置要控制的存储器类型，它支持控制的存储器类型为SRAM、 PSRAM以及NOR FLASH(FSMC_MemoryType_SRAM/PSRAM/NOR)。
+**FSMC_MemoryType**
 
-(4) FSMC_MemoryDataWidth
+- **意义**: 指定连接的存储器类型（如 SRAM、NOR Flash）。
+- **示例**:
 
-> 本成员用于设置要控制的存储器的数据宽度，可选择设置成8或16位(FSMC_MemoryDataWidth_8b /16b)。
+```c
+FSMC_MemoryType_SRAM; // 指定为 SRAM
+FSMC_MemoryType_NOR;  // 指定为 NOR Flash
+```
 
-(5) FSMC_BurstAccessMode
+**FSMC_MemoryDataWidth**
 
-> 本成员用于设置是否使用突发访问模式(FSMC_BurstAccessMode_Enable/Disable)，突发访问模式是指发送一个地址后连续访问多个数据， 非突发模式下每访问一个数据都需要输入一个地址，仅在控制同步类型的存储器时才能使用突发模式。
+- **意义**: 设置存储器的数据宽度（8 位或 16 位）。
+- **示例**：
 
-(6) FSMC_AsynchronousWait
+```c
+FSMC_MemoryDataWidth_8b;    // 8 位数据宽度
+FSMC_MemoryDataWidth_16b;   // 16 位数据宽度
+```
 
-> 本成员用于设置是否使能在同步传输时使用的等待信号(FSMC_AsynchronousWait_Enable/Disable)，在控制同步类型的NOR或PSRAM时， 存储器可以使用FSMC_NWAIT引脚通知STM32需要等待。
+**FSMC_BurstAccessMode**
 
-(7) FSMC_WaitSignalPolarity
+- **意义**: 启用或禁用突发访问模式。
+- **示例**:
 
-> 本成员用于设置等待信号的有效极性，即要求等待时，使用高电平还是低电平(FSMC_WaitSignalPolarity_High/Low)。
+```c
+FSMC_BurstAccessMode_Enable; // 启用突发访问模式
+FSMC_BurstAccessMode_Disable;// 禁用突发访问模式
+```
 
-(8) FSMC_WrapMode
+**FSMC_AsynchronousWait**
 
-> 本成员用于设置是否支持把非对齐的AHB突发操作分割成2次线性操作(FSMC_WrapMode_Enable/Disable)，该配置仅在突发模式下有效。
+- **意义**: 配置是否在同步传输中使能等待信号。
 
-(9) FSMC_WaitSignalActive
+- **示例**：
 
-> 本成员用于配置在突发传输模式时， 决定存储器是在等待状态之前的一个数据周期有效还是在等待状态期间有效(FSMC_WaitSignalActive_BeforeWaitState/DuringWaitState)。
+```c
+FSMC_AsynchronousWait_Enable; // 启用异步等待
+FSMC_AsynchronousWait_Disable;// 禁用异步等待
+```
 
-(10) FSMC_WriteOperation
+**FSMC_WaitSignalPolarity**
 
-> 这个成员用于设置是否写使能(FSMC_WriteOperation_ Enable /Disable)， 禁止写使能的话FSMC只能从存储器中读取数据，不能写入。
+- **意义**: 设置等待信号的极性（高电平或低电平有效）。
 
-(11) FSMC_WaitSignal
+- **示例**:
 
-> 本成员用于设置当存储器处于突发传输模式时，是否允许通过NWAIT信号插入等待状态(FSMC_WaitSignal_Enable/Disable)。
+```c
+FSMC_WaitSignalPolarity_High; // 等待信号高有效
+FSMC_WaitSignalPolarity_Low;  // 等待信号低有效
+```
 
-(12) FSMC_ExtendedMode
+**FSMC_WrapMode**
 
-> 本成员用于设置是否使用扩展模式(FSMC_ExtendedMode_Enable/Disable)，在非扩展模式下，对存储器读写的时序都只使用FSMC_BCR寄存器中的配置， 即下面的FSMC_ReadWriteTimingStruct结构体成员；在扩展模式下，对存储器的读写时序可以分开配置， 读时序使用FSMC_BCR寄存器，写时序使用FSMC_BWTR寄存器的配置，即后面的FSMC_WriteTimingStruct结构体成员。
+- **意义**: 设置是否支持突发模式下的循环操作。
+- **示例**:
 
-(13) FSMC_ReadWriteTimingStruct
+```c
+FSMC_WrapMode_Enable; // 启用循环模式
+FSMC_WrapMode_Disable;// 禁用循环模式
+```
 
-> 本成员是一个指针，赋值时使用上一小节中讲解的时序结构体FSMC_NORSRAMInitTypeDef设置，当不使用扩展模式时，读写时序都使用本成员的参数配置。
+**FSMC_WaitSignalActive**
 
-(14) FSMC_WriteTimingStruct
+- **意义**: 决定等待信号的有效时机。
+- **示例**:
 
-> 同样地，本成员也是一个时序结构体的指针，只有当使用扩展模式时，本配置才有效，它是写操作使用的时序。
+```c
+FSMC_WaitSignalActive_BeforeWaitState; // 在等待状态之前有效
+FSMC_WaitSignalActive_DuringWaitState; // 在等待状态期间有效
+```
 
-对本结构体赋值完成后，调用FSMC_NORSRAMInit库函数即可把配置参数写入到FSMC_BCR及FSMC_BTR/BWTR寄存器中。
+**FSMC_WriteOperation**
+
+- **意义**: 设置是否允许写操作。
+- **示例**:
+
+```c
+FSMC_WriteOperation_Enable; // 启用写操作
+FSMC_WriteOperation_Disable;// 禁用写操作
+```
+
+**FSMC_WaitSignal**
+
+- **意义**: 配置是否在读写过程中插入等待状态。
+- **示例**:
+
+```c
+FSMC_WaitSignal_Enable; // 启用等待信号
+FSMC_WaitSignal_Disable;// 禁用等待信号
+```
+
+**FSMC_ExtendedMode**
+
+- **意义**: 启用额外的扩展配置选项。
+- **示例**:
+
+```c
+FSMC_ExtendedMode_Enable; // 启用扩展模式
+FSMC_ExtendedMode_Disable;// 禁用扩展模式
+```
+
+**FSMC_WriteBurst**
+
+- **意义**: 启用写入突发操作。
+- **示例**:
+
+```c
+FSMC_WriteBurst_Enable; // 启用写入突发
+FSMC_WriteBurst_Disable;// 禁用写入突发
+```
+
+以下是一个完整的示例，展示如何配置 `FSMC_NORSRAMInitTypeDef` 结构体：
+
+```c
+FSMC_NORSRAMInitTypeDef FSMC_NORSRAMInitStruct;
+
+// 配置 FSMC 参数
+FSMC_NORSRAMInitStruct.FSMC_Bank = FSMC_Bank1;
+FSMC_NORSRAMInitStruct.FSMC_DataAddressMux = FSMC_DataAddressMux_Enable;
+FSMC_NORSRAMInitStruct.FSMC_MemoryType = FSMC_MemoryType_NOR;
+FSMC_NORSRAMInitStruct.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
+FSMC_NORSRAMInitStruct.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Enable;
+FSMC_NORSRAMInitStruct.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable;
+FSMC_NORSRAMInitStruct.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_High;
+FSMC_NORSRAMInitStruct.FSMC_WrapMode = FSMC_WrapMode_Disable;
+FSMC_NORSRAMInitStruct.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
+FSMC_NORSRAMInitStruct.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
+FSMC_NORSRAMInitStruct.FSMC_WaitSignal = FSMC_WaitSignal_Enable;
+FSMC_NORSRAMInitStruct.FSMC_ExtendedMode = FSMC_ExtendedMode_Disable;
+FSMC_NORSRAMInitStruct.FSMC_WriteBurst = FSMC_WriteBurst_Enable;
+
+// 初始化 FSMC
+FSMC_NORSRAMInit(&FSMC_NORSRAMInitStruct); 
+// 这个示例展示了如何配置 FSMC 控制器以连接到一个 16 位宽的 NOR Flash 存储器，
+// 启用突发访问和写操作。
+```
+
+---
+
+2024.9.26 第一次修订，后期不再维护
