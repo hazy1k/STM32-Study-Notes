@@ -5,48 +5,36 @@
 
 static void LCD_Test(void);	
 static void Delay ( __IO uint32_t nCount );
-void Printf_Charater(void)   ;
-
+void Printf_Charater(void);
 
 int main ( void )
 {
-
 	ILI9341_Init (); // LCD 初始化
-
 	USART_Config();		
-	
-  
 	printf("\r\n ********** 液晶屏英文显示程序*********** \r\n"); 
 	printf("\r\n 本程序不支持中文，显示中文的程序请学习下一章 \r\n"); 
-	
- //其中0、3、5、6 模式适合从左至右显示文字，
- //不推荐使用其它模式显示文字	其它模式显示文字会有镜像效果			
- //其中 6 模式为大部分液晶例程的默认显示方向  
-  ILI9341_GramScan(6);
+  // 其中0、3、5、6 模式适合从左至右显示文字，
+  // 不推荐使用其它模式显示文字	其它模式显示文字会有镜像效果			
+  // 其中 6 模式为大部分液晶例程的默认显示方向  
+  ILI9341_GramScan(6); // 设置显示模式为6，从左至右显示文字
 	while ( 1 )
 	{
-		LCD_Test();
+		LCD_Test(); // 测试显示函数
 	}
-	
 	
 }
 
-
 extern uint16_t lcdid;
-
-/*用于测试各种液晶的函数*/
+// 用于测试各种液晶的函数
 void LCD_Test(void)
 {
-	/*演示显示变量*/
+	// 演示显示变量
 	static uint8_t testCNT = 0;	
 	char dispBuff[100];
-	
-	testCNT++;	
-	
-	LCD_SetFont(&Font8x16);
-	LCD_SetColors(RED,BLACK);
-
-  ILI9341_Clear(0,0,LCD_X_LENGTH,LCD_Y_LENGTH);	/* 清屏，显示全黑 */
+	testCNT++; // 计数器自增
+	LCD_SetFont(&Font8x16); // 设置字体
+	LCD_SetColors(RED, BLACK); // 设置字体颜色
+  ILI9341_Clear(0, 0, LCD_X_LENGTH, LCD_Y_LENGTH);	// 清屏，显示全黑
 	/********显示字符串示例*******/
   if(lcdid == LCDID_ILI9341)
   {
@@ -67,7 +55,6 @@ void LCD_Test(void)
 	/********显示变量示例*******/
 	LCD_SetFont(&Font16x24);
 	LCD_SetTextColor(GREEN);
-
 	/*使用c标准库把变量转化成字符串*/
 	sprintf(dispBuff,"Count : %d ",testCNT);
   LCD_ClearLine(LINE(4));	/* 清除单行文字 */
