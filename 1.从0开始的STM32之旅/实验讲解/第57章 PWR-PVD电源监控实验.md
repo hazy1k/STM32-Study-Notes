@@ -99,16 +99,16 @@ void PVD_IRQHandler(void)
 #include "./pvd/bsp_pvd.h"
 
 int main(void)
-{	
-	LED_GPIO_Config();	
-	// 亮绿灯，表示正常运行
-	LED_GREEN; 
-	// 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
-	PVD_Config();
-	
+{    
+    LED_GPIO_Config();    
+    // 亮绿灯，表示正常运行
+    LED_GREEN; 
+    // 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
+    PVD_Config();
+
   while(1)
-  {					
-		/*正常运行的程序*/
+  {                    
+        /*正常运行的程序*/
   }
 }
 ```
@@ -194,11 +194,11 @@ void PVD_Config(void)
 void GPIO_Config(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
-    
+
     // 使能GPIO时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-    
+
     // 配置LED引脚为输出模式
     GPIO_InitStruct.GPIO_Pin = LED_PIN;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -206,7 +206,7 @@ void GPIO_Config(void)
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(LED_PORT, &GPIO_InitStruct);
-    
+
     // 配置蜂鸣器引脚为输出模式
     GPIO_InitStruct.GPIO_Pin = BUZZER_PIN;
     GPIO_Init(BUZZER_PORT, &GPIO_InitStruct);
