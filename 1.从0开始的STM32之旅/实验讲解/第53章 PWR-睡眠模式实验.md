@@ -1,4 +1,4 @@
-# 第五十四章 PWR-睡眠模式实验
+# 第五十三章 PWR-睡眠模式实验
 
 ## 1. 硬件设计
 
@@ -244,7 +244,7 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    
+
     // LED引脚配置
     GPIO_InitStruct.Pin = LED_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -268,7 +268,6 @@ void SystemClock_Config(void)
 {
     // 系统时钟配置代码（生成的代码）
 }
-
 ```
 
 ---

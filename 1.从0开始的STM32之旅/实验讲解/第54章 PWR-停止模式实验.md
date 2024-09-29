@@ -1,4 +1,4 @@
-# 第五十五章 PWR-停止模式实验
+# 第五十四章 PWR-停止模式实验
 
 ## 1. 硬件设计
 
@@ -221,11 +221,11 @@ void Enter_Stop_Mode(void)
 void GPIO_Config(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
-    
+
     // 使能GPIO时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-    
+
     // 配置LED引脚为输出模式
     GPIO_InitStruct.GPIO_Pin = LED_PIN;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -239,10 +239,10 @@ void GPIO_Config(void)
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // 下拉
     GPIO_Init(GPIO_PORT, &GPIO_InitStruct);
-    
+
     // 配置外部中断
     SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource13);
-    
+
     EXTI_InitTypeDef EXTI_InitStruct;
     EXTI_InitStruct.EXTI_Line = EXTI_Line13; // 选择按键引脚
     EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt; // 中断模式
@@ -263,12 +263,8 @@ void Delay(uint32_t time)
 {
     while (time--);
 }
-
-
 ```
 
 ---
 
 2024.9.25 第一次修订，后期不再维护
-
-
