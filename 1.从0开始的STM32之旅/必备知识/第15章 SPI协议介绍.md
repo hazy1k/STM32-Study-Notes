@@ -6,19 +6,19 @@ SPI协议是由摩托罗拉公司提出的通讯协议(Serial Peripheral Interfa
 
 ### 1.1 SPI物理层
 
-SPI通讯设备之间的常用连接方式见图 [常见的SPI通讯系统](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id2) 。
+SPI通讯设备之间的常用连接方式见图。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI002.png)
 
 SPI通讯使用3条总线及片选线，3条总线分别为SCK、MOSI、MISO，片选线为SS，它们的作用介绍如下：
 
-(1) SS ( Slave Select)：从设备选择信号线，常称为片选信号线，也称为NSS、CS，以下用NSS表示。当有多个SPI从设备与SPI主机相连时， 设备的其它信号线SCK、MOSI及MISO同时并联到相同的SPI总线上，即无论有多少个从设备，都共同只使用这3条总线； 而每个从设备都有独立的这一条NSS信号线，本信号线独占主机的一个引脚，即有多少个从设备，就有多少条片选信号线。 I2C协议中通过设备地址来寻址、选中总线上的某个设备并与其进行通讯；而SPI协议中没有设备地址，它使用NSS信号线来寻址， 当主机要选择从设备时，把该从设备的NSS信号线设置为低电平，该从设备即被选中，即片选有效， 接着主机开始与被选中的从设备进行SPI通讯。所以SPI通讯以NSS线置低电平为开始信号，以NSS线被拉高作为结束信号。
+1. SS ( Slave Select)：从设备选择信号线，常称为片选信号线，也称为NSS、CS，以下用NSS表示。当有多个SPI从设备与SPI主机相连时， 设备的其它信号线SCK、MOSI及MISO同时并联到相同的SPI总线上，即无论有多少个从设备，都共同只使用这3条总线； 而每个从设备都有独立的这一条NSS信号线，本信号线独占主机的一个引脚，即有多少个从设备，就有多少条片选信号线。 I2C协议中通过设备地址来寻址、选中总线上的某个设备并与其进行通讯；而SPI协议中没有设备地址，它使用NSS信号线来寻址， 当主机要选择从设备时，把该从设备的NSS信号线设置为低电平，该从设备即被选中，即片选有效， 接着主机开始与被选中的从设备进行SPI通讯。所以SPI通讯以NSS线置低电平为开始信号，以NSS线被拉高作为结束信号。
 
-(2) SCK (Serial Clock)：时钟信号线，用于通讯数据同步。它由通讯主机产生，决定了通讯的速率，不同的设备支持的最高时钟频率不一样， 如STM32的SPI时钟频率最大为fpclk/2，两个设备之间通讯时，通讯速率受限于低速设备。
+2. SCK (Serial Clock)：时钟信号线，用于通讯数据同步。它由通讯主机产生，决定了通讯的速率，不同的设备支持的最高时钟频率不一样， 如STM32的SPI时钟频率最大为fpclk/2，两个设备之间通讯时，通讯速率受限于低速设备。
 
-(3) MOSI (Master Output， Slave Input)：主设备输出/从设备输入引脚。主机的数据从这条信号线输出， 从机由这条信号线读入主机发送的数据，即这条线上数据的方向为主机到从机。
+3. MOSI (Master Output， Slave Input)：主设备输出/从设备输入引脚。主机的数据从这条信号线输出， 从机由这条信号线读入主机发送的数据，即这条线上数据的方向为主机到从机。
 
-(4) MISO (Master Input,，Slave Output)：主设备输入/从设备输出引脚。主机从这条信号线读入数据， 从机的数据由这条信号线输出到主机，即在这条线上数据的方向为从机到主机。
+4. MISO (Master Input,，Slave Output)：主设备输入/从设备输出引脚。主机从这条信号线读入数据， 从机的数据由这条信号线输出到主机，即在这条线上数据的方向为从机到主机。
 
 ### 1.2 协议层
 
@@ -26,7 +26,7 @@ SPI通讯使用3条总线及片选线，3条总线分别为SCK、MOSI、MISO，�
 
 #### 1.2.1 SPI基础通讯过程
 
-先看看SPI通讯的通讯时序，见图 [SPI通讯时序](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id5) 。
+先看看SPI通讯的通讯时序，见图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI003.jpg)
 
@@ -36,11 +36,11 @@ SPI通讯使用3条总线及片选线，3条总线分别为SCK、MOSI、MISO，�
 
 #### 1.2.2 通讯的起始和停止信号
 
-在图 [SPI通讯时序](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id5) 中的标号处，NSS信号线由高变低，是SPI通讯的起始信号。NSS是每个从机各自独占的信号线， 当从机在自己的NSS线检测到起始信号后，就知道自己被主机选中了，开始准备与主机通讯。在图中的标号处，NSS信号由低变高， 是SPI通讯的停止信号，表示本次通讯结束，从机的选中状态被取消。
+在图中的标号处，NSS信号线由高变低，是SPI通讯的起始信号。NSS是每个从机各自独占的信号线， 当从机在自己的NSS线检测到起始信号后，就知道自己被主机选中了，开始准备与主机通讯。在图中的标号处，NSS信号由低变高， 是SPI通讯的停止信号，表示本次通讯结束，从机的选中状态被取消。
 
 #### 1.2.3 数据有效性
 
-SPI使用MOSI及MISO信号线来传输数据，使用SCK信号线进行数据同步。MOSI及MISO数据线在SCK的每个时钟周期传输一位数据， 且数据输入输出是同时进行的。数据传输时，MSB先行或LSB先行并没有作硬性规定，但要保证两个SPI通讯设备之间使用同样的协定， 一般都会采用图 [SPI通讯时序](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id5) 中的MSB先行模式。
+SPI使用MOSI及MISO信号线来传输数据，使用SCK信号线进行数据同步。MOSI及MISO数据线在SCK的每个时钟周期传输一位数据， 且数据输入输出是同时进行的。数据传输时，MSB先行或LSB先行并没有作硬性规定，但要保证两个SPI通讯设备之间使用同样的协定， 一般都会采用图中的MSB先行模式。
 
 观察图中的标号处，MOSI及MISO的数据在SCK的上升沿期间变化输出，在SCK的下降沿时被采样。即在SCK的下降沿时刻， MOSI及MISO的数据有效，高电平时表示数据“1”，为低电平时表示数据“0”。在其它时刻，数据无效，MOSI及MISO为下一次表示数据做准备。
 
@@ -48,11 +48,11 @@ SPI每次数据传输可以8位或16位为单位，每次传输的单位数不�
 
 #### 1.2.4 CPOL/CPHA及通讯模式
 
-上面讲述的图 [SPI通讯时序](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id5) 中的时序只是SPI中的其中一种通讯模式，SPI一共有四种通讯模式， 它们的主要区别是总线空闲时SCK的时钟状态以及数据采样时刻。为方便说明，在此引入“时钟极性CPOL”和“时钟相位CPHA”的概念。
+上面讲述的图中的时序只是SPI中的其中一种通讯模式，SPI一共有四种通讯模式， 它们的主要区别是总线空闲时SCK的时钟状态以及数据采样时刻。为方便说明，在此引入“时钟极性CPOL”和“时钟相位CPHA”的概念。
 
 时钟极性CPOL是指SPI通讯设备处于空闲状态时，SCK信号线的电平信号(即SPI通讯开始前、 NSS线为高电平时SCK的状态)。CPOL=0时， SCK在空闲状态时为低电平，CPOL=1时，则相反。
 
-时钟相位CPHA是指数据的采样的时刻，当CPHA=0时，MOSI或MISO数据线上的信号将会在SCK时钟线的“奇数边沿”被采样。当CPHA=1时， 数据线在SCK的“偶数边沿”采样。见图 CPHA = [0时的SPI通讯模式](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id8) 及图 CPHA = [1时的SPI通讯模式](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id9) 。
+时钟相位CPHA是指数据的采样的时刻，当CPHA=0时，MOSI或MISO数据线上的信号将会在SCK时钟线的“奇数边沿”被采样。当CPHA=1时， 数据线在SCK的“偶数边沿”采样。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI004.jpeg)
 
@@ -64,7 +64,7 @@ SPI每次数据传输可以8位或16位为单位，每次传输的单位数不�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI005.jpeg)
 
-由CPOL及CPHA的不同状态，SPI分成了四种模式，见表 [SPI的四种模式](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id10) ， 主机与从机需要工作在相同的模式下才可以正常通讯，实际中采用较多的是“模式0”与“模式3”。
+由CPOL及CPHA的不同状态，SPI分成了四种模式，见表， 主机与从机需要工作在相同的模式下才可以正常通讯，实际中采用较多的是“模式0”与“模式3”。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI01.png)
 
@@ -82,7 +82,7 @@ STM32的SPI外设可用作通讯的主机及从机， 支持最高的SCK时钟�
 
 #### 2.2.1 通讯引脚
 
-SPI的所有硬件架构都从图 [SPI架构图](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id13) 中左侧MOSI、MISO、SCK及NSS线展开的。STM32芯片有多个SPI外设， 它们的SPI通讯信号引出到不同的GPIO引脚上，使用时必须配置到这些指定的引脚
+SPI的所有硬件架构都从图 中左侧MOSI、MISO、SCK及NSS线展开的。STM32芯片有多个SPI外设， 它们的SPI通讯信号引出到不同的GPIO引脚上，使用时必须配置到这些指定的引脚
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI02.png)
 
@@ -90,13 +90,13 @@ SPI的所有硬件架构都从图 [SPI架构图](https://doc.embedfire.com/mcu/
 
 #### 2.2.2 时钟控制逻辑
 
-SCK线的时钟信号，由波特率发生器根据“控制寄存器CR1”中的BR[0:2]位控制，该位是对fpclk时钟的分频因子， 对fpclk的分频结果就是SCK引脚的输出时钟频率，计算方法见表 [BR位对fpclk的分频](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#brfpclk) 。
+SCK线的时钟信号，由波特率发生器根据“控制寄存器CR1”中的BR[0:2]位控制，该位是对fpclk时钟的分频因子， 对fpclk的分频结果就是SCK引脚的输出时钟频率，计算方法见表。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI03.png)
 
 其中的fpclk频率是指SPI所在的APB总线频率， APB1为fpclk1，APB2为fpckl2。
 
-通过配置“控制寄存器CR”的“CPOL位”及“CPHA”位可以把SPI设置成前面分析的[4种SPI模式](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#cpolcpha%E5%8F%8A%E9%80%9A%E8%AE%AF%E6%A8%A1%E5%BC%8F)。
+通过配置“控制寄存器CR”的“CPOL位”及“CPHA”位可以把SPI设置成前面分析的4种SPI模式。
 
 #### 2.2.3 数据控制逻辑
 
@@ -112,7 +112,7 @@ SPI的MOSI及MISO都连接到数据移位寄存器上，数据移位寄存器的
 
 STM32使用SPI外设通讯时，在通讯的不同阶段它会对“状态寄存器SR”的不同数据位写入参数，我们通过读取这些寄存器标志来了解通讯状态。
 
-图 [主发送器通讯过程](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#id19) 中的是“主模式”流程，即STM32作为SPI通讯的主机端时的数据收发过程。
+图中的是“主模式”流程，即STM32作为SPI通讯的主机端时的数据收发过程。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/SPI007.jpeg)
 
@@ -132,20 +132,20 @@ STM32使用SPI外设通讯时，在通讯的不同阶段它会对“状态寄存
 
 ## 3. SPI初始化结构体详解
 
-其它外设一样，STM32标准库提供了SPI初始化结构体及初始化函数来配置SPI外设。 初始化结构体及函数定义在库文件“stm32f10x_spi.h”及“stm32f10x_spi.c”中，编程时我们可以结合这两个文件内的注释使用或参考库帮助文档。 了解初始化结构体后我们就能对SPI外设运用自如了，见 [代码清单:SPI-1](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/book/SPI.html#spi-1) 。
+其它外设一样，STM32标准库提供了SPI初始化结构体及初始化函数来配置SPI外设。 初始化结构体及函数定义在库文件“stm32f10x_spi.h”及“stm32f10x_spi.c”中，编程时我们可以结合这两个文件内的注释使用或参考库帮助文档。 了解初始化结构体后我们就能对SPI外设运用自如。
 
 ```c
 typedef struct
 {
-    uint16_t SPI_Direction;           /*设置SPI的单双向模式 */
-    uint16_t SPI_Mode;                /*设置SPI的主/从机端模式 */
-    uint16_t SPI_DataSize;            /*设置SPI的数据帧长度，可选8/16位 */
-    uint16_t SPI_CPOL;                /*设置时钟极性CPOL，可选高/低电平*/
-    uint16_t SPI_CPHA;                /*设置时钟相位，可选奇/偶数边沿采样 */
-    uint16_t SPI_NSS;                /*设置NSS引脚由SPI硬件控制还是软件控制*/
-    uint16_t SPI_BaudRatePrescaler;  /*设置时钟分频因子，fpclk/分频数=fSCK */
-    uint16_t SPI_FirstBit;            /*设置MSB/LSB先行 */
-    uint16_t SPI_CRCPolynomial;       /*设置CRC校验的表达式 */
+    uint16_t SPI_Direction;         // 设置SPI的单双向模式 
+    uint16_t SPI_Mode;              // 设置SPI的主/从机端模式 
+    uint16_t SPI_DataSize;          // 设置SPI的数据帧长度，可选8/16
+    uint16_t SPI_CPOL;              // 设置时钟极性CPOL，可选高/低电平
+    uint16_t SPI_CPHA;              // 设置时钟相位，可选奇/偶数边沿采样 
+    uint16_t SPI_NSS;               // 设置NSS引脚由SPI硬件控制还是软件控制
+    uint16_t SPI_BaudRatePrescaler; // 设置时钟分频因子，fpclk/分频数=fSCK 
+    uint16_t SPI_FirstBit;          // 设置MSB/LSB先行 
+    uint16_t SPI_CRCPolynomial;     // 设置CRC校验的表达式 
 } SPI_InitTypeDef;
 ```
 
@@ -188,5 +188,9 @@ typedef struct
 这是SPI的CRC校验中的多项式，若我们使用CRC校验时，就使用这个成员的参数(多项式)，来计算CRC的值。
 
 配置完这些结构体成员后，我们要调用SPI_Init函数把这些参数写入到寄存器中，实现SPI的初始化，然后调用SPI_Cmd来使能SPI外设。
+
+---
+
+2024.9.29 第一次修订，后期不再维护
 
 
