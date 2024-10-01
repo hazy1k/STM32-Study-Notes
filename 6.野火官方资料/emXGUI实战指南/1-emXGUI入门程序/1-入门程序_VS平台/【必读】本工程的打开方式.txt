@@ -1,0 +1,8 @@
+VS平台的工程代码需要使用Visual studio 2017社区版打开，
+
+工程文件为：
+\基础demo\PRJ_MSVS\X_GUI_SIM.sln
+和
+\综合demo\PRJ_MSVS\X_GUI_SIM.sln
+
+直接使用Visual studio 2017打开文件即可
