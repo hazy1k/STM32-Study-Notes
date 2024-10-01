@@ -1,0 +1,10 @@
+#include "emXGUI.h" 
+
+
+void GUI_DEMO_Button(void);
+
+
+void GUI_AppMain(void)
+{
+	GUI_DEMO_Button();
+}

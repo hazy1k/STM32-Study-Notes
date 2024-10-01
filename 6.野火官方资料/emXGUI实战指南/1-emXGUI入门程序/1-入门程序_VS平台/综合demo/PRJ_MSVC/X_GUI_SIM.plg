@@ -1,0 +1,77 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: X_GUI_SIM - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\liuwei\AppData\Local\Temp\RSP5830.tmp" with contents
+[
+/nologo /MD /W3 /Gm /GX /ZI /Od /I "./../X_GUI" /I "./../X_GUI_Arch/Inc" /I "./../X_GUI_Drv" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /Zm1000 /c 
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_SIM.cpp"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Drv\DisplayDev.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Drv\GUI_Drv.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Drv\KeyDev_WIN32.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Drv\MouseDev_WIN32.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\GUI_App\GUI_App.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\GUI_App\GUI_DEMO\GUI_DEMO_Button.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Arch\Resource\xft_font\GB2312_16_4BPP.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Arch\GUI_Arch.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Arch\GUI_GPU.c"
+"G:\System_Module\X_GUI_SIM(MS-WIN32)\X_GUI_Arch\OS_Options\X_GUI_WIN32.c"
+]
+Creating command line "cl.exe @C:\Users\liuwei\AppData\Local\Temp\RSP5830.tmp" 
+Creating temporary file "C:\Users\liuwei\AppData\Local\Temp\RSP5831.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/X_GUI_SIM.pdb" /debug /machine:I386 /out:"Debug/X_GUI_SIM.exe" /pdbtype:sept 
+".\Debug\X_GUI_SIM.obj"
+".\Debug\DisplayDev.obj"
+".\Debug\GUI_Drv.obj"
+".\Debug\KeyDev_WIN32.obj"
+".\Debug\MouseDev_WIN32.obj"
+".\Debug\GUI_App.obj"
+".\Debug\GUI_DEMO_Button.obj"
+".\Debug\GB2312_16_4BPP.obj"
+".\Debug\GUI_Arch.obj"
+".\Debug\GUI_GPU.obj"
+".\Debug\X_GUI_WIN32.obj"
+]
+Creating command line "link.exe @C:\Users\liuwei\AppData\Local\Temp\RSP5831.tmp"
+<h3>Output Window</h3>
+Compiling...
+X_GUI_SIM.cpp
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\gui_drv_cfg.h(55) : warning C4005: 'LCD_COLOR' : macro redefinition
+        g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\gui_drv_cfg.h(46) : see previous definition of 'LCD_COLOR'
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\gui_drv_cfg.h(56) : warning C4005: 'LCD_BUF_SIZE' : macro redefinition
+        g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\gui_drv_cfg.h(47) : see previous definition of 'LCD_BUF_SIZE'
+Generating Code...
+Compiling...
+DisplayDev.c
+GUI_Drv.c
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\gui_drv.c(86) : warning C4101: 'width_bytes' : unreferenced local variable
+KeyDev_WIN32.c
+MouseDev_WIN32.c
+GUI_App.c
+GUI_DEMO_Button.c
+g:\system_module\x_gui_sim(ms-win32)\gui_app\gui_demo\gui_demo_button.c(120) : warning C4013: 'GUI_Printf' undefined; assuming extern returning int
+GB2312_16_4BPP.c
+g:\system_module\x_gui_sim(ms-win32)\x_gui_arch\resource\xft_font\gb2312_16_4bpp.c(74801) : warning C4049: compiler limit : terminating line number emission
+GUI_Arch.c
+GUI_GPU.c
+X_GUI_WIN32.c
+Generating Code...
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\mousedev_win32.c(77) : warning C4761: integral size mismatch in argument; conversion supplied
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\keydev_win32.c(15) : warning C4761: integral size mismatch in argument; conversion supplied
+g:\system_module\x_gui_sim(ms-win32)\x_gui_drv\keydev_win32.c(22) : warning C4761: integral size mismatch in argument; conversion supplied
+Linking...
+LINK : fatal error LNK1104: cannot open file "TEMPFILE"
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+X_GUI_SIM.exe - 1 error(s), 8 warning(s)
+</pre>
+</body>
+</html>
