@@ -2,9 +2,27 @@
 
 ## 1. 导入
 
-    RCC ：reset clock control  复位和时钟控制器。本章我们主要讲解时钟部分，理解了时钟树，STM32的一切时钟的来龙去脉都会了如指掌。
+    首先我们得了解RCC是什么：
 
-## 2. RCC主要作用-时钟部分
+    RCC ：reset clock control  也就是专门用来控制复位和时钟的，本章我们主要讲解时钟部分。
+
+## 2. 为什么单片机需要系统时钟
+
+时钟信号对于单片机（或微控制器）来说是至关重要的，它控制着微控制器内部和外部的所有时间相关操作。如果没有系统时钟，我们的程序就会发生混乱。
+
+- 单片机内部的各个模块（如 CPU、内存、外设等）需要一个统一的时钟信号来进行同步操作。时钟信号决定了系统的时序，确保所有操作在正确的时间顺序执行。每个机器周期（Clock Cycle）对应于时钟信号的一个周期，CPU 和其他外设会根据时钟的边沿执行指令或操作。
+
+- 单片机的中央处理单元（CPU）依赖时钟信号来驱动指令的执行。每个时钟周期，CPU 执行一条或多条指令，时钟频率决定了 CPU 的执行速度。时钟频率越高，CPU 每秒钟能处理的指令就越多，从而提高了单片机的处理能力。
+
+- 除了 CPU，单片机的外设（如 ADC、PWM、USART 等）也需要时钟来进行定时操作。例如，ADC 模块需要时钟信号来驱动其转换过程，USART 需要时钟来控制数据的发送和接收速率。时钟信号确保这些外设以正确的速率和时序工作。
+
+- 很多单片机应用需要实现定时器和计时器功能，这些功能的实现都依赖于时钟信号。定时器/计时器通过时钟周期计算时间间隔、触发中断等操作。没有时钟，单片机就无法完成定时、计时、延时等功能。
+
+- 在数据通信中，时钟信号用于同步数据传输。例如，在 SPI、I2C 等通信协议中，时钟信号用于同步发送和接收的数据流。没有时钟信号，数据的发送与接收将无法保持同步，导致通信失败。
+
+- 时钟系统的管理还涉及单片机的功耗控制。单片机可以根据需要关闭部分时钟源或降低时钟频率以降低功耗。通过时钟源的选择和分频，可以在性能与功耗之间做出平衡，特别是在低功耗模式下，时钟信号的管理变得尤为重要。
+
+## 3. RCC主要作用-时钟部分
 
     设置系统时钟SYSCLK、设置AHB分频因子（决定HCLK等于多少）、设置APB2分频因子（决定PCLK2等于多少）、 设置APB1分频因子（决定PCLK1等于多少）、设置各个外设的分频因子；控制AHB、APB2和APB1这三条总线时钟的开启、 控制每个外设的时钟的开启。对于SYSCLK、HCLK、PCLK2、PCLK1这四个时钟的配置一般是： 
 
@@ -16,15 +34,15 @@
 
     更多内容参考：[从小白到 Pro | RCC时钟基础知识和常见问题 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/145221712)
 
-## 3. RCC框图剖析—时钟部分
+## 4. RCC框图剖析—时钟部分
 
      我们这里选取库函数时钟系统时钟函数：**SetSysClockTo72();** 以这个函数的编写流程来讲解时钟树， 这个函数也是我们用库的时候默认的系统时钟设置函数。 该函数的功能是利用HSE把时钟设置为：PCLK2 = HCLK = SYSCLK = 72M，PCLK1=HCLK/2 = 36M。 下面我们就以这个代码的流程为主线，来分析时钟树，对应的是图中的黄色部分，代码流程在时钟树中以数字的大小顺序标识。
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/RCC002.png)
 
-### 3.1 系统时钟
+### 4.1 系统时钟
 
-#### 3.1.1 HSE高速外部时钟信号
+#### 4.1.1 HSE高速外部时钟信号
 
     HSE是高速的外部时钟信号，可以由有源晶振或者无源晶振提供，频率从4-16MHZ不等。当使用有源晶振时， 时钟从OSC_IN引脚进入，OSC_OUT引脚悬空，当选用无源晶振时，时钟从OSC_IN和OSC_OUT进入，并且要配谐振电容。
 
@@ -56,7 +74,7 @@
 
     更多参考：[【STM32】系统时钟RCC详解(超详细，超全面)_rcc时钟-CSDN博客](https://blog.csdn.net/as480133937/article/details/98845509)
 
-#### 3.1.2 设置系统时钟库函数
+#### 4.1.2 设置系统时钟库函数
 
     上面的7个步骤对应的设置系统时钟库函数如下，该函数截取自固件库文件system_stm32f10x.c。为了方便阅读， 我已把互联型相关的代码删掉，把英文注释翻译成了中文，并把代码标上了序号，总共七个步骤。该函数是直接操作寄存器的， 有关寄存器部分请参考数据手册的RCC的寄存器描述部分。
 
@@ -64,10 +82,8 @@
 static void SetSysClockTo72(void)
 {
     __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
-
     // ① 使能HSE，并等待HSE稳定
     RCC->CR |= ((uint32_t)RCC_CR_HSEON);
-
     // 等待HSE启动稳定，并做超时处理
     do {
         HSEStatus = RCC->CR & RCC_CR_HSERDY;
@@ -82,7 +98,6 @@ static void SetSysClockTo72(void)
     }
     // HSE启动成功，则继续往下处理
     if (HSEStatus == (uint32_t)0x01) {
-
         //-----------------------------------------------------------
         // 使能FLASH 预存取缓冲区 */
         FLASH->ACR |= FLASH_ACR_PRFTBE;
@@ -96,7 +111,6 @@ static void SetSysClockTo72(void)
         FLASH->ACR &= (uint32_t)((uint32_t)~FLASH_ACR_LATENCY);
         FLASH->ACR |= (uint32_t)FLASH_ACR_LATENCY_2;
         //------------------------------------------------------------
-
         // ② 设置AHB、APB2、APB1预分频因子
         // HCLK = SYSCLK
         RCC->CFGR |= (uint32_t)RCC_CFGR_HPRE_DIV1;
@@ -104,7 +118,6 @@ static void SetSysClockTo72(void)
         RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE2_DIV1;
         //PCLK1 = HCLK/2
         RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV2;
-
         // ③ 设置PLL时钟来源，设置PLL倍频因子，PLLCLK = HSE * 9 = 72 MHz
         RCC->CFGR &= (uint32_t)((uint32_t)
                                 ~(RCC_CFGR_PLLSRC
@@ -112,18 +125,14 @@ static void SetSysClockTo72(void)
                                 | RCC_CFGR_PLLMULL));
         RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLSRC_HSE
                                 | RCC_CFGR_PLLMULL9);
-
         // ④ 使能 PLL
         RCC->CR |= RCC_CR_PLLON;
-
         // ⑤ 等待PLL稳定
         while ((RCC->CR & RCC_CR_PLLRDY) == 0) {
         }
-
         // ⑥ 选择PLL作为系统时钟来源
         RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
         RCC->CFGR |= (uint32_t)RCC_CFGR_SW_PLL;
-
         // ⑦ 读取时钟切换状态位，确保PLLCLK被选为系统时钟
         while ((RCC->CFGR&(uint32_t)RCC_CFGR_SWS) != (uint32_t)0x08){
         }
@@ -132,7 +141,7 @@ static void SetSysClockTo72(void)
 }
 ```
 
-### 3.2 其他时钟
+### 4.2 其他时钟
 
 - USB时钟
 
@@ -154,6 +163,21 @@ static void SetSysClockTo72(void)
 
     MCO是microcontroller clock output的缩写，是微控制器时钟输出引脚，在STM32 F1系列中 由 PA8复用所得， 主要作用是可以对外提供时钟，相当于一个有源晶振。MCO的时钟来源可以是：PLLCLK/2、HSI、HSE、SYSCLK， 具体选哪个由时钟配置寄存器CFGR的位26-24：MCO[2:0]决定。除了对外提供时钟这个作用之外， 我们还可以通过示波器监控MCO引脚的时钟输出来验证我们的系统时钟配置是否正确。
 
+## 5. 小结
+
+STM32 微控制器的 **RCC**（Reset and Clock Control）模块负责管理和配置所有时钟源，包括系统时钟（SYSCLK）、外设时钟（APB、AHB 时钟）以及用于外设驱动的各类内部/外部时钟。时钟树配置是确保微控制器在正确的频率下运行、满足性能要求以及实现功耗优化的关键步骤。
+
+一个典型的时钟树配置流程可能包括：
+
+1. 启动 HSE（外部晶振），等待其稳定。
+2. 配置 PLL（例如使用 HSE 作为 PLL 输入源，倍频器为 8）。
+3. 启动 PLL，并等待其稳定。
+4. 切换系统时钟源为 PLL 输出时钟。
+5. 配置 AHB、APB 总线的时钟分频。
+6. 启用外设时钟。
+
 ---
 
 2024.8.19 第一次修订，后期不再维护
+
+2024.12.7 修补内容，新增小结
