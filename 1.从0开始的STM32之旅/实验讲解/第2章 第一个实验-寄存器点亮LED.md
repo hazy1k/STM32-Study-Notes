@@ -26,18 +26,14 @@
 
 ```c
 // 前期准备-外设地址定义
-
 /*片上外设基地址  */
 #define PERIPH_BASE         ((unsigned int)0x40000000)
-
 /*总线基地址，GPIO都挂载到APB2上 */
 #define APB2PERIPH_BASE     (PERIPH_BASE + 0x10000) // 地址偏移
 /* AHB总线基地址 */
 #define AHBPERIPH_BASE      (PERIPH_BASE + 0x20000) // 地址偏移
-
 /*GPIOB外设基地址*/
 #define GPIOB_BASE          (APB2PERIPH_BASE + 0x0C00)
-
 /* GPIOB寄存器地址,强制转换成指针 */
 #define GPIOB_CRL           *(unsigned int*)(GPIOB_BASE+0x00)
 #define GPIOB_CRH           *(unsigned int*)(GPIOB_BASE+0x04)
@@ -46,7 +42,6 @@
 #define GPIOB_BSRR          *(unsigned int*)(GPIOB_BASE+0x10)
 #define GPIOB_BRR           *(unsigned int*)(GPIOB_BASE+0x14)
 #define GPIOB_LCKR          *(unsigned int*)(GPIOB_BASE+0x18)
-
 /*RCC外设基地址*/
 #define RCC_BASE           (AHBPERIPH_BASE + 0x1000)
 /*RCC的AHB1时钟使能寄存器地址,强制转换成指针*/
@@ -77,7 +72,6 @@ int main(void)
 
 ```c
 // 配置输出模式
-
 // 清空控制PB0的端口位
 GPIOB_CRL &= ~(0x0F << (4*0)); // 0000 1111->0000 0000
 // 配置PB0为通用推挽输出，速度为10M
@@ -118,7 +112,6 @@ GPIOB_CRL = 0x0000001;
 
 ```c
 // 控制引脚输出电平
-
 // PB0输出低电平
 GPIOB_ODR &= ~(1<<0);
 ```
@@ -167,15 +160,12 @@ int main(void)
 {
     // 首先开启GPIOB端口时钟
     RCC_APB2ENR |= (1<<3); // GPIOB
-
     // 首先清空控制PB0的端口位再写入
     GPIOB_CRL &= ~( 0x0F<< (4*0));
     // 配置PB0为通用推挽输出，速度为10M
     GPIOB_CRL |= (1<<4*0);
-
     // 使PB0输出为低电平
     GPIOB_ODR |= (0<<0);
-
     while(1)
     {
 
@@ -183,13 +173,7 @@ int main(void)
 }
 ```
 
-## 5. 实验现象
-
-    开发板上的LED成功点亮：
-
-<img src="https://img.picgo.net/2024/05/28/IMG_20240528_2105052fc813d4a7ab59ed.jpg" title="" alt="" width="424">
-
-## 6. 小结
+## 5. 小结
 
     这一章的实验还是比较简单的，毕竟是点亮一个LED灯，但还是比51难以理解的，我们不妨和51比较一下：
 
@@ -210,3 +194,5 @@ int main(void)
 2024.7.20第一次修订
 
 2024.8.18 第二次修订，后期不再维护
+
+2024.12.8 修补部分内容

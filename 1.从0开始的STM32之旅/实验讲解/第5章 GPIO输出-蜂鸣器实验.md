@@ -14,7 +14,9 @@
 
 所以在Beep节点输入PWM脉冲时，蜂鸣器就会发出响声。
 
-参考：[蜂鸣器原理与实现方法 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/513107262)
+更多内容参考：[蜂鸣器原理与实现方法 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/513107262)
+
+[有源和无源蜂鸣器两者有什么不一样？如何进行区分？ - 21ic电子网](https://www.21ic.com/a/957252.html)
 
 ## 2. 软件设计
 
@@ -23,18 +25,14 @@
 ```c
 #ifndef __BEEP_H
 #define __BEEP_H
-
 #include "stm32f10x.h"
-
 // 定义蜂鸣器连接的GPIO端口, 用户只需要修改下面的代码即可改变控制的蜂鸣器引脚 */
-#define BEEP_GPIO_PORT        GPIOA                 // 蜂鸣器使用的GPIO端口
-#define BEEP_GPIO_CLK         RCC_APB2Periph_GPIOA // 开启GPIOA端口时钟
+#define BEEP_GPIO_PORT       GPIOA                 // 蜂鸣器使用的GPIO端口
+#define BEEP_GPIO_CLK        RCC_APB2Periph_GPIOA // 开启GPIOA端口时钟
 #define BEEP_GPIO_PIN        GPIO_Pin_8             // 连接到蜂鸣器的GPIO的引脚
-
 /* 高电平时，蜂鸣器响 */
 #define ON  1
 #define OFF 0
-
 /* 带参宏，可以像内联函数一样使用 */
 #define BEEP(a)    if (a)    \
                     GPIO_SetBits(BEEP_GPIO_PORT,BEEP_GPIO_PIN);\
@@ -42,7 +40,6 @@
                     GPIO_ResetBits(BEEP_GPIO_PORT,BEEP_GPIO_PIN)
 
 void BEEP_GPIO_Config(void);
-
 #endif 
 ```
 
@@ -187,7 +184,6 @@ typedef struct
   GPIOSpeed_TypeDef GPIO_Speed;  /*!< 指定所选引脚的速度。
                                这个参数可以是 @ref GPIOSpeed_TypeDef 的一个值 */
 } GPIO_InitTypeDef;
-
 ```
 
 - `RCC_APB2PeriphClockCmd` 是一个 STM32 微控制器库函数，用于配置和控制 APB2 总线上的外设时钟。具体来说，它用来启用或禁用 APB2 总线上的外设时钟，这样可以控制外设的时钟源，以确保外设可以正常工作。
