@@ -1,25 +1,24 @@
+#include "beep.h"
 #include "stm32f10x.h"
-#include "./beep/bsp_beep.h"
 
-void Delay(__IO u32 nCount); 
+// 延时函数声明
+void Delay(__IO uint32_t nCount);
 
 int main(void)
-{	
-	// 初始化蜂鸣器GPIO
-	BEEP_GPIO_Config();	
-	
-	while(1)
-	{		
-		BEEP( ON ); // 开启蜂鸣器	
-		Delay(0x0FFFFF);	
+{
+    // 只需初始化一次蜂鸣器
+    BEEP_GPIO_Config(); // 蜂鸣器初始化
 
-		BEEP( OFF );		
-		Delay(0x0FFFFF);
-	}
+    while(1)
+    {
+        BEEP(ON); // 蜂鸣器响起
+        Delay(1000); // 延时1s
+        BEEP(OFF); // 蜂鸣器停止
+        Delay(1000);
+    }
 }
 
-// 延时函数
-void Delay(__IO uint32_t nCount) 
+void Delay(__IO uint32_t nCount)
 {
 	for(; nCount != 0; nCount--);
 }
