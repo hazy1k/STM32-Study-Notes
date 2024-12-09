@@ -1,41 +1,16 @@
-#include "led.h"   
+#include "led.h"
 
-void LED_GPIO_Config(void)
-{		
-		// 1.¶¨Òå½á¹¹Ìå-ÀÏÌ×Â·ÁË
-		GPIO_InitTypeDef GPIO_InitStructure;
-
-		// 2.¿ªÆô¿ØÖÆGIPOµÄÊ±ÖÓÒ²¾ÍÊÇAPB2¿©
-		RCC_APB2PeriphClockCmd( LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
-	
-		// 3.Ñ¡ÔñÎÒÃÇÒª¿ØÖÆµÄÒı½Å
-		GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;	
-	
-		// 4.ÉèÖÃÒı½ÅÄ£Ê½ÎªÍ¨ÓÃÍÆÍìÊä³ö
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	
-		// 5.ÉèÖÃÒı½ÅËÙÂÊÎª50MHz   
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-
-		// 6.µ÷ÓÃ¿âº¯Êı£¬³õÊ¼»¯GPIO
-		GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);	
-		
-	    // Èç´Ë£¬ÎÒÃÇ¾ÍÍê³ÉÁËGPIO£¨¿ØÖÆLED1£©µÄ³õÊ¼»¯¹¤×÷ÁË£¬ÄÇÃ´LED2ºÍLED3ÄØ£¿-ÕÕºùÂ«»­Æ°
-
-		/*Ñ¡ÔñÒª¿ØÖÆµÄGPIOÒı½Å*/
-		GPIO_InitStructure.GPIO_Pin = LED2_GPIO_PIN;
-	
-		/*µ÷ÓÃ¿âº¯Êı£¬³õÊ¼»¯GPIO*/
-		GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStructure);
-		
-		/*Ñ¡ÔñÒª¿ØÖÆµÄGPIOÒı½Å*/
-		GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
-
-		/*µ÷ÓÃ¿âº¯Êı£¬³õÊ¼»¯GPIO*/
-		GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
-
-		// ³õÊ¼»¯Ê±¹Ø±ÕËùÓĞledµÆ
-		GPIO_SetBits(LED1_GPIO_PORT, LED1_GPIO_PIN);
-		GPIO_SetBits(LED2_GPIO_PORT, LED2_GPIO_PIN);	 
-		GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
+// LEDåˆå§‹åŒ–
+void LED_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+		RCC_APB2PeriphClockCmd(LED1_GPIO_CLK | LED2_GPIO_CLK | LED3_GPIO_CLK, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = LED1_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = LED_GPIO_Mode;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = LED2_GPIO_PIN;
+    GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
+    GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
 }

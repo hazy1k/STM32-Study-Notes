@@ -56,8 +56,6 @@
 /* #define USE_FULL_ASSERT    1 */
 
 /* Exported macro ------------------------------------------------------------*/
-
-//#define USE_FULL_ASSERT
 #ifdef  USE_FULL_ASSERT
 
 /**
@@ -69,12 +67,10 @@
   */
   #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
 /* Exported functions ------------------------------------------------------- */
-void assert_failed(uint8_t* file, uint32_t line);
+  void assert_failed(uint8_t* file, uint32_t line);
 #else
   #define assert_param(expr) ((void)0)
 #endif /* USE_FULL_ASSERT */
-
-
 
 #endif /* __STM32F10x_CONF_H */
 
