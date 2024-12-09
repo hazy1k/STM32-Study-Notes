@@ -20,7 +20,7 @@
 
 ## 2. 软件设计
 
-- 蜂鸣器初始化函数
+### 2.1 蜂鸣器相关参数宏定义
 
 ```c
 #ifndef __BEEP_H
@@ -30,10 +30,10 @@
 #define BEEP_GPIO_PORT       GPIOA                 // 蜂鸣器使用的GPIO端口
 #define BEEP_GPIO_CLK        RCC_APB2Periph_GPIOA // 开启GPIOA端口时钟
 #define BEEP_GPIO_PIN        GPIO_Pin_8             // 连接到蜂鸣器的GPIO的引脚
-/* 高电平时，蜂鸣器响 */
+// 高电平时，蜂鸣器响 */
 #define ON  1
 #define OFF 0
-/* 带参宏，可以像内联函数一样使用 */
+// 带参宏，可以像内联函数一样使用 */
 #define BEEP(a)    if (a)    \
                     GPIO_SetBits(BEEP_GPIO_PORT,BEEP_GPIO_PIN);\
                     else        \
@@ -54,6 +54,8 @@ void BEEP_GPIO_Config(void);
    这行代码将 `BEEP_GPIO_PIN` 引脚在 `BEEP_GPIO_PORT` 端口设置为低电平。常用于使 GPIO 引脚输出低电压信号（例如 0V）。
 
 再对照我们的宏定义，是不是豁然开朗了呢:smile:
+
+### 2.2 蜂鸣器初始化函数
 
 ```c
 #include "bsp_beep.h"   
@@ -84,7 +86,7 @@ void BEEP_GPIO_Config(void)
 }
 ```
 
-- 主函数
+### 2.3 主函数
 
 ```c
 #include "stm32f10x.h"
@@ -279,3 +281,5 @@ void Delay(__IO uint32_t nCount)
 2024.7.21 第一次修订
 
 2024.8.19 第二次修订，后期不再维护
+
+2024.12.9 修补部分内容，优化结构
