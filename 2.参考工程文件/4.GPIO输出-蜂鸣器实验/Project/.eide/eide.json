@@ -2,7 +2,9 @@
   "name": "beep",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [],
+  "srcDirs": [
+    "../Doc"
+  ],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],

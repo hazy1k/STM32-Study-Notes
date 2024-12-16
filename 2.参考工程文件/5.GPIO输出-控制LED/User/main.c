@@ -1,53 +1,34 @@
 #include "stm32f10x.h"
 #include "led.h"
-#define SOFT_DELAY Delay(0x0FFFFF);
-void Delay(__IO uint32_t nCount);
+
+// 延时函数
+void Delay(uint32_t time)
+{
+    while (time--);
+}
 
 int main(void)
 {
-	LED_GPIO_Init();
-	while(1)
-	{
-        LED1_ON; // ?
-        SOFT_DELAY; // ??
-        LED1_OFF; // ?
+    // 初始化LED
+    LED_Init();
 
-        LED2_ON;             
-        SOFT_DELAY;
-        LED2_OFF;          
-
-        LED3_ON;             
-        SOFT_DELAY;
-        LED3_OFF;         
-
-        /*???? ??????? ??*/
-        LED_RED;
-        SOFT_DELAY;
-
-        LED_GREEN;
-        SOFT_DELAY;
-
-        LED_BLUE;
-        SOFT_DELAY;
-
-        LED_YELLOW;
-        SOFT_DELAY;
-
-        LED_PURPLE;
-        SOFT_DELAY;
-
-        LED_CYAN;
-        SOFT_DELAY;
-
-        LED_WHITE;
-        SOFT_DELAY;
-
-        LED_RGBOFF;
-        SOFT_DELAY;
-	}	
-}
-
-void Delay(__IO uint32_t nCount)
-{
-    for (; nCount != 0; nCount--);
+    while (1)
+    {
+        LED_RED();      // 红色
+        Delay(1000000); // 延时
+        LED_GREEN();    // 绿色
+        Delay(1000000); // 延时
+        LED_BLUE();     // 蓝色
+        Delay(1000000); // 延时
+        LED_YELLOW();   // 黄色
+        Delay(1000000); // 延时
+        LED_PURPLE();   // 紫色
+        Delay(1000000); // 延时
+        LED_CYAN();     // 青色
+        Delay(1000000); // 延时
+        LED_WHITE();    // 白色
+        Delay(1000000); // 延时
+        LED_RGBOFF();   // 关闭所有LED
+        Delay(1000000); // 延时
+    }
 }
