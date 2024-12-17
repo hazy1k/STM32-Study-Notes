@@ -93,8 +93,6 @@ void LED_Init(void)
     // 初始化完成后，先关闭所有LED
     LED_RGBOFF();
 }
-
-
 ```
 
 函数执行流程如下：
@@ -150,7 +148,6 @@ int main(void)
         Delay(1000000); // 延时
     }
 }
-
 ```
 
 ## 3. 小结
