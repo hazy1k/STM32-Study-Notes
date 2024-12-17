@@ -5,7 +5,11 @@
   "srcDirs": [],
   "virtualFolder": {
     "name": "<virtual_root>",
-    "files": [],
+    "files": [
+      {
+        "path": "../Doc/readme.txt"
+      }
+    ],
     "folders": [
       {
         "name": "CMSIS",
@@ -123,6 +127,12 @@
           },
           {
             "path": "../User/led/led.h"
+          },
+          {
+            "path": "../User/key/key.c"
+          },
+          {
+            "path": "../User/key/key.h"
           }
         ],
         "folders": []
@@ -272,7 +282,7 @@
           "../Libraries/FWlib/inc",
           "../User",
           "../User/led",
-          ".cmsis/include",
+          "../User/key",
           "RTE/_LED"
         ],
         "libList": [],

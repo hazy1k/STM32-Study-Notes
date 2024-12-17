@@ -21,7 +21,6 @@ void LED_Init(void)
     // 初始化LED3
     GPIO_InitStructure.GPIO_Pin = LED3_GPIO_PIN;
     GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStructure);
-
     // 初始化完成后，先关闭所有LED
     LED_RGBOFF();
 }

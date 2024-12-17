@@ -29,7 +29,8 @@ Section Cross References
     startup_stm32f10x_hd.o(.text) refers to __main.o(!!!main) for __main
     startup_stm32f10x_hd.o(.text) refers to startup_stm32f10x_hd.o(HEAP) for Heap_Mem
     startup_stm32f10x_hd.o(.text) refers to startup_stm32f10x_hd.o(STACK) for Stack_Mem
-    main.o(.text) refers to led.o(.text) for LED_GPIO_Init
+    main.o(.text) refers to led.o(.text) for LED_Init
+    main.o(.text) refers to stm32f10x_gpio.o(.text) for GPIO_ResetBits
     led.o(.text) refers to stm32f10x_rcc.o(.text) for RCC_APB2PeriphClockCmd
     led.o(.text) refers to stm32f10x_gpio.o(.text) for GPIO_Init
     __main.o(!!!main) refers to __rtentry.o(.ARM.Collect$$rtentry$$00000000) for __rt_entry
@@ -302,15 +303,15 @@ Image Symbol Table
     .text                                    0x08000588   Section        0  stm32f10x_rcc.o(.text)
     .text                                    0x08000840   Section       64  startup_stm32f10x_hd.o(.text)
     .text                                    0x08000880   Section        0  main.o(.text)
-    .text                                    0x08000928   Section        0  stm32f10x_it.o(.text)
-    .text                                    0x0800093c   Section        0  led.o(.text)
-    .text                                    0x08000984   Section        0  heapauxi.o(.text)
-    .text                                    0x0800098a   Section       74  sys_stackheap_outer.o(.text)
-    .text                                    0x080009d4   Section        0  exit.o(.text)
-    .text                                    0x080009e8   Section        8  libspace.o(.text)
-    .text                                    0x080009f0   Section        0  sys_exit.o(.text)
-    .text                                    0x080009fc   Section        2  use_no_semi.o(.text)
-    .text                                    0x080009fe   Section        0  indicate_semi.o(.text)
+    .text                                    0x08000988   Section        0  stm32f10x_it.o(.text)
+    .text                                    0x0800099c   Section        0  led.o(.text)
+    .text                                    0x080009fc   Section        0  heapauxi.o(.text)
+    .text                                    0x08000a02   Section       74  sys_stackheap_outer.o(.text)
+    .text                                    0x08000a4c   Section        0  exit.o(.text)
+    .text                                    0x08000a60   Section        8  libspace.o(.text)
+    .text                                    0x08000a68   Section        0  sys_exit.o(.text)
+    .text                                    0x08000a74   Section        2  use_no_semi.o(.text)
+    .text                                    0x08000a76   Section        0  indicate_semi.o(.text)
     .data                                    0x20000000   Section       20  system_stm32f10x.o(.data)
     .data                                    0x20000014   Section       20  stm32f10x_rcc.o(.data)
     ADCPrescTable                            0x20000014   Data           4  stm32f10x_rcc.o(.data)
@@ -523,32 +524,32 @@ Image Symbol Table
     USB_LP_CAN1_RX0_IRQHandler               0x0800085b   Thumb Code     0  startup_stm32f10x_hd.o(.text)
     WWDG_IRQHandler                          0x0800085b   Thumb Code     0  startup_stm32f10x_hd.o(.text)
     __user_initial_stackheap                 0x0800085d   Thumb Code     0  startup_stm32f10x_hd.o(.text)
-    Delay                                    0x08000881   Thumb Code    16  main.o(.text)
-    main                                     0x08000891   Thumb Code   144  main.o(.text)
-    NMI_Handler                              0x08000929   Thumb Code     2  stm32f10x_it.o(.text)
-    HardFault_Handler                        0x0800092b   Thumb Code     2  stm32f10x_it.o(.text)
-    MemManage_Handler                        0x0800092d   Thumb Code     2  stm32f10x_it.o(.text)
-    BusFault_Handler                         0x0800092f   Thumb Code     2  stm32f10x_it.o(.text)
-    UsageFault_Handler                       0x08000931   Thumb Code     2  stm32f10x_it.o(.text)
-    SVC_Handler                              0x08000933   Thumb Code     2  stm32f10x_it.o(.text)
-    DebugMon_Handler                         0x08000935   Thumb Code     2  stm32f10x_it.o(.text)
-    PendSV_Handler                           0x08000937   Thumb Code     2  stm32f10x_it.o(.text)
-    SysTick_Handler                          0x08000939   Thumb Code     2  stm32f10x_it.o(.text)
-    LED_GPIO_Init                            0x0800093d   Thumb Code    68  led.o(.text)
-    __use_two_region_memory                  0x08000985   Thumb Code     2  heapauxi.o(.text)
-    __rt_heap_escrow$2region                 0x08000987   Thumb Code     2  heapauxi.o(.text)
-    __rt_heap_expand$2region                 0x08000989   Thumb Code     2  heapauxi.o(.text)
-    __user_setup_stackheap                   0x0800098b   Thumb Code    74  sys_stackheap_outer.o(.text)
-    exit                                     0x080009d5   Thumb Code    18  exit.o(.text)
-    __user_libspace                          0x080009e9   Thumb Code     8  libspace.o(.text)
-    __user_perproc_libspace                  0x080009e9   Thumb Code     0  libspace.o(.text)
-    __user_perthread_libspace                0x080009e9   Thumb Code     0  libspace.o(.text)
-    _sys_exit                                0x080009f1   Thumb Code     8  sys_exit.o(.text)
-    __I$use$semihosting                      0x080009fd   Thumb Code     0  use_no_semi.o(.text)
-    __use_no_semihosting_swi                 0x080009fd   Thumb Code     2  use_no_semi.o(.text)
-    __semihosting_library_function           0x080009ff   Thumb Code     0  indicate_semi.o(.text)
-    Region$$Table$$Base                      0x08000a00   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08000a20   Number         0  anon$$obj.o(Region$$Table)
+    Delay                                    0x08000881   Thumb Code     6  main.o(.text)
+    main                                     0x08000887   Thumb Code   250  main.o(.text)
+    NMI_Handler                              0x08000989   Thumb Code     2  stm32f10x_it.o(.text)
+    HardFault_Handler                        0x0800098b   Thumb Code     2  stm32f10x_it.o(.text)
+    MemManage_Handler                        0x0800098d   Thumb Code     2  stm32f10x_it.o(.text)
+    BusFault_Handler                         0x0800098f   Thumb Code     2  stm32f10x_it.o(.text)
+    UsageFault_Handler                       0x08000991   Thumb Code     2  stm32f10x_it.o(.text)
+    SVC_Handler                              0x08000993   Thumb Code     2  stm32f10x_it.o(.text)
+    DebugMon_Handler                         0x08000995   Thumb Code     2  stm32f10x_it.o(.text)
+    PendSV_Handler                           0x08000997   Thumb Code     2  stm32f10x_it.o(.text)
+    SysTick_Handler                          0x08000999   Thumb Code     2  stm32f10x_it.o(.text)
+    LED_Init                                 0x0800099d   Thumb Code    92  led.o(.text)
+    __use_two_region_memory                  0x080009fd   Thumb Code     2  heapauxi.o(.text)
+    __rt_heap_escrow$2region                 0x080009ff   Thumb Code     2  heapauxi.o(.text)
+    __rt_heap_expand$2region                 0x08000a01   Thumb Code     2  heapauxi.o(.text)
+    __user_setup_stackheap                   0x08000a03   Thumb Code    74  sys_stackheap_outer.o(.text)
+    exit                                     0x08000a4d   Thumb Code    18  exit.o(.text)
+    __user_libspace                          0x08000a61   Thumb Code     8  libspace.o(.text)
+    __user_perproc_libspace                  0x08000a61   Thumb Code     0  libspace.o(.text)
+    __user_perthread_libspace                0x08000a61   Thumb Code     0  libspace.o(.text)
+    _sys_exit                                0x08000a69   Thumb Code     8  sys_exit.o(.text)
+    __I$use$semihosting                      0x08000a75   Thumb Code     0  use_no_semi.o(.text)
+    __use_no_semihosting_swi                 0x08000a75   Thumb Code     2  use_no_semi.o(.text)
+    __semihosting_library_function           0x08000a77   Thumb Code     0  indicate_semi.o(.text)
+    Region$$Table$$Base                      0x08000a78   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08000a98   Number         0  anon$$obj.o(Region$$Table)
     SystemCoreClock                          0x20000000   Data           4  system_stm32f10x.o(.data)
     AHBPrescTable                            0x20000004   Data          16  system_stm32f10x.o(.data)
     __libspace_start                         0x20000028   Data          96  libspace.o(.bss)
@@ -562,9 +563,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000131
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00000a48, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00000ac0, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00000a20, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00000a98, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -621,28 +622,28 @@ Memory Map of the image
     0x08000324   0x08000324   0x00000264   Code   RO          263    .text               stm32f10x_gpio.o
     0x08000588   0x08000588   0x000002b8   Code   RO          311    .text               stm32f10x_rcc.o
     0x08000840   0x08000840   0x00000040   Code   RO          402    .text               startup_stm32f10x_hd.o
-    0x08000880   0x08000880   0x000000a8   Code   RO          406    .text               main.o
-    0x08000928   0x08000928   0x00000012   Code   RO          422    .text               stm32f10x_it.o
-    0x0800093a   0x0800093a   0x00000002   PAD
-    0x0800093c   0x0800093c   0x00000048   Code   RO          437    .text               led.o
-    0x08000984   0x08000984   0x00000006   Code   RO          451    .text               c_w.l(heapauxi.o)
-    0x0800098a   0x0800098a   0x0000004a   Code   RO          471    .text               c_w.l(sys_stackheap_outer.o)
-    0x080009d4   0x080009d4   0x00000012   Code   RO          473    .text               c_w.l(exit.o)
-    0x080009e6   0x080009e6   0x00000002   PAD
-    0x080009e8   0x080009e8   0x00000008   Code   RO          481    .text               c_w.l(libspace.o)
-    0x080009f0   0x080009f0   0x0000000c   Code   RO          542    .text               c_w.l(sys_exit.o)
-    0x080009fc   0x080009fc   0x00000002   Code   RO          553    .text               c_w.l(use_no_semi.o)
-    0x080009fe   0x080009fe   0x00000000   Code   RO          555    .text               c_w.l(indicate_semi.o)
-    0x080009fe   0x080009fe   0x00000002   PAD
-    0x08000a00   0x08000a00   0x00000020   Data   RO          610    Region$$Table       anon$$obj.o
+    0x08000880   0x08000880   0x00000108   Code   RO          406    .text               main.o
+    0x08000988   0x08000988   0x00000012   Code   RO          422    .text               stm32f10x_it.o
+    0x0800099a   0x0800099a   0x00000002   PAD
+    0x0800099c   0x0800099c   0x00000060   Code   RO          437    .text               led.o
+    0x080009fc   0x080009fc   0x00000006   Code   RO          451    .text               c_w.l(heapauxi.o)
+    0x08000a02   0x08000a02   0x0000004a   Code   RO          471    .text               c_w.l(sys_stackheap_outer.o)
+    0x08000a4c   0x08000a4c   0x00000012   Code   RO          473    .text               c_w.l(exit.o)
+    0x08000a5e   0x08000a5e   0x00000002   PAD
+    0x08000a60   0x08000a60   0x00000008   Code   RO          481    .text               c_w.l(libspace.o)
+    0x08000a68   0x08000a68   0x0000000c   Code   RO          542    .text               c_w.l(sys_exit.o)
+    0x08000a74   0x08000a74   0x00000002   Code   RO          553    .text               c_w.l(use_no_semi.o)
+    0x08000a76   0x08000a76   0x00000000   Code   RO          555    .text               c_w.l(indicate_semi.o)
+    0x08000a76   0x08000a76   0x00000002   PAD
+    0x08000a78   0x08000a78   0x00000020   Data   RO          610    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08000a20, Size: 0x00000688, Max: 0x00010000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08000a98, Size: 0x00000688, Max: 0x00010000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x08000a20   0x00000014   Data   RW           18    .data               system_stm32f10x.o
-    0x20000014   0x08000a34   0x00000014   Data   RW          312    .data               stm32f10x_rcc.o
+    0x20000000   0x08000a98   0x00000014   Data   RW           18    .data               system_stm32f10x.o
+    0x20000014   0x08000aac   0x00000014   Data   RW          312    .data               stm32f10x_rcc.o
     0x20000028        -       0x00000060   Zero   RW          482    .bss                c_w.l(libspace.o)
     0x20000088        -       0x00000200   Zero   RW          400    HEAP                startup_stm32f10x_hd.o
     0x20000288        -       0x00000400   Zero   RW          399    STACK               startup_stm32f10x_hd.o
@@ -656,8 +657,8 @@ Image component sizes
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
          0          0          0          0          0       4540   core_cm3.o
-        72          4          0          0          0        520   led.o
-       168          8          0          0          0       1211   main.o
+        96          4          0          0          0        519   led.o
+       264          8          0          0          0       1619   main.o
         64         26        304          0       1536        840   startup_stm32f10x_hd.o
        612         36          0          0          0       6193   stm32f10x_gpio.o
         18          0          0          0          0       1206   stm32f10x_it.o
@@ -665,7 +666,7 @@ Image component sizes
        344         34          0         20          0     222383   system_stm32f10x.o
 
     ----------------------------------------------------------------------
-      1976        140        336         40       1536     246085   Object Totals
+      2096        140        336         40       1536     246492   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          2          0          0          0          0          0   (incl. Padding)
 
@@ -714,15 +715,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      2256        156        336         40       1632     246041   Grand Totals
-      2256        156        336         40       1632     246041   ELF Image Totals
-      2256        156        336         40          0          0   ROM Totals
+      2376        156        336         40       1632     246396   Grand Totals
+      2376        156        336         40       1632     246396   ELF Image Totals
+      2376        156        336         40          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 2592 (   2.53kB)
+    Total RO  Size (Code + RO Data)                 2712 (   2.65kB)
     Total RW  Size (RW Data + ZI Data)              1672 (   1.63kB)
-    Total ROM Size (Code + RO Data + RW Data)       2632 (   2.57kB)
+    Total ROM Size (Code + RO Data + RW Data)       2752 (   2.69kB)
 
 ==============================================================================
 
