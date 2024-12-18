@@ -380,6 +380,15 @@ void GPIO_ResetBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
   GPIOx->BRR = GPIO_Pin;
 }
 
+void GPIO_ToggleBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
+    if (GPIO_ReadOutputDataBit(GPIOx, GPIO_Pin)) {
+        GPIO_ResetBits(GPIOx, GPIO_Pin);
+    } else {
+        GPIO_SetBits(GPIOx, GPIO_Pin);
+    }
+}
+
+
 /**
   * @brief  Sets or clears the selected data port bit.
   * @param  GPIOx: where x can be (A..G) to select the GPIO peripheral.
