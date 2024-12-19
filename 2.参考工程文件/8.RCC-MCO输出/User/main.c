@@ -1,46 +1,17 @@
 #include "stm32f10x.h"
-#include "./led/bsp_led.h"
-#include "bsp_clkconfig.h"
-#include "bsp_mcooutput.h"
-
-//  Èí¼þÑÓÊ±º¯Êý£¬Ê¹ÓÃ²»Í¬µÄÏµÍ³Ê±ÖÓ£¬ÑÓÊ±²»Ò»Ñù
-void Delay(__IO u32 nCount); 
+#include "clkconfig.h"
+#include "mcooutput.h"
 
 int main(void)
-{	
-	// ³ÌÐòÀ´µ½mainº¯ÊýÖ®Ç°£¬Æô¶¯ÎÄ¼þ£ºstatup_stm32f10x_hd.sÒÑ¾­µ÷ÓÃSystemInit()º¯Êý°ÑÏµÍ³Ê±ÖÓ³õÊ¼»¯³É72MHZ
-	// SystemInit()ÔÚsystem_stm32f10x.cÖÐ¶¨Òå
-	// Èç¹ûÓÃ»§ÏëÐÞ¸ÄÏµÍ³Ê±ÖÓ£¬¿É×ÔÐÐ±àÐ´³ÌÐòÐÞ¸Ä
-	
-	// ÖØÐÂÉèÖÃÏµÍ³Ê±ÖÓ£¬¸ù¾ÝÐèÒªÐÞ¸Ä£¬Ò»°ãÉèÖÃ×î¸ßÎª128MHz
-	// SYSCLK = 8M * RCC_PLLMul_x, x:[2,3,...16]
-	// HSE_SetSysClock(RCC_PLLMul_9);
-	
-	HSI_SetSysClock(RCC_PLLMul_16);
-	// MCO Òý½Å³õÊ¼»¯
-	MCO_GPIO_Config();
-	
-	// ÉèÖÃMCOÒý½ÅÊä³öÊ±ÖÓ£¬ÓÃÊ¾²¨Æ÷¼´¿ÉÔÚPA8²âÁ¿µ½Êä³öµÄÊ±ÖÓÐÅºÅ
-	// MCOÒý½ÅÊä³ö¿ÉÒÔÊÇHSE,HSI,PLLCLK/2,SYSCLK
-	//RCC_MCOConfig(RCC_MCO_HSE);	             // 8M	        
-	//RCC_MCOConfig(RCC_MCO_HSI);	           // 8M 	        
-	//RCC_MCOConfig(RCC_MCO_PLLCLK_Div2);    // 36M		
-	RCC_MCOConfig(RCC_MCO_SYSCLK);		     // 72M  
-	
-	// LED ¶Ë¿Ú³õÊ¼»¯
-	LED_GPIO_Config();
-	while (1)
-	{
-		LED1( ON );			  // ÁÁ
-		Delay(0x0FFFFF);
-		LED1( OFF );		  // Ãð 
-		Delay(0x0FFFFF);		
-	}
-
-}
-
-//  Èí¼þÑÓÊ±º¯Êý£¬Ê¹ÓÃ²»Í¬µÄÏµÍ³Ê±ÖÓ£¬ÑÓÊ±²»Ò»Ñù
-void Delay(__IO uint32_t nCount)	
 {
-	for(; nCount != 0; nCount--);
+	// ä½¿ç”¨HSEæ—¶ï¼šSYSCLK = 8M * RCC_PLLMul_x(x=2~16)ï¼Œæœ€é«˜128M
+	// ä½¿ç”¨HSIæ—¶ï¼šSYSCLK = 4M * RCC_PLLMul_x(x=2~16)ï¼Œæœ€é«˜64M
+	HSI_SetSYSCLK(RCC_PLLMul_16); // è¿™é‡Œæˆ‘ä»¬é€‰æ‹©HSIä½œä¸ºç³»ç»Ÿæ—¶é’Ÿæºï¼ŒSYSCLK = 4M * 16 = 64M
+	MCO_GPIO_Init();
+	// è®¾ç½®MCOå¼•è„šè¾“å‡ºçš„æ—¶é’Ÿé¢‘çŽ‡
+	// MCOå¼•è„šè¾“å‡ºçš„é¢‘çŽ‡å¯ä»¥æ˜¯HSEã€HSIã€SYSCLKã€PLLCLKç­‰ï¼Œè¿™é‡Œæˆ‘ä»¬é€‰æ‹©SYSCLKä½œä¸ºè¾“å‡ºæºï¼Œä¹Ÿå°±æ˜¯HSIå•¦
+	RCC_MCOConfig(RCC_MCO_SYSCLK);
+	while(1)
+	{
+	}	
 }
