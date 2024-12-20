@@ -2,7 +2,7 @@
 
 ## 1. EXTI简介
 
-    EXTI（External interrupt/event controller）—外部中断/事件控制器，管理了控制器的20个中断/事件线。 每个中断/事件线都对应有一个边沿检测器，可以实现输入信号的上升沿检测和下降沿的检测。EXTI可以实现对每个中断/事件线进行单独配置， 可以单独配置为中断或者事件，以及触发事件的属性。
+    EXTI（External interrupt/event controller）：外部中断/事件控制器，管理了控制器的20个中断/事件线。 每个中断/事件线都对应有一个边沿检测器，可以实现输入信号的上升沿检测和下降沿的检测。EXTI可以实现对每个中断/事件线进行单独配置， 可以单独配置为中断或者事件，以及触发事件的属性。
 
 ## 2. EXTI功能框图
 
@@ -11,6 +11,8 @@
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/EXTI002.png)
 
     EXTI可分为两大部分功能，一个是产生中断，另一个是产生事件，这两个功能从硬件上就有所不同。
+
+### 2.1 产生中断
 
     首先我们来看图中红色虚线指示的电路流程。它是一个产生中断的线路，最终信号流入到NVIC控制器内。
 
@@ -23,6 +25,8 @@
     编号4电路是一个与门电路，它的一个输入是编号3电路，另外一个输入来自中断屏蔽寄存器(EXTI_IMR)。与门电路要求输入都为1才输出1， 导致的结果是如果EXTI_IMR设置为0时，那不管编号3电路的输出信号是1还是0，最终编号4电路输出的信号都为0；如果EXTI_IMR设置为1时， 最终编号4电路输出的信号才由编号3电路的输出信号决定，这样我们可以简单的控制EXTI_IMR来实现是否产生中断的目的。 编号4电路输出的信号会被保存到挂起寄存器(EXTI_PR)内，如果确定编号4电路输出为1就会把EXTI_PR对应位置1。
 
     编号5是将EXTI_PR寄存器内容输出到NVIC内，从而实现系统中断事件控制。
+
+### 2.2 产生事件
 
     接下来我们来看看绿色虚线指示的电路流程。它是一个产生事件的线路，最终输出一个脉冲信号。
 
@@ -46,11 +50,11 @@
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/EXTI003.png)
 
+更多内容可以参考：[STM32 EXTI（外部中断） - 浇筑菜鸟 - 博客园](https://www.cnblogs.com/jzcn/p/15793353.html)
+
 ## 4. EXTI初始化结构体详解
 
-    标准库函数对每个外设都建立了一个初始化结构体，比如EXTI_InitTypeDef，结构体成员用于设置外设工作参数，并由外设初始化配置函数， 比如EXTI_Init()调用，这些设定参数将会设置外设相应的寄存器，达到配置外设工作环境的目的。
-
-    初始化结构体和初始化库函数配合使用是标准库精髓所在，理解了初始化结构体每个成员意义基本上就可以对该外设运用自如了。 初始化结构体定义在stm32f10x_exti.h文件中，初始化库函数定义在stm32f10x_exti.c文件中，编程时我们可以结合这两个文件内注释使用。
+   初始化结构体和初始化库函数配合使用是标准库精髓所在，理解了初始化结构体每个成员意义基本上就可以对该外设运用自如了。 初始化结构体定义在stm32f10x_exti.h文件中，初始化库函数定义在stm32f10x_exti.c文件中，编程时我们可以结合这两个文件内注释使用。
 
 ```c
 // EXTI-1 EXTI初始化结构体
@@ -62,14 +66,76 @@ typedef struct {
 } EXTI_InitTypeDef;
 ```
 
-1. EXTI_Line：EXTI中断/事件线选择，可选EXTI0至EXTI19，可参考表选择。
+### 4.1 `Line` 字段
 
-2. EXTI_Mode：EXTI模式选择，可选为产生中断(EXTI_Mode_Interrupt)或者产生事件(EXTI_Mode_Event)。
+- **作用**：指定要配置的外部中断线，通常对应于具体的 GPIO 引脚。
+- **类型**：`uint32_t`
+- **可选值**：
+  - `EXTI_Line0` 到 `EXTI_Line15`（每个外部中断引脚对应一个 EXTI 中断线，例如 `EXTI_Line0` 对应 `PA0`，`EXTI_Line1` 对应 `PA1` 等）。
 
-3. EXTI_Trigger：EXTI边沿触发事件，可选上升沿触发(EXTI_Trigger_Rising)、 下降沿触发( EXTI_Trigger_Falling)或者上升沿和下降沿都触发( EXTI_Trigger_Rising_Falling)。
+### 4.2 `Mode` 字段
 
-4. EXTI_LineCmd：控制是否使能EXTI线，可选使能EXTI线(ENABLE)或禁用(DISABLE)。
+- **作用**：指定中断线的工作模式（触发条件）。
+- **类型**：`uint32_t`
+- **可选值**：
+  - `EXTI_Mode_Interrupt`：配置为中断模式，表示当触发条件满足时，产生中断请求。
+  - `EXTI_Mode_Event`：配置为事件模式，表示当触发条件满足时，产生事件请求。事件不会生成中断，通常用于定时器输入捕获等应用。
+
+### 4.3 `Trigger` 字段
+
+- **作用**：配置触发中断的边沿条件。
+- **类型**：`uint32_t`
+- **可选值**：
+  - `EXTI_Trigger_Rising`：触发条件为上升沿（从低电平到高电平）。
+  - `EXTI_Trigger_Falling`：触发条件为下降沿（从高电平到低电平）。
+  - `EXTI_Trigger_Rising_Falling`：触发条件为双边沿（既可以是上升沿，也可以是下降沿）。
+
+### 4.4 `LineCmd` 字段
+
+- **作用**：使能或禁用外部中断。
+- **类型**：`FunctionalState`（可以是 `ENABLE` 或 `DISABLE`）
+- **可选值**：
+  - `ENABLE`：使能指定的外部中断线。
+  - `DISABLE`：禁用指定的外部中断线。
+
+以下是一个使用 `EXTI_InitTypeDef` 初始化外部中断的代码示例，假设我们要配置 `PA0` 引脚产生外部中断。
+
+```c
+#include "stm32f4xx_hal.h"
+
+void EXTI0_IRQHandler(void)
+{
+    // 中断处理代码
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);  // 切换 GPIOB 的第 0 引脚状态
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);   // 清除中断标志
+}
+
+void EXTI_Init(void)
+{
+    EXTI_InitTypeDef EXTI_InitStruct = {0};
+
+    // 配置 PA0 产生中断
+    EXTI_InitStruct.Line = EXTI_Line0;                 // 选择中断线0
+    EXTI_InitStruct.Mode = EXTI_Mode_Interrupt;         // 配置为中断模式
+    EXTI_InitStruct.Trigger = EXTI_Trigger_Rising;      // 上升沿触发
+    EXTI_InitStruct.LineCmd = ENABLE;                   // 使能中断
+
+    // 初始化 EXTI
+    HAL_EXTI_SetConfigLine(&EXTI_InitStruct);
+}
+
+```
+
+## 5. 小结
+
+`EXTI_InitTypeDef` 结构体是配置 STM32 外部中断的核心部分，通过设置其各个字段，可以灵活配置不同引脚的中断触发方式和模式。一般来说，使用 EXTI 时，流程包括：
+
+1. 配置 EXTI 引脚和中断触发方式。
+2. 使能外部中断。
+3. 配置 NVIC 使能中断服务函数。
 
 ---
 
 2024.8.23 第一次修订，后期不再维护
+
+2024.12.20 修补内容，新增“小结”章节
