@@ -25,8 +25,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_led.h"
-#include "bsp_exti.h"
+#include "led.h"
+#include "exti.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -141,29 +141,24 @@ void SysTick_Handler(void)
 }
 
 
-
+// 编写我们的中断函数
+// 产生中断后，执行中断服务程序，处理中断源产生的事件。
 void KEY1_IRQHandler(void)
 {
-  //ȷ���Ƿ������EXTI Line�ж�
-	if(EXTI_GetITStatus(KEY1_INT_EXTI_LINE) != RESET) 
-	{
-		// LED1 ȡ��		
-		LED1_TOGGLE;
-    //����жϱ�־λ
-		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
-	}  
+  if(EXTI_GetITStatus(KEY1_EXTI_LINE) != RESET) // 首先确保EXTI确实产生了中断
+  {
+    LED1_TOGGLE(); // LED1 反转
+    EXTI_ClearITPendingBit(KEY1_EXTI_LINE); // 因为事件已经处理完毕，清除中断标志位
+  }
 }
 
 void KEY2_IRQHandler(void)
 {
-  //ȷ���Ƿ������EXTI Line�ж�
-	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
-	{
-		// LED2 ȡ��		
-		LED2_TOGGLE;
-    //����жϱ�־λ
-		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
-	}  
+  if(EXTI_GetITStatus(KEY2_EXTI_LINE) != RESET)
+  {
+    LED2_TOGGLE();
+    EXTI_ClearITPendingBit(KEY2_EXTI_LINE);
+  }
 }
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
