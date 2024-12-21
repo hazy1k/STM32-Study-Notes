@@ -25,8 +25,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "led.h"
+#include "exti.h"
+#include "SysTick.h"
 
-extern void TimingDelay_Decrement(void);
+extern __IO uint32_t Delay_Time; // 引入 SysTick 中的延时计数器
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -131,13 +134,38 @@ void PendSV_Handler(void)
 {
 }
 
-
+/**
+  * @brief  This function handles SysTick Handler.
+  * @param  None
+  * @retval None
+  */
 void SysTick_Handler(void)
 {
-	TimingDelay_Decrement();	
+  if (Delay_Time != 0) 
+  {
+    Delay_Time--;  // 每次 SysTick 中断时，减少延时计数器
+  }
 }
 
+// 编写我们的中断函数
+// 产生中断后，执行中断服务程序，处理中断源产生的事件。
+void KEY1_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(KEY1_EXTI_LINE) != RESET) // 首先确保EXTI确实产生了中断
+  {
+    LED1_TOGGLE(); // LED1 反转
+    EXTI_ClearITPendingBit(KEY1_EXTI_LINE); // 因为事件已经处理完毕，清除中断标志位
+  }
+}
 
+void KEY2_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(KEY2_EXTI_LINE) != RESET)
+  {
+    LED2_TOGGLE();
+    EXTI_ClearITPendingBit(KEY2_EXTI_LINE);
+  }
+}
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
