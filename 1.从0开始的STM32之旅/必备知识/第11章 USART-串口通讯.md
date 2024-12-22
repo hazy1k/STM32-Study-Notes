@@ -88,9 +88,9 @@
 
     USART在STM32应用最多莫过于“打印”程序信息，一般在硬件设计时都会预留一个USART通信接口连接电脑， 用于在调试程序是可以把一些调试信息“打印”在电脑端的串口调试助手工具上，从而了解程序运行是否正确、如果出错哪具体哪里出错等等。
 
-## 3. USART功能框图
+   UART与USART两者的区别可以参考： [UART和USART：在STM32上选择最适合你的串口通信方式 - 知乎](https://zhuanlan.zhihu.com/p/686283041)
 
-    USART的功能框图包含了USART最核心内容，掌握了功能框图，对USART就有一个整体的把握， 在编程时就思路就非常清晰。
+## 3. USART功能框图
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/USART008.png)
 
@@ -411,7 +411,6 @@ int main(void) {
         // 可以在这里添加其他应用代码
     }
 }
-
 ```
 
 1. **USART1外部时钟配置 (`USART1_ClockConfig`)**:
@@ -447,3 +446,5 @@ int main(void) {
 2024.8.23 第一次修订，后期不再维护
 
 2024.9.4 有阅读量，加更
+
+2024.12.22 再次加了点内容
