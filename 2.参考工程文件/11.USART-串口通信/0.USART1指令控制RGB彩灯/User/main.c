@@ -3,15 +3,15 @@
 
 static void Show_Info(void) // 显示RGB彩灯控制信息
 {
-	USART_SendString(USARTx, "Please input the RGB value:\r\n");
-	USART_SendString(USARTx, "1  -----   红色\n");
-	USART_SendString(USARTx, "2  -----   绿色\n");
-	USART_SendString(USARTx, "3  -----   蓝色\n");
-	USART_SendString(USARTx, "4  -----   黄色\n");
-	USART_SendString(USARTx, "5  -----   紫色\n");
-	USART_SendString(USARTx, "6  -----   青色\n");
-	USART_SendString(USARTx, "7  -----   白色\n");
-	USART_SendString(USARTx, "8  -----   关闭\n");
+	USART_SendString(USARTx, (uint8_t*)"Please input the RGB value:\r\n");
+	USART_SendString(USARTx, (uint8_t*)"1  -----   红色\n");
+	USART_SendString(USARTx, (uint8_t*)"2  -----   绿色\n");
+	USART_SendString(USARTx, (uint8_t*)"3  -----   蓝色\n");
+	USART_SendString(USARTx, (uint8_t*)"4  -----   黄色\n");
+	USART_SendString(USARTx, (uint8_t*)"5  -----   紫色\n");
+	USART_SendString(USARTx, (uint8_t*)"6  -----   青色\n");
+	USART_SendString(USARTx, (uint8_t*)"7  -----   白色\n");
+	USART_SendString(USARTx, (uint8_t*)"8  -----   关闭\n");
 }
 
 int main(void)

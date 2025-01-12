@@ -380,6 +380,7 @@ void GPIO_ResetBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
   GPIOx->BRR = GPIO_Pin;
 }
 
+// note
 void GPIO_ToggleBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
     if (GPIO_ReadOutputDataBit(GPIOx, GPIO_Pin)) {
         GPIO_ResetBits(GPIOx, GPIO_Pin);

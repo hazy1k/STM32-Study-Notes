@@ -25,13 +25,10 @@
 #define USARTx_IRQHandler USART1_IRQHandler
 
 // 一些函数声明
-void NVIC_Configuration(void);
 void USART_Config(void);
 void USART_SendByte(USART_TypeDef *pUSARTx, uint8_t ch);
 void USART_SendArray(USART_TypeDef *pUSARTx, uint8_t *pArray, uint16_t len);
 void USART_SendString(USART_TypeDef *pUSARTx, uint8_t *pStr);
 void USART_SendHalfWord(USART_TypeDef *pUSARTx, uint16_t ch);
-int USART_PutChar(int ch, FILE *f);
-int USART_GetChar(FILE *f);
 
 #endif
