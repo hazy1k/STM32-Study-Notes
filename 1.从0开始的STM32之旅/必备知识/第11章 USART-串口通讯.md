@@ -1,4 +1,4 @@
-# 第十一章 USART-串口通讯
+# 第十一章 USART介绍
 
 ## 1. 串口通讯协议简介
 
@@ -258,25 +258,20 @@ USART_ClockInitTypeDef USART_ClockInitStruct;
 void USART_Config(void) {
     // 假设我们要配置USART1
     USART_TypeDef *USARTx = USART1;
-
     // 初始化USART_ClockInitTypeDef结构体
     USART_ClockInitStruct.USART_Clock = USART_CLOCK_ENABLE;  // 启用时钟
     USART_ClockInitStruct.USART_CPOL = USART_CPOL_LOW;       // 时钟极性：低电平空闲
     USART_ClockInitStruct.USART_CPHA = USART_CPHA_1EDGE;     // 时钟相位：第一沿采样
     USART_ClockInitStruct.USART_LastBit = USART_LASTBIT_DISABLE; // 禁用最后一位时钟脉冲
-
     // 调用配置函数
     USART_ClockInit(USARTx, &USART_ClockInitStruct);
 }
-
 // 主函数
 int main(void) {
     // 初始化系统
     SystemInit();
-
     // 配置USART
     USART_Config();
-
     // 主循环
     while (1) {
         // 在这里添加你的应用代码
@@ -302,26 +297,20 @@ int main(void) {
 
 ```c
 #include "stm32f4xx.h"
-
 // 定义数据缓冲区大小
 #define BUFFER_SIZE 256
-
 // 数据缓冲区，发送的数据
 uint8_t tx_buffer[BUFFER_SIZE] = "Hello, USART1 with DMA and external clock!";
-
 // 初始化USART1的外部时钟配置
 void USART1_ClockConfig(void) {
     USART_ClockInitTypeDef USART_ClockInitStruct;
-
     // 启用USART1的时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-
     // 配置USART1的时钟参数
     USART_ClockInitStruct.USART_Clock = USART_CLOCK_ENABLE; // 启用时钟
     USART_ClockInitStruct.USART_CPOL = USART_CPOL_HIGH;     // 时钟极性高
     USART_ClockInitStruct.USART_CPHA = USART_CPHA_2EDGE;    // 时钟相位在第二沿采样
     USART_ClockInitStruct.USART_LastBit = USART_LASTBIT_DISABLE; // 不启用最后一个位的时钟脉冲
-
     // 应用USART时钟配置
     USART_ClockInit(USART1, &USART_ClockInitStruct);
 }
@@ -329,7 +318,6 @@ void USART1_ClockConfig(void) {
 // 初始化USART1的基本参数
 void USART1_Init(void) {
     USART_InitTypeDef USART_InitStruct;
-
     // 配置USART1的参数
     USART_InitStruct.USART_BaudRate = 9600;               // 设置波特率为9600
     USART_InitStruct.USART_WordLength = USART_WordLength_8b; // 数据位长度8位
@@ -337,10 +325,8 @@ void USART1_Init(void) {
     USART_InitStruct.USART_Parity = USART_Parity_No;      // 不使用校验位
     USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 不使用硬件流控制
     USART_InitStruct.USART_Mode = USART_Mode_Tx;          // 只配置为发送模式
-
     // 初始化USART1
     USART_Init(USART1, &USART_InitStruct);
-
     // 启用USART1
     USART_Cmd(USART1, ENABLE);
 }
@@ -348,10 +334,8 @@ void USART1_Init(void) {
 // 初始化DMA用于USART1的数据传输
 void DMA_Init(void) {
     DMA_InitTypeDef DMA_InitStruct;
-
     // 启用DMA2的时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-
     // 配置DMA2流7用于USART1的发送
     DMA_InitStruct.DMA_Channel = DMA_Channel_4; // DMA通道4用于USART1
     DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)(&(USART1->DR)); // 外设基地址为USART1的数据寄存器
@@ -368,16 +352,12 @@ void DMA_Init(void) {
     DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_Full; // FIFO阈值为满
     DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single; // 内存突发传输单次
     DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // 外设突发传输单次
-
     // 配置DMA2流7
     DMA_Init(DMA2_Stream7, &DMA_InitStruct);
-
     // 启用DMA传输完成中断
     DMA_ITConfig(DMA2_Stream7, DMA_IT_TC, ENABLE);
-
     // 配置USART1使用DMA进行数据传输
     USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
-
     // 启动DMA传输
     DMA_Cmd(DMA2_Stream7, ENABLE);
 }
@@ -396,16 +376,12 @@ void DMA2_Stream7_IRQHandler(void) {
 int main(void) {
     // 初始化系统时钟
     SystemInit();
-
     // 配置USART1的外部时钟
     USART1_ClockConfig();
-
     // 初始化USART1
     USART1_Init();
-
     // 初始化DMA
     DMA_Init();
-
     // 主循环
     while (1) {
         // 可以在这里添加其他应用代码
@@ -440,6 +416,12 @@ int main(void) {
    - 进入主循环，可用于其他应用代码。
 
 这个示例展示了如何结合使用USART的同步模式、DMA数据传输，以及外部时钟源配置，从而实现一个复杂的通信和数据处理场景。
+
+## 5. UART和USART的区别
+
+[UART和USART：在STM32上选择最适合你的串口通信方式 - 知乎](https://zhuanlan.zhihu.com/p/686283041)
+
+简单来说UART置支持异步通信，而USART则支持多种方式
 
 ---
 

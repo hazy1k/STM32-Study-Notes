@@ -50,7 +50,6 @@ void NVIC_Configuration(void);
 void EXTI_KeyInit(void);
 
 #endif
-
 ```
 
 在上面的宏定义中，我们除了开GPIO的端口时钟外，我们还打开了AFIO的时钟， 这是因为等下配置EXTI信号源的时候需要用到AFIO的外部中断控制寄存器AFIO_EXTICRx。
@@ -108,15 +107,21 @@ void KEY2_IRQHandler(void)
 `EXTI_GetITStatus`
 
 - **功能**: 该函数用于检查指定的外部中断线的中断状态。
-- **原型**: `ITStatus EXTI_GetITStatus(uint32_t EXTI_Line);`
-- **参数**: `EXTI_Line` 是要检查的外部中断线的标识符，通常是一个位掩码。
-- **返回值**: 返回 `SET` 或 `RESET`。如果中断发生，则返回 `SET`，否则返回 `RESET`。
 
- `EXTI_ClearITPendingBit`
+- **原型**: `ITStatus EXTI_GetITStatus(uint32_t EXTI_Line);`
+
+- **参数**: `EXTI_Line` 是要检查的外部中断线的标识符，通常是一个位掩码。
+
+- **返回值**: 返回 `SET` 或 `RESET`。如果中断发生，则返回 `SET`，否则返回 `RESET`。
+  
+  `EXTI_ClearITPendingBit`
 
 - **功能**: 清除指定外部中断线的中断挂起标志位，以便下一次中断可以正常触发。
+
 - **原型**: `void EXTI_ClearITPendingBit(uint32_t EXTI_Line);`
+
 - **参数**: `EXTI_Line` 是要清除中断挂起标志位的外部中断线标识符。
+
 - **返回值**: 无返回值。
 
 #### 2.2.4 EXTI 初始化
