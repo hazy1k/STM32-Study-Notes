@@ -11,16 +11,11 @@ int main()
 		LED1_ON();
 		Delay_ms(1000);
 		LED1_OFF();
-
 		LED2_ON();
 		Delay_ms(1000);
 		LED2_OFF();
-
 		LED3_ON();
 		Delay_ms(1000);
 		LED3_OFF();
 	}
 }
-
-
-

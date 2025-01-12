@@ -147,7 +147,6 @@ void USART1_IRQHandler(void)
     TempData = USART_ReceiveData(USARTx);
     USART_SendData(USARTx, TempData);
   }
-
 }
 
 /**
