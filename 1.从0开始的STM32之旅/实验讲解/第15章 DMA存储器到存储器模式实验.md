@@ -8,94 +8,69 @@ DMA存储器到存储器实验不需要其他硬件要求，只用到RGB彩色�
 
 ## 2. 软件设计
 
-### 2.1 编程目的
+### 2.1 编程大纲
 
-1. 使能DMA时钟；
+1. 使能DMA时钟
 
-2. 配置DMA数据参数；
+2. 配置DMA数据参数
 
-3. 使能DMA，进行传输；
+3. 使能DMA，进行传输
 
 4. 等待传输完成，并对源数据和目标地址数据进行比较
 
 ### 2.2 代码分析
 
-- DMA宏定义及相关变量定义
+#### 2.2.1 DMA宏定义
 
 ```c
-// 当使用存储器到存储器模式时候，通道可以随便选，没有硬性的规定
-#define DMA_CHANNEL     DMA1_Channel6      // 我们这里使用的通道是DMA1_Channel6
-#define DMA_CLOCK       RCC_AHBPeriph_DMA1 // DMA1时钟
-
+// 选择使用的通道和时钟
+#define DMA_CHx  DMA1_Channel6
+#define DMA_CLK  RCC_AHBPeriph_DMA1
 // 传输完成标志
-#define DMA_FLAG_TC     DMA1_FLAG_TC6
+#define DMA_FLAG_TC   DMA1_FLAG_TC6
+// 要发送的数据的最长长度
+#define DMA_BUFFER_SIZE  32
 
-// 要发送的数据大小
-#define BUFFER_SIZE     32
-
-/* 定义aSRC_Const_Buffer数组作为DMA传输数据源
- * const关键字将aSRC_Const_Buffer数组变量定义为常量类型
- * 表示数据存储在内部的FLASH中
- */
-const uint32_t aSRC_Const_Buffer[BUFFER_SIZE]= {
-                                    0x01020304,0x05060708,0x090A0B0C,0x0D0E0F10,
-                                    0x11121314,0x15161718,0x191A1B1C,0x1D1E1F20,
-                                    0x21222324,0x25262728,0x292A2B2C,0x2D2E2F30,
-                                    0x31323334,0x35363738,0x393A3B3C,0x3D3E3F40,
-                                    0x41424344,0x45464748,0x494A4B4C,0x4D4E4F50,
-                                    0x51525354,0x55565758,0x595A5B5C,0x5D5E5F60,
-                                    0x61626364,0x65666768,0x696A6B6C,0x6D6E6F70,
-                                    0x71727374,0x75767778,0x797A7B7C,0x7D7E7F80};
-
-// 定义DMA传输目标存储器-存储在内部的SRAM中                                                                        
-uint32_t aDST_Buffer[BUFFER_SIZE];
+extern uint32_t Send_DMA_BUFFER[DMA_BUFFER_SIZE];
+extern uint32_t Rece_DMA_BUFFER[DMA_BUFFER_SIZE];
 ```
 
 使用宏定义设置外设配置方便程序修改和升级。
 
 存储器到存储器传输通道没有硬性规定，可以随意选择。
 
-aSRC_Const_Buffer[BUFFER_SIZE]定义用来存放源数据，并且使用了const关键字修饰，即常量类型，使得变量是存储在内部flash空间上。
+Send_DMA_Buffer[DMA_BUFFER_SIZE]定义用来存放源数据
 
-- DMA配置
+#### 2.2.2 DMA配置
 
 ```c
-// DMA配置函数
 void DMA_Config(void)
 {
-        // 1.DMA初始化结构体
-        DMA_InitTypeDef DMA_InitStructure;
-        // 2.开启DMA时钟
-        RCC_AHBPeriphClockCmd(DMA_CLOCK, ENABLE);
-        // 3.源数据地址
-        DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)aSRC_Const_Buffer;
-        // 4.目标数据地址
-        DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)aDST_Buffer;
-        // 6.设置传输方向：外设到存储器（这里的外设是内部的FLASH）    
-        DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-        // 7.设置传输大小    
-        DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE;
-        // 8.设置外设（内部的FLASH）地址递增    
-        DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
-        // 9.内存地址递增
-        DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-        // 10.外设数据单位    
-        DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-        // 11.内存数据单位
-        DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
-        // 12.设置DMA模式，一次或者循环模式
-        DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-        //DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-        // 13.设置通道优先级：高    
-        DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-        // 14.使能内存到内存的传输
-        DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
-        // 15.配置DMA通道           
-        DMA_Init(DMA_CHANNEL, &DMA_InitStructure);
-       // 16.清除DMA数据流传输完成标志位
-        DMA_ClearFlag(DMA_FLAG_TC);
-        // 17.使能DMA
-        DMA_Cmd(DMA_CHANNEL, ENABLE);
+    // 1.定义一个DMA初始化结构体
+    DMA_InitTypeDef DMA_InitStructure;
+    // 2.使能DMA时钟
+    RCC_AHBPeriphClockCmd(DMA_CLK, ENABLE);
+    // 3.选择源数据地址和目标数据地址（我们这个工程源是FLASH，目标是SRAM）
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)Send_DMA_BUFFER;
+    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)Rece_DMA_BUFFER;
+    // 4.设置传输方向和大小（我们工程使用的外设道存储器，这里的外设指内部的FLASH）
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    DMA_InitStructure.DMA_BufferSize = DMA_BUFFER_SIZE;
+    // 5.设置外设地址递增和内存地址递增
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    // 6.设置外设和内存数据单位
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word; // 外设数据单位为字
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
+    // 7.设置模式（一次或者循环模式）
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+    // 8.设置优先级
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    // 9.初始化
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+    DMA_Init(DMA_CHx, &DMA_InitStructure);
+    DMA_ClearFlag(DMA_FLAG_TC);
+    DMA_Cmd(DMA_CHx, ENABLE);
 }
 ```
 
@@ -126,78 +101,59 @@ DMA_ClearFlag函数用于清除DMA标志位，代码用到传输完成标志位�
 
 DMA_Cmd函数用于启动或者停止DMA数据传输，它接收两个参数，第一个是DMA通道，另外一个是开启ENABLE或者停止DISABLE。
 
-- 存储器数据对比
+#### 2.2.3 存储器数据对比
 
 ```c
-/*
-判断指定长度的两个数据源是否完全相等，
-如果完全相等返回1，只要其中一对数据不相等返回0
-*/
-uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength)
+// 判断两个数据是否相等
+uint8_t Buffer_Compare(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t Length)
 {
-  // 数据长度递减
-  while(BufferLength--)
-  {
-    // 判断两个数据源是否对应相等 
-    if(*pBuffer != *pBuffer1)
-    {
-      // 对应数据源不相等马上退出函数，并返回0
-      return 0;
-    }
-    // 递增两个数据源的地址指针
-    pBuffer++;
-    pBuffer1++;
-  }
-  // 完成判断并且对应数据相对
-  return 1; // 数据完全相等
+	// 数据长度递增
+	while(Length--)
+	{
+		if(*pBuffer != *pBuffer1)
+		{
+			return 0; // 如果不同，返回0
+		}
+		pBuffer++;
+		pBuffer1++;
+	}
+	return 1; // 如果相同，返回1
 }
 ```
 
 判断指定长度的两个数据源是否完全相等，如果完全相等返回1；只要其中一对数据不相等返回0。 它需要三个形参，前两个是两个数据源的地址，第三个是要比较数据长度。
 
-- 主函数
+#### 2.2.4 主函数测试
 
 ```c
-int main(void)
+int main()
 {
-  // 1.定义存放比较结果变量
-  uint8_t TransferStatus;
-  // 2.LED 端口初始化
-  LED_GPIO_Config();
-  // 3.设置RGB彩色灯为紫色
-  LED_PURPLE;  
-  // 4.简单延时函数
-  Delay(0xFFFFFF);  
-  // 5.DMA传输配置
-  DMA_Config(); 
-  // 6.等待DMA传输完成
-  while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
-  {
+	uint8_t Buffer_Result; // 两个数据比较结果
+	LED_Init();
+	LED_PURPLE();
+	Delay(0xFFFFFF);
+	DMA_Config(); // 启动DMA传输
+	while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET); // 等待DMA传输完成
+	// 比较通过DMA传输的数据和预设数据是否相同
+	Buffer_Result = Buffer_Compare(Send_DMA_BUFFER, Rece_DMA_BUFFER, DMA_BUFFER_SIZE);
+	if(Buffer_Result == 0)
+	{
+		LED_RED(); // 显示不同
+	}
+	else
+	{
+		LED_GREEN(); // 显示相同
+	}
+	while(1)
+	{
 
-  }   
-  // 7.比较源数据与传输后数据
-  TransferStatus = Buffercmp(aSRC_Const_Buffer, aDST_Buffer, BUFFER_SIZE);
-  // 8.判断源数据与传输后数据比较结果
-  if(TransferStatus == 0)  
-  {
-    // 源数据与传输后数据不相等时RGB彩色灯显示红色
-    LED_RED;
-  }
-  else
-  { 
-    // 源数据与传输后数据相等时RGB彩色灯显示蓝色
-    LED_BLUE;
-  }
-  while (1)
-  {        
-
-  }
+	}
 }
 ```
 
 首先定义一个变量用来保存存储器数据比较结果。
 
-RGB彩色灯用来指示程序进程，使用之前需要初始化它，LED_GPIO_Config定义在bsp_led.c文件中。开始设置RGB彩色灯为紫色， LED_PURPLE是定义在bsp_led.h文件的一个宏定义。
+RGB彩色灯用来指示程序进程，使用之前需要初始化它，开始设置RGB彩色灯为紫色
 
 Delay函数只是一个简单的延时函数。
 
@@ -205,7 +161,7 @@ Delay函数只是一个简单的延时函数。
 
 DMA_GetFlagStatus函数获取DMA事件标志位的当前状态，这里获取DMA数据传输完成这个标志位，使用循环持续等待直到该标志位被置位， 即DMA传输完成这个事件发生，然后退出循环，运行之后程序。
 
-确定DMA传输完成之后就可以调用Buffercmp函数比较源数据与DMA传输后目标地址的数据是否一一对应。TransferStatus保存比较结果， 如果为1表示两个数据源一一对应相等说明DMA传输成功；相反，如果为0表示两个数据源数据存在不等情况，说明DMA传输出错。
+确定DMA传输完成之后就可以调用Buffercmp函数比较源数据与DMA传输后目标地址的数据是否一一对应。保存比较结果， 如果为1表示两个数据源一一对应相等说明DMA传输成功；相反，如果为0表示两个数据源数据存在不等情况，说明DMA传输出错。
 
 如果DMA传输成功设置RGB彩色灯为蓝色，如果DMA传输出错设置RGB彩色灯为红色。
 
@@ -274,3 +230,5 @@ while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
 ---
 
 2024.8.28 第一次修订，后期不再维护
+
+2025.1.13 优化代码

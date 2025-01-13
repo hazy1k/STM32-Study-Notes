@@ -149,16 +149,12 @@ void DMA_Config(void) {
     DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_Full; // FIFO阈值为满
     DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single; // 内存突发模式为单次
     DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // 外设突发模式为单次
-
     // 初始化DMA2流7
     DMA_Init(DMA1_Stream4, &DMA_InitStruct);
-
     // 启用DMA传输完成中断
     DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
-
     // 配置USART1使用DMA进行数据传输
     USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
-
     // 启动DMA传输
     DMA_Cmd(DMA1_Stream4, ENABLE);
 }
@@ -167,11 +163,9 @@ void DMA_Config(void) {
 int main(void) {
     // 初始化系统时钟
     SystemInit();
-
     // 配置USART1
     USART_InitTypeDef USART_InitStruct;
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); // 启用USART1时钟
-
     USART_InitStruct.USART_BaudRate = 9600; // 设置波特率为9600
     USART_InitStruct.USART_WordLength = USART_WordLength_8b; // 8位数据长度
     USART_InitStruct.USART_StopBits = USART_StopBits_1; // 1位停止位
@@ -179,12 +173,9 @@ int main(void) {
     USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 不使用硬件流控制
     USART_InitStruct.USART_Mode = USART_Mode_Tx; // 只配置为发送模式
     USART_Init(USART1, &USART_InitStruct); // 初始化USART1
-
     USART_Cmd(USART1, ENABLE); // 启用USART1
-
     // 配置DMA
     DMA_Config();
-
     // 主循环
     while (1) {
         // 主循环中可以添加其他代码
