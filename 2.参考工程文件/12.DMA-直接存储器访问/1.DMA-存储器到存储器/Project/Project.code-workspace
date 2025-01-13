@@ -1,8 +1,7 @@
 {
     "folders": [
         {
-            "name": "RT-Thread MicroPython",
-            "path": "C:/Users/qiu/Desktop/esp32/template"
+            "path": "."
         }
     ],
     "settings": {
@@ -10,7 +9,16 @@
         "C_Cpp.default.configurationProvider": "cl.eide",
         "C_Cpp.errorSquiggles": "disabled",
         "files.associations": {
-            ".mpyproject.json": "jsonc"
+            ".eideignore": "ignore",
+            "*.a51": "a51",
+            "*.h": "c",
+            "*.c": "c",
+            "*.hxx": "cpp",
+            "*.hpp": "cpp",
+            "*.c++": "cpp",
+            "*.cpp": "cpp",
+            "*.cxx": "cpp",
+            "*.cc": "cpp"
         },
         "[yaml]": {
             "editor.insertSpaces": true,
@@ -34,12 +42,6 @@
                 "command": "extension.execute",
                 "priority": 4
             }
-        ],
-        "python.autoComplete.extraPaths": [
-            "c:/Users/qiu/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
-        ],
-        "python.analysis.extraPaths": [
-            "c:/Users/qiu/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
         ]
     },
     "extensions": {

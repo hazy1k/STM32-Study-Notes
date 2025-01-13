@@ -1,7 +1,7 @@
 ..\..\output\main.o: ..\..\User\main.c
 ..\..\output\main.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\main.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\main.o: E:\dianzi\KEILARM\ARM\ARMCC\Bin\..\include\stdint.h
+..\..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\main.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\main.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\main.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h
@@ -29,5 +29,5 @@
 ..\..\output\main.o: ..\..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\..\output\main.o: ..\..\Libraries\FWlib\inc\misc.h
 ..\..\output\main.o: ..\..\User\usart\bsp_usart_dma.h
-..\..\output\main.o: E:\dianzi\KEILARM\ARM\ARMCC\Bin\..\include\stdio.h
+..\..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h
 ..\..\output\main.o: ..\..\User\led\bsp_led.h

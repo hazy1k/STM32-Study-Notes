@@ -2,7 +2,7 @@
 ..\..\output\bsp_usart_dma.o: ..\..\User\usart\bsp_usart_dma.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\bsp_usart_dma.o: E:\dianzi\KEILARM\ARM\ARMCC\Bin\..\include\stdint.h
+..\..\output\bsp_usart_dma.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\bsp_usart_dma.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h
@@ -29,4 +29,4 @@
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\FWlib\inc\stm32f10x_usart.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\..\output\bsp_usart_dma.o: ..\..\Libraries\FWlib\inc\misc.h
-..\..\output\bsp_usart_dma.o: E:\dianzi\KEILARM\ARM\ARMCC\Bin\..\include\stdio.h
+..\..\output\bsp_usart_dma.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h

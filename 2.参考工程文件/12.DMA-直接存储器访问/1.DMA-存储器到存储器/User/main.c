@@ -1,174 +1,52 @@
-#include "stm32f10x.h"
-#include "./led/bsp_led.h"
+#include "led.h"
+#include "dma.h"
 
-// µ±Ê¹ÓÃ´æ´¢Æ÷µ½´æ´¢Æ÷Ä£Ê½Ê±ºò£¬Í¨µÀ¿ÉÒÔËæ±ãÑ¡£¬Ã»ÓĞÓ²ĞÔµÄ¹æ¶¨
-#define DMA_CHANNEL     DMA1_Channel6 // ÎÒÃÇÕâÀïÊ¹ÓÃµÄÍ¨µÀÊÇDMA1_Channel6
-#define DMA_CLOCK       RCC_AHBPeriph_DMA1 // DMA1Ê±ÖÓ
+// DMAè¦ä¼ è¾“çš„æ•°æ®-å­˜å‚¨åœ¨å†…éƒ¨çš„FLASHä¸­
+uint32_t Send_DMA_BUFFER[DMA_BUFFER_SIZE] = {0x11223344, 0x55667788, 0x99AABBCC, 0xDDCCEEFF};
+// DMAæ¥æ”¶åˆ°çš„æ•°æ®-å­˜å‚¨åœ¨å†…éƒ¨çš„SRAMä¸­
+uint32_t Rece_DMA_BUFFER[DMA_BUFFER_SIZE];
 
-// ´«ÊäÍê³É±êÖ¾
-#define DMA_FLAG_TC     DMA1_FLAG_TC6
-
-// Òª·¢ËÍµÄÊı¾İ´óĞ¡
-#define BUFFER_SIZE     32
-
-/* ¶¨ÒåaSRC_Const_BufferÊı×é×÷ÎªDMA´«ÊäÊı¾İÔ´
- * const¹Ø¼ü×Ö½«aSRC_Const_BufferÊı×é±äÁ¿¶¨ÒåÎª³£Á¿ÀàĞÍ
- * ±íÊ¾Êı¾İ´æ´¢ÔÚÄÚ²¿µÄFLASHÖĞ
- */
-const uint32_t aSRC_Const_Buffer[BUFFER_SIZE]= {
-                                    0x01020304,0x05060708,0x090A0B0C,0x0D0E0F10,
-                                    0x11121314,0x15161718,0x191A1B1C,0x1D1E1F20,
-                                    0x21222324,0x25262728,0x292A2B2C,0x2D2E2F30,
-                                    0x31323334,0x35363738,0x393A3B3C,0x3D3E3F40,
-                                    0x41424344,0x45464748,0x494A4B4C,0x4D4E4F50,
-                                    0x51525354,0x55565758,0x595A5B5C,0x5D5E5F60,
-                                    0x61626364,0x65666768,0x696A6B6C,0x6D6E6F70,
-                                    0x71727374,0x75767778,0x797A7B7C,0x7D7E7F80};
-
-// ¶¨ÒåDMA´«ÊäÄ¿±ê´æ´¢Æ÷-´æ´¢ÔÚÄÚ²¿µÄSRAMÖĞ																		
-uint32_t aDST_Buffer[BUFFER_SIZE];
-
-#define SOFT_DELAY Delay(0x0FFFFF); // ¼òµ¥µÄÑÓÊ±º¯Êı
-void Delay(__IO u32 nCount); // ÑÓÊ±º¯ÊıÉùÃ÷
-uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength); // ÅĞ¶ÏÁ½¸öÊı¾İÔ´ÊÇ·ñÍêÈ«ÏàµÈµÄº¯ÊıÉùÃ÷
-void DMA_Config(void); // DMAÅäÖÃº¯ÊıÉùÃ÷																
-																		
-int main(void)
+// åˆ¤æ–­ä¸¤ä¸ªæ•°æ®æ˜¯å¦ç›¸ç­‰
+uint8_t Buffer_Compare(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t Length)
 {
-  // 1.¶¨Òå´æ·Å±È½Ï½á¹û±äÁ¿
-  uint8_t TransferStatus;
-  
-	// 2.LED ¶Ë¿Ú³õÊ¼»¯
-	LED_GPIO_Config();
-    
-  // 3.ÉèÖÃRGB²ÊÉ«µÆÎª×ÏÉ«
-  LED_PURPLE;  
-  
-  // 4.¼òµ¥ÑÓÊ±º¯Êı
-  Delay(0xFFFFFF);  
-  
-  // 5.DMA´«ÊäÅäÖÃ
-  DMA_Config(); 
-  
-  // 6.µÈ´ıDMA´«ÊäÍê³É
-  while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET)
-  {
-    
-  }   
-  
-  // 7.±È½ÏÔ´Êı¾İÓë´«ÊäºóÊı¾İ
-  TransferStatus = Buffercmp(aSRC_Const_Buffer, aDST_Buffer, BUFFER_SIZE);
-  
-  // 8.ÅĞ¶ÏÔ´Êı¾İÓë´«ÊäºóÊı¾İ±È½Ï½á¹û
-  if(TransferStatus == 0)  
-  {
-    /* Ô´Êı¾İÓë´«ÊäºóÊı¾İ²»ÏàµÈÊ±RGB²ÊÉ«µÆÏÔÊ¾ºìÉ« */
-    LED_RED;
-  }
-  else
-  { 
-    /* Ô´Êı¾İÓë´«ÊäºóÊı¾İÏàµÈÊ±RGB²ÊÉ«µÆÏÔÊ¾À¶É« */
-    LED_BLUE;
-  }
-
-	while (1)
-	{		
-
+	// æ•°æ®é•¿åº¦é€’å¢
+	while(Length--)
+	{
+		if(*pBuffer != *pBuffer1)
+		{
+			return 0; // å¦‚æœä¸åŒï¼Œè¿”å›0
+		}
+		pBuffer++;
+		pBuffer1++;
 	}
+	return 1; // å¦‚æœç›¸åŒï¼Œè¿”å›1
 }
 
-void Delay(__IO uint32_t nCount)	 //¼òµ¥µÄÑÓÊ±º¯Êı
+void Delay(__IO uint32_t nCount)	 //ç®€å•çš„å»¶æ—¶å‡½æ•°
 {
 	for(; nCount != 0; nCount--);
 }
 
-// DMAÅäÖÃº¯Êı
-void DMA_Config(void)
+int main()
 {
-    // 1.DMA³õÊ¼»¯½á¹¹Ìå
-	  DMA_InitTypeDef DMA_InitStructure;
-	
-		// 2.¿ªÆôDMAÊ±ÖÓ
-		RCC_AHBPeriphClockCmd(DMA_CLOCK, ENABLE);
+	uint8_t Buffer_Result; // ä¸¤ä¸ªæ•°æ®æ¯”è¾ƒç»“æœ
+	LED_Init();
+	LED_PURPLE();
+	Delay(0xFFFFFF);
+	DMA_Config(); // å¯åŠ¨DMAä¼ è¾“
+	while(DMA_GetFlagStatus(DMA_FLAG_TC) == RESET); // ç­‰å¾…DMAä¼ è¾“å®Œæˆ
+	// æ¯”è¾ƒé€šè¿‡DMAä¼ è¾“çš„æ•°æ®å’Œé¢„è®¾æ•°æ®æ˜¯å¦ç›¸åŒ
+	Buffer_Result = Buffer_Compare(Send_DMA_BUFFER, Rece_DMA_BUFFER, DMA_BUFFER_SIZE);
+	if(Buffer_Result == 0)
+	{
+		LED_RED(); // æ˜¾ç¤ºä¸åŒ
+	}
+	else
+	{
+		LED_GREEN(); // æ˜¾ç¤ºç›¸åŒ
+	}
+	while(1)
+	{
 
-		// 3.Ô´Êı¾İµØÖ·
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)aSRC_Const_Buffer;
-
-		// 4.Ä¿±êÊı¾İµØÖ·
-		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)aDST_Buffer;
-
-		// 6.ÉèÖÃ´«Êä·½Ïò£ºÍâÉèµ½´æ´¢Æ÷£¨ÕâÀïµÄÍâÉèÊÇÄÚ²¿µÄFLASH£©	
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-
-		// 7.ÉèÖÃ´«Êä´óĞ¡	
-		DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE;
-
-		// 8.ÉèÖÃÍâÉè£¨ÄÚ²¿µÄFLASH£©µØÖ·µİÔö    
-		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
-
-		// 9.ÄÚ´æµØÖ·µİÔö
-		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-
-		// 10.ÍâÉèÊı¾İµ¥Î»	
-		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-
-		// 11.ÄÚ´æÊı¾İµ¥Î»
-		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
-
-		// 12.ÉèÖÃDMAÄ£Ê½£¬Ò»´Î»òÕßÑ­»·Ä£Ê½
-		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-		//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-
-		// 13.ÉèÖÃÍ¨µÀÓÅÏÈ¼¶£º¸ß	
-		DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-
-		// 14.Ê¹ÄÜÄÚ´æµ½ÄÚ´æµÄ´«Êä
-		DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
-
-		// 15.ÅäÖÃDMAÍ¨µÀ		   
-		DMA_Init(DMA_CHANNEL, &DMA_InitStructure);
-
-    // 16.Çå³ıDMAÊı¾İÁ÷´«ÊäÍê³É±êÖ¾Î»
-    DMA_ClearFlag(DMA_FLAG_TC);
-
-		// 17.Ê¹ÄÜDMA
-		DMA_Cmd(DMA_CHANNEL, ENABLE);
+	}
 }
-
-/*
-ÅĞ¶ÏÖ¸¶¨³¤¶ÈµÄÁ½¸öÊı¾İÔ´ÊÇ·ñÍêÈ«ÏàµÈ£¬
-Èç¹ûÍêÈ«ÏàµÈ·µ»Ø1£¬Ö»ÒªÆäÖĞÒ»¶ÔÊı¾İ²»ÏàµÈ·µ»Ø0
-*/
-uint8_t Buffercmp(const uint32_t* pBuffer, uint32_t* pBuffer1, uint16_t BufferLength)
-{
-  /* Êı¾İ³¤¶Èµİ¼õ */
-  while(BufferLength--)
-  {
-    /* ÅĞ¶ÏÁ½¸öÊı¾İÔ´ÊÇ·ñ¶ÔÓ¦ÏàµÈ */
-    if(*pBuffer != *pBuffer1)
-    {
-      /* ¶ÔÓ¦Êı¾İÔ´²»ÏàµÈÂíÉÏÍË³öº¯Êı£¬²¢·µ»Ø0 */
-      return 0;
-    }
-    /* µİÔöÁ½¸öÊı¾İÔ´µÄµØÖ·Ö¸Õë */
-    pBuffer++;
-    pBuffer1++;
-  }
-  /* Íê³ÉÅĞ¶Ï²¢ÇÒ¶ÔÓ¦Êı¾İÏà¶Ô */
-  return 1; // Êı¾İÍêÈ«ÏàµÈ
-}
-
-//typedef struct
-//{
-//  uint32_t DMA_PeripheralBaseAddr;   // ÍâÉèµØÖ·
-//  uint32_t DMA_MemoryBaseAddr;       // ´æ´¢Æ÷µØÖ·
-//  uint32_t DMA_DIR;                  // ´«Êä·½Ïò
-//  uint32_t DMA_BufferSize;           // ´«ÊäÊıÄ¿
-//  uint32_t DMA_PeripheralInc;        // ÍâÉèµØÖ·ÔöÁ¿Ä£Ê½
-//  uint32_t DMA_MemoryInc;            // ´æ´¢Æ÷µØÖ·ÔöÁ¿Ä£Ê½
-//  uint32_t DMA_PeripheralDataSize;   // ÍâÉèÊı¾İ¿í¶È
-//  uint32_t DMA_MemoryDataSize;       // ´æ´¢Æ÷Êı¾İ¿í¶È
-//  uint32_t DMA_Mode;                 // Ä£Ê½Ñ¡Ôñ
-//  uint32_t DMA_Priority;             // Í¨µÀÓÅÏÈ¼¶
-//  uint32_t DMA_M2M;                  // ´æ´¢Æ÷µ½´æ´¢Æ÷Ä£Ê½
-//}DMA_InitTypeDef;
