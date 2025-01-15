@@ -25,7 +25,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_usart_dma.h"
+#include "dma.h"
+#include "usart.h"
+
+extern uint8_t ReceiveBuff[ReceBuff_Size];
+
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -40,7 +44,7 @@
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
-extern uint8_t ReceiveBuff[RECEIVEBUFF_SIZE];
+
 /**
   * @brief  This function handles NMI exception.
   * @param  None
@@ -138,6 +142,21 @@ void SysTick_Handler(void)
 {
 }
 
+void USART1_IRQHandler(void)
+{
+    uint16_t t;
+    if(USART_GetITStatus(USARTx, USART_IT_IDLE) == SET)         
+    {    
+        DMA_Cmd(USART_TX_DMA_CHANNEL,DISABLE);                         
+        t = DMA_GetCurrDataCounter(USART_TX_DMA_CHANNEL);              
+        USART_SendArray(USARTx, ReceiveBuff, ReceBuff_Size-t);       
+        DMA_SetCurrDataCounter(USART_TX_DMA_CHANNEL,ReceBuff_Size);    
+        DMA_Cmd(USART_TX_DMA_CHANNEL,ENABLE);                          
+        USART_ReceiveData(USARTx);                              
+        USART_ClearFlag(USARTx,USART_FLAG_IDLE);        
+    }    
+}
+
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
@@ -153,32 +172,6 @@ void SysTick_Handler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
-
-/**
-  * @brief  串口空闲中断.
-  * @param  无
-  * @retval 无
-  */
-void DEBUG_USART_IRQHandler(void)
-{
-	uint16_t t;
-	if(USART_GetITStatus(DEBUG_USARTx,USART_IT_IDLE) == SET)          //检查中断是否发生
-	{	
-		DMA_Cmd(USART_TX_DMA_CHANNEL,DISABLE);                         //关闭DMA传输
-
-		t = DMA_GetCurrDataCounter(USART_TX_DMA_CHANNEL);              //获取剩余的数据数量
-		
-        Usart_SendArray(DEBUG_USARTx,ReceiveBuff,RECEIVEBUFF_SIZE-t);       //向电脑返回数据（接收数据数量 = SENDBUFF_SIZE - 剩余未传输的数据数量）
-		
-		DMA_SetCurrDataCounter(USART_TX_DMA_CHANNEL,RECEIVEBUFF_SIZE);    //重新设置传输的数据数量
-
-		DMA_Cmd(USART_TX_DMA_CHANNEL,ENABLE);                          //开启DMA传输
-		
-		USART_ReceiveData(DEBUG_USARTx);                              //读取一次数据，不然会一直进中断
-		USART_ClearFlag(DEBUG_USARTx,USART_FLAG_IDLE);                //清除串口空闲中断标志位
-	}
-	
-}
 
 /**
   * @}
