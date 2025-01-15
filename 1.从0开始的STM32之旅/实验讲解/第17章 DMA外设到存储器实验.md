@@ -6,7 +6,7 @@
 
 ## 2. 软件设计
 
-### 2.1 编程目的
+### 2.1 编程大纲
 
 - 配置USART通信功能；
 
@@ -18,147 +18,185 @@
 
 ### 2.2 代码分析
 
-- 串口配置宏定义
+#### 2.2.1 DMA和串口宏定义
 
 ```c
-// 串口工作参数宏定义
-#define  DEBUG_USARTx                   USART1                 // 使用USART1作为调试串口 
-#define  DEBUG_USART_CLK                RCC_APB2Periph_USART1  // USART1时钟
-#define  DEBUG_USART_APBxClkCmd         RCC_APB2PeriphClockCmd // USART1时钟使能函数
-#define  DEBUG_USART_BAUDRATE           115200                 // 波特率
+// USARTx 引脚宏定义
+#define USARTx_GPIO_CLK RCC_APB2Periph_GPIOA
+#define USARTx_GPIO_APBxClkCmd RCC_APB2PeriphClockCmd
+// TX-发送数据输出引脚
+#define USARTx_TX_GPIO_PORT GPIOA
+#define USARTx_TX_GPIO_PIN GPIO_Pin_9
+// RX-接收数据输入引脚
+#define USARTx_RX_GPIO_PORT GPIOA
+#define USARTx_RX_GPIO_PIN GPIO_Pin_10
 
-// USART GPIO 引脚宏定义
-#define  DEBUG_USART_GPIO_CLK           (RCC_APB2Periph_GPIOA) // GPIO时钟
-#define  DEBUG_USART_GPIO_APBxClkCmd    RCC_APB2PeriphClockCmd // GPIO时钟使能函数
+// USARTx 相关参数宏定义
+#define USARTx  USART1
+#define USARTx_CLK RCC_APB2Periph_USART1
+#define USARTx_APBxCLKCmd RCC_APB2PeriphClockCmd
+#define USARTx_BaudRate 115200
 
-#define  DEBUG_USART_TX_GPIO_PORT       GPIOA                  // 串口发送GPIO端口
-#define  DEBUG_USART_TX_GPIO_PIN        GPIO_Pin_9             // 串口发送GPIO引脚
-#define  DEBUG_USART_RX_GPIO_PORT       GPIOA                  // 串口接收GPIO端口
-#define  DEBUG_USART_RX_GPIO_PIN        GPIO_Pin_10            // 串口接收GPIO引脚
+// 中断相关宏定义
+#define USARTx_IRQn USART1_IRQn
+#define USARTx_IRQHandler USART1_IRQHandler
 
-#define  DEBUG_USART_IRQ                USART1_IRQn            // USART1中断源
-#define  DEBUG_USART_IRQHandler         USART1_IRQHandler      // USART1中断处理函数
-
-// 串口对应的DMA请求通道
-#define  USART_TX_DMA_CHANNEL     DMA1_Channel5                // 使用通道5  
-// 外设寄存器地址
-#define  USART_DR_ADDRESS        (USART1_BASE+0x04)            // USART数据寄存器地址
-// 一次发送的数据量
-#define  RECEIVEBUFF_SIZE            5000
+// DMA相关参数宏定义
+#define USART_TX_DMA_CHANNEL DMA1_Channel5 
+#define USART_DR_ADDRESS (USART1_BASE+0x04) // USART1数据寄存器地址
+#define ReceBuff_Size 5000 // 发送缓冲区大小
 ```
 
-- 串口配置
+#### 2.2.2 串口配置
 
 ```c
-// 串口配置函数
+// USART配置函数
 void USART_Config(void)
 {
-    // 结构体定义
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStruct;
-
-    // 1.打开串口GPIO的时钟
-    DEBUG_USART_GPIO_APBxClkCmd(DEBUG_USART_GPIO_CLK, ENABLE);
-    // 2.打开串口外设的时钟
-    DEBUG_USART_APBxClkCmd(DEBUG_USART_CLK, ENABLE);
-    // 3.配置NVIC
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // 设置抢占优先级2
-    NVIC_InitStruct.NVIC_IRQChannel = DEBUG_USART_IRQ; // 设置中断源
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE; // 使能中断
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1; // 抢占优先级
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 3; // 响应优先级
-    NVIC_Init(&NVIC_InitStruct); // 初始化NVIC
-    // 4.将USART Tx的GPIO配置为推挽复用模式
-    GPIO_InitStructure.GPIO_Pin = DEBUG_USART_TX_GPIO_PIN; // 设置Tx引脚-PA9
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;        // 设置复用推挽输出
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 设置GPIO速度为50MHz
-    GPIO_Init(DEBUG_USART_TX_GPIO_PORT, &GPIO_InitStructure); // 初始化GPIO
-    // 5.将USART Rx的GPIO配置为浮空输入模式
-    GPIO_InitStructure.GPIO_Pin = DEBUG_USART_RX_GPIO_PIN; // 设置Rx引脚-PA10
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  // 设置浮空输入
-    GPIO_Init(DEBUG_USART_RX_GPIO_PORT, &GPIO_InitStructure); // 初始化GPIO
-
-    // 配置串口的工作参数
-    // 1.配置波特率
-    USART_InitStructure.USART_BaudRate = DEBUG_USART_BAUDRATE; // 设置波特率115200
-    // 2.配置数据字长
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 设置数据字长8位
-    // 3.配置停止位
-    USART_InitStructure.USART_StopBits = USART_StopBits_1; // 设置停止位1
-    // 4.配置校验位
-    USART_InitStructure.USART_Parity = USART_Parity_No; // 设置无校验位
-    // 5.配置硬件流控制
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 设置无硬件流控制
-    // 6.配置工作模式，收发一起
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 设置收发一起工作模式
-    // 7.完成串口的初始化配置
-    USART_Init(DEBUG_USARTx, &USART_InitStructure); // 初始化串口
-    // 8.使能空闲中断
-    USART_ITConfig(DEBUG_USARTx,USART_IT_IDLE,ENABLE);
-    // 9.使能串口
-    USART_Cmd(DEBUG_USARTx, ENABLE);        
+    NVIC_InitTypeDef NVIC_InitStructure;
+    // 时钟使能
+    USARTx_GPIO_APBxClkCmd(USARTx_GPIO_CLK, ENABLE);
+    USARTx_APBxCLKCmd(USARTx_CLK, ENABLE);
+    // NVIC 配置
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // 设置中断优先级组2
+    NVIC_InitStructure.NVIC_IRQChannel = USARTx_IRQn; // 选择USARTx的中断请求
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; // 使能USARTx的中断请求
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; 
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3; 
+    NVIC_Init(&NVIC_InitStructure);
+    // TX引脚配置
+    GPIO_InitStructure.GPIO_Pin = USARTx_TX_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
+    // RX引脚配置
+    GPIO_InitStructure.GPIO_Pin = USARTx_RX_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; // 输入浮空
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
+    // USART 配置
+    USART_InitStructure.USART_BaudRate = USARTx_BaudRate; // 波特率115200
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 字长8位数据
+    USART_InitStructure.USART_StopBits = USART_StopBits_1; // 一个停止位
+    USART_InitStructure.USART_Parity = USART_Parity_No; // 无校验位
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无硬件流控
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 收发模式
+    USART_Init(USARTx, &USART_InitStructure);
+    // 使能空闲中断
+    USART_ITConfig(USARTx, USART_IT_IDLE, ENABLE);
+    USART_Cmd(USARTx, ENABLE); // 使能串口
 }
 ```
 
-- DMA配置
+相比于上一节，因为我们需要使用到中断，NVIC需要重新配置，注意一个重要库函数：
 
 ```c
-// USARTx TX DMA 配置，内存到外设(USART1->DR)
+USART_ITConfig(USARTx, USART_IT_IDLE, ENABLE);
+```
+
+##### 2.2.2.1 函数名：`USART_ITConfig`
+
+- **`USART_ITConfig`** 是一个库函数，用于配置指定 USART 外设的中断。此函数的作用是使能或禁用指定的中断事件。
+
+##### 2.2.2.2 参数：
+
+1. **`USARTx`**：指定目标 USART 外设。`x` 可以是数字，代表不同的 USART 外设，比如 `USART1`、`USART2`、`USART3` 等。
+   
+   示例：
+   
+   - `USART1`
+   - `USART2`
+   - `USART3`
+   
+   你可以根据你的硬件配置选择要操作的 USART 外设。
+
+2. **`USART_IT_IDLE`**：指定要配置的中断类型。`USART_IT_IDLE` 表示配置空闲中断。USART 空闲中断在接收到数据流停止时触发，常用于判断串口传输的结束，或者用于检测数据流的空闲状态。
+
+3. **`ENABLE`**：指示是否启用该中断。`ENABLE` 启用中断，`DISABLE` 禁用中断。
+
+##### 2.2.2.3 空闲中断（Idle Interrupt）
+
+- **空闲中断**是 USART 外设的一个特殊中断，当 USART 外设检测到数据流停止（即接收线路处于空闲状态）时，它会触发该中断。通常，当串口的接收通道闲置（没有接收到数据）时，这个中断会被触发。
+
+- 空闲中断的应用场景：这种中断可以用来检测数据接收过程的结束，或者实现一些特殊的数据处理策略，比如根据特定的时间间隔来判断数据接收是否已完成。
+
+#### 2.2.3 DMA配置
+
+```c
 void USARTx_DMA_Config(void)
 {
-        DMA_InitTypeDef DMA_InitStructure;
-        // 开启DMA时钟
-        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-        // 设置DMA源地址：串口数据寄存器地址*/
-        DMA_InitStructure.DMA_PeripheralBaseAddr = USART_DR_ADDRESS;
-        // 内存地址(要传输的变量的指针)
-        DMA_InitStructure.DMA_MemoryBaseAddr = (u32)ReceiveBuff;
-        // 方向：从外设到内存    
-        DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-        // 传输大小    
-        DMA_InitStructure.DMA_BufferSize = RECEIVEBUFF_SIZE;
-        // 外设地址不增        
-        DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-        // 内存地址自增
-        DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-        // 外设数据单位    
-        DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-        // 内存数据单位
-        DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;     
-        // DMA模式，一次或者循环模式
-//        DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
-        DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; // 循环模式
-        // 优先级：中    
-        DMA_InitStructure.DMA_Priority = DMA_Priority_Medium; 
-        // 禁止内存到内存的传输
-        DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-        // 配置DMA通道           
-        DMA_Init(USART_TX_DMA_CHANNEL, &DMA_InitStructure);        
-        // 使能DMA
-        DMA_Cmd (USART_TX_DMA_CHANNEL,ENABLE);
+    DMA_InitTypeDef DMA_InitStructure;
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    DMA_InitStructure.DMA_PeripheralBaseAddr = USART_DR_ADDRESS;    
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32)ReceiveBuff;
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;    
+    DMA_InitStructure.DMA_BufferSize = ReceBuff_Size;  
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;     
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;  
+    DMA_InitStructure.DMA_Priority = DMA_Priority_Medium; 
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;           
+    DMA_Init(USART_TX_DMA_CHANNEL, &DMA_InitStructure);   
+    DMA_Cmd(USART_TX_DMA_CHANNEL,ENABLE);
 }
 ```
 
-- 主函数
+#### 2.2.4 中断服务函数
 
 ```c
+void USART1_IRQHandler(void)
+{
+    uint16_t t;
+    if(USART_GetITStatus(USARTx, USART_IT_IDLE) == SET)         
+    {    
+        DMA_Cmd(USART_TX_DMA_CHANNEL,DISABLE);                         
+        t = DMA_GetCurrDataCounter(USART_TX_DMA_CHANNEL);              
+        USART_SendArray(USARTx, ReceiveBuff, ReceBuff_Size-t);       
+        DMA_SetCurrDataCounter(USART_TX_DMA_CHANNEL,ReceBuff_Size);    
+        DMA_Cmd(USART_TX_DMA_CHANNEL,ENABLE);                          
+        USART_ReceiveData(USARTx);                              
+        USART_ClearFlag(USARTx,USART_FLAG_IDLE);        
+    }    
+}
+```
+
+工作流程：
+
+1. 当 USART 发生空闲中断时，DMA 数据传输被禁用。
+2. 根据 DMA 剩余的传输字节数（`t`），将接收到的数据发送出去。
+3. 重新配置 DMA，使其继续接收数据。
+4. 清除 USART 的 IDLE 标志，为下次中断做好准备。
+
+#### 2.2.5 主函数测试
+
+```c
+#include "led.h"
+#include "dma.h"
+#include "usart.h"
+
+static void Delay(__IO uint32_t nCount)     //简单的延时函数
+{
+    for(; nCount != 0; nCount--);
+}
+
 int main(void)
 {
-  USART_Config(); 
-  USARTx_DMA_Config();
-  LED_GPIO_Config();
-
-  printf("\r\nDMA外设到存储器模式，用电脑向开发板串口发送数据，数据会返回到电脑。\r\n");
-
-  // USART1 向 DMA发出RX请求
-  USART_DMACmd(DEBUG_USARTx, USART_DMAReq_Rx, ENABLE); // 函数参数：选用的串口，DMA请求，使能/禁止
-  // 用电脑向开发板串口发送数据，数据会返回到电脑。
-  while(1)
-  {
-    LED1_TOGGLE
-    Delay(0xFFFFF);
-  }
+    LED_Init();
+    USARTx_DMA_Config();
+    USART_Config();
+    USART_SendString(USARTx, "\r\nDMA USART1 Test!\r\n");
+    USART_DMACmd(USARTx, USART_DMAReq_Rx, ENABLE);
+    while(1)
+    {
+        LED1_ON();
+        Delay(0xFFFFFF);
+        LED1_OFF();
+        Delay(0xFFFFFF);
+    }
 }
 ```
 
@@ -168,7 +206,7 @@ int main(void)
 
 DMA 从外设（如串口）到存储器的配置允许外设数据自动传输到内存中，无需 CPU 干预。以下是配置步骤和示例
 
-### 配置步骤
+### 3.1 配置步骤
 
 1. **开启 DMA 时钟**：
 
@@ -212,7 +250,7 @@ DMA_Cmd(DMA1_Channel5, ENABLE);
 USART_DMACmd(USART1, USART_DMAReq_Rx, ENABLE);
 ```
 
-### 示例代码
+### 3.2 示例代码
 
 假设你要将 USART1 的接收到的数据存储到 `ReceiveBuff` 缓冲区中：
 
@@ -266,11 +304,10 @@ int main(void)
         // 你可以在这里处理接收到的数据
     }
 }
-
 ```
 
 ---
 
 2024.8.29 第一次修订，后期不再维护
 
-
+2025.1.14 新增了许多内容，代码优化

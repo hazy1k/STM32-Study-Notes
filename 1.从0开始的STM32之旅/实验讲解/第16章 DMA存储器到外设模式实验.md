@@ -34,7 +34,6 @@
 void USARTx_DMA_Init(void); // USART1 DMA初始化函数
 
 #endif /* __DMA_H */
-
 ```
 
 ```c
@@ -68,7 +67,6 @@ void USART_SendString(USART_TypeDef *pUSARTx, uint8_t *pStr);
 void USART_SendHalfWord(USART_TypeDef *pUSARTx, uint16_t ch);
 
 #endif
-
 ```
 
 使用宏定义设置外设配置方便程序修改和升级。
@@ -81,29 +79,29 @@ USART部分设置与USART章节内容相同，可以参考USART章节内容理�
 // USART配置函数
 void USART_Config(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
-	USARTx_GPIO_APBxClkCmd(USARTx_GPIO_CLK, ENABLE);
-	USARTx_APBxCLKCmd(USARTx_CLK, ENABLE);
-	// TX引脚配置
-	GPIO_InitStructure.GPIO_Pin = USARTx_TX_GPIO_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    USARTx_GPIO_APBxClkCmd(USARTx_GPIO_CLK, ENABLE);
+    USARTx_APBxCLKCmd(USARTx_CLK, ENABLE);
+    // TX引脚配置
+    GPIO_InitStructure.GPIO_Pin = USARTx_TX_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
     // RX引脚配置
-	GPIO_InitStructure.GPIO_Pin = USARTx_RX_GPIO_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; // 输入浮空
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
-	// USART 配置
-	USART_InitStructure.USART_BaudRate = USARTx_BaudRate; // 波特率115200
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 字长8位数据
-	USART_InitStructure.USART_StopBits = USART_StopBits_1; // 一个停止位
-	USART_InitStructure.USART_Parity = USART_Parity_No; // 无校验位
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无硬件流控
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 收发模式
-	USART_Init(USARTx, &USART_InitStructure);
-	USART_Cmd(USARTx, ENABLE); // 使能串口
+    GPIO_InitStructure.GPIO_Pin = USARTx_RX_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; // 输入浮空
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
+    // USART 配置
+    USART_InitStructure.USART_BaudRate = USARTx_BaudRate; // 波特率115200
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 字长8位数据
+    USART_InitStructure.USART_StopBits = USART_StopBits_1; // 一个停止位
+    USART_InitStructure.USART_Parity = USART_Parity_No; // 无校验位
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无硬件流控
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 收发模式
+    USART_Init(USARTx, &USART_InitStructure);
+    USART_Cmd(USARTx, ENABLE); // 使能串口
 }
 ```
 
@@ -143,7 +141,6 @@ void USARTx_DMA_Init(void)
     DMA_Init(USART_TX_DMA_CHANNEL, &DMA_InitStructure);
     DMA_Cmd(USART_TX_DMA_CHANNEL, ENABLE);
 }
-
 ```
 
 #### 2.2.4 主函数测试
@@ -161,27 +158,26 @@ static void Delay(__IO uint32_t nCount) // 简单的延时函数
 
 int main()
 {
-	uint16_t i;
-	LED_Init();
-	USART_Config();
-	USARTx_DMA_Init();
-	// for循环填充要发送的数据
-	for(i = 0; i < SendBuff_Size; i++)
-	{
-		SendBuff[i] = 'A';
-	}
-	// USART向DMA发出TX请求
-	USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
-	while(1)
-	{
-		// DMA不消耗CPU资源，我们可以做其他事，这里我们只是让LED闪烁
-		LED1_ON();
-		Delay(0xFFFFFF);
-		LED1_OFF();
-		Delay(0xFFFFFF);
-	}
+    uint16_t i;
+    LED_Init();
+    USART_Config();
+    USARTx_DMA_Init();
+    // for循环填充要发送的数据
+    for(i = 0; i < SendBuff_Size; i++)
+    {
+        SendBuff[i] = 'A';
+    }
+    // USART向DMA发出TX请求
+    USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
+    while(1)
+    {
+        // DMA不消耗CPU资源，我们可以做其他事，这里我们只是让LED闪烁
+        LED1_ON();
+        Delay(0xFFFFFF);
+        LED1_OFF();
+        Delay(0xFFFFFF);
+    }
 }
-
 ```
 
 USART_DMACmd函数用于控制USART的DMA请求的启动和关闭。它接收三个参数，第一个参数用于设置串口外设，可以是USART1/2/3和UART4/5这5个参数可选， 第二个参数设置串口的具体DMA请求，有串口发送请求USART_DMAReq_Tx和接收请求USART_DMAReq_Rx可选， 第三个参数用于设置启动请求ENABLE或者关闭请求DISABLE。运行该函数后USART的DMA发送传输就开始了，根据配置存储器的数据会发送到串口。
