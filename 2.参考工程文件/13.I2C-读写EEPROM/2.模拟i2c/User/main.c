@@ -1,24 +1,82 @@
-#include "stm32f10x.h"
-#include "./usart/bsp_usart.h"
-#include "./led/bsp_led.h" 
-#include "./i2c/bsp_i2c_ee.h"
+#include "led.h"
+#include "I2C.h"
+#include "i2c_gpio.h"
+#include "usart.h"
 
-int main(void)
+static void ee_Delay(__IO uint32_t nCount);
+uint8_t EEPROM_Test(void);
+
+int main()
 {
-  
-    LED_GPIO_Config();  
-    LED_BLUE; // 初始状态蓝灯亮
-		USART_Config();
-
-		printf("eeprom 软件GPIO模拟i2c测试例程 \r\n");		
-  
-    if(ee_Test() == 1)
-  	{
-			LED_GREEN; // 成功绿灯亮
+    LED_Init();
+    USART_Config();
+    LED_BLUE();
+    if(EEPROM_Test() == 1)
+    {
+        LED_GREEN();
     }
     else
     {
-        LED_RED;
+        LED_RED();
     }
-    while(1);
+    while(1)
+    {
+    }
+}
+
+// EEPROM测试函数
+uint8_t EEPROM_Test(void)
+{
+    uint16_t i;
+    uint8_t write_buf[EEPROM_SIZE];
+    uint8_t read_buf[EEPROM_SIZE];
+    if(EEPROM_CheckOk() == 0)    
+    {
+        printf("没有找到EEPROM\r\n");
+        return 0;
+    }
+    for(i=0;i<EEPROM_SIZE;i++)
+    {
+        write_buf[i] = i;
+    }
+    if(EEPROM_WriteBytes(write_buf, 0, EEPROM_SIZE) == 0)
+    {
+        printf("EEPROM写入失败\r\n");
+        return 0;
+    }
+    else
+    {
+        printf("EEPROM写入成功\r\n");
+    }
+    ee_Delay(0x0FFFFF);
+    if(EEPROM_ReadBytes(read_buf, 0, EEPROM_SIZE) == 0)
+    {
+        printf("EEPROM读取失败\r\n");
+        return 0;
+    }
+    else
+    {
+        printf("EEPROM读取成功,数据如下:\r\n");
+    }
+    for(i=0;i<EEPROM_SIZE;i++)
+    {
+        if(read_buf[i]!= write_buf[i])
+        {
+            printf("0x%02X", read_buf[i]);
+            printf("错误，两次读取数据不一致\r\n");
+            return 0;
+        }
+        printf("0x%02X ", read_buf[i]);
+        if((i & 15) == 15)
+        {
+            printf("\r\n");
+        }
+    }
+    printf("EEPROM测试通过\r\n");
+    return 1;
+}
+
+static void ee_Delay(__IO uint32_t nCount) // 简单的延时函数
+{
+    for(; nCount != 0; nCount--);
 }
