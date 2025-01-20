@@ -1,8 +1,10 @@
 {
-  "name": "BH-F103",
+  "name": "stm32f103vet6",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [],
+  "srcDirs": [
+    "../Doc"
+  ],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
@@ -11,7 +13,7 @@
         "name": "STARTUP",
         "files": [
           {
-            "path": "../../Libraries/CMSIS/startup/startup_stm32f10x_hd.s"
+            "path": "../Libraries/CMSIS/startup/startup_stm32f10x_hd.s"
           }
         ],
         "folders": []
@@ -20,16 +22,16 @@
         "name": "CMSIS",
         "files": [
           {
-            "path": "../../Libraries/CMSIS/core_cm3.h"
+            "path": "../Libraries/CMSIS/system_stm32f10x.c"
           },
           {
-            "path": "../../Libraries/CMSIS/stm32f10x.h"
+            "path": "../Libraries/CMSIS/core_cm3.c"
           },
           {
-            "path": "../../Libraries/CMSIS/system_stm32f10x.c"
+            "path": "../Libraries/CMSIS/system_stm32f10x.h"
           },
           {
-            "path": "../../Libraries/CMSIS/system_stm32f10x.h"
+            "path": "../Libraries/CMSIS/stm32f10x.h"
           }
         ],
         "folders": []
@@ -38,73 +40,73 @@
         "name": "FWLB",
         "files": [
           {
-            "path": "../../Libraries/FWlib/src/misc.c"
+            "path": "../Libraries/FWlib/src/misc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_adc.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_adc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_bkp.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_bkp.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_can.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_can.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_cec.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_cec.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_crc.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_crc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_dac.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_dac.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_dbgmcu.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_dbgmcu.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_dma.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_dma.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_exti.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_exti.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_flash.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_flash.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_fsmc.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_fsmc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_gpio.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_gpio.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_i2c.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_i2c.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_iwdg.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_iwdg.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_pwr.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_pwr.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_rcc.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_rcc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_rtc.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_rtc.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_sdio.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_sdio.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_spi.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_spi.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_tim.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_tim.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_usart.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_usart.c"
           },
           {
-            "path": "../../Libraries/FWlib/src/stm32f10x_wwdg.c"
+            "path": "../Libraries/FWlib/src/stm32f10x_wwdg.c"
           }
         ],
         "folders": []
@@ -113,34 +115,25 @@
         "name": "USER",
         "files": [
           {
-            "path": "../../User/main.c"
+            "path": "../User/main.c"
           },
           {
-            "path": "../../User/stm32f10x_it.c"
+            "path": "../User/stm32f10x_it.c"
           },
           {
-            "path": "../../User/i2c/bsp_i2c_ee.c"
+            "path": "../User/stm32f10x_it.h"
           },
           {
-            "path": "../../User/usart/bsp_usart.c"
+            "path": "../User/stm32f10x_conf.h"
           },
           {
-            "path": "../../User/led/bsp_led.c"
+            "path": "../User/led/led.c"
           },
           {
-            "path": "../../User/stm32f10x_conf.h"
+            "path": "../User/i2c/I2C.c"
           },
           {
-            "path": "../../User/stm32f10x_it.h"
-          }
-        ],
-        "folders": []
-      },
-      {
-        "name": "DOC",
-        "files": [
-          {
-            "path": "../../Doc/readme.txt"
+            "path": "../User/usart/usart.c"
           }
         ],
         "folders": []
@@ -151,10 +144,10 @@
   "deviceName": null,
   "packDir": null,
   "miscInfo": {
-    "uid": "5622a928a4b568316d9f282e012a6dd4"
+    "uid": "9c6a3c416a2953dc6f1593e21dec34b0"
   },
   "targets": {
-    "IIC（AT24C02）": {
+    "I2C": {
       "excludeList": [],
       "toolchain": "AC5",
       "compileConfig": {
@@ -286,21 +279,48 @@
       "custom_dep": {
         "name": "default",
         "incList": [
-          "../../Libraries/CMSIS",
-          "../../User",
-          "../../Libraries/FWlib/inc",
-          "../../User/usart",
-          "../../User/i2c",
+          "../Libraries/CMSIS",
+          "../Libraries/FWlib/inc",
+          "../User",
+          "../User/i2c",
+          "../User/led",
+          "../User/usart",
           ".cmsis/include",
-          "RTE/_IIC（AT24C02）"
+          "RTE/_I2C"
         ],
         "libList": [],
         "defineList": [
           "STM32F10X_HD",
           "USE_STDPERIPH_DRIVER"
         ]
+      },
+      "builderOptions": {
+        "AC5": {
+          "version": 4,
+          "beforeBuildTasks": [],
+          "afterBuildTasks": [],
+          "global": {
+            "use-microLIB": true,
+            "output-debug-info": "enable"
+          },
+          "c/cpp-compiler": {
+            "optimization": "level-0",
+            "one-elf-section-per-function": true,
+            "c99-mode": true,
+            "C_FLAGS": "--diag_suppress=1 --diag_suppress=1295",
+            "CXX_FLAGS": "--diag_suppress=1 --diag_suppress=1295",
+            "warnings": "unspecified"
+          },
+          "asm-compiler": {},
+          "linker": {
+            "output-format": "elf",
+            "xo-base": "",
+            "ro-base": "0x08000000",
+            "rw-base": "0x20000000"
+          }
+        }
       }
     }
   },
-  "version": "3.4"
+  "version": "3.5"
 }

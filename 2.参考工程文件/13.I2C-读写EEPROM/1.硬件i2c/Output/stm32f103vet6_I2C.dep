@@ -701,8 +701,7 @@ I (..\Libraries\FWlib\inc\stm32f10x_spi.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B93)
-F (..\User\main.c)(0x6788A587)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\i2c -I ..\User\led -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\main.o --omf_browse ..\output\main.crf --depend ..\output\main.d)
-I (..\User\usart\usart.h)(0x67879CAB)
+F (..\User\main.c)(0x678E4B87)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\i2c -I ..\User\led -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\main.o --omf_browse ..\output\main.crf --depend ..\output\main.d)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x67877B93)
 I (..\Libraries\CMSIS\core_cm3.h)(0x67877B93)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdint.h)(0x5E8E3CC2)
@@ -731,8 +730,11 @@ I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B93)
+I (..\User\led\led.h)(0x67877B93)
+I (..\User\usart\usart.h)(0x67879CAB)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdio.h)(0x5E8E3CC2)
-I (..\User\i2c\I2C.h)(0x67877B93)
+I (..\User\i2c\I2C.h)(0x6788B3A3)
+I (E:\dianzi\MDKv5\ARM\AC5\include\string.h)(0x5E8E3CC2)
 F (..\User\stm32f10x_it.c)(0x67877B93)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\i2c -I ..\User\led -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\stm32f10x_it.o --omf_browse ..\output\stm32f10x_it.crf --depend ..\output\stm32f10x_it.d)
 I (..\User\stm32f10x_it.h)(0x67877B93)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x67877B93)
@@ -795,8 +797,8 @@ I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x67877B93)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B93)
-F (..\User\i2c\I2C.c)(0x67879B47)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\i2c -I ..\User\led -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\i2c.o --omf_browse ..\output\i2c.crf --depend ..\output\i2c.d)
-I (..\User\i2c\I2C.h)(0x67877B93)
+F (..\User\i2c\I2C.c)(0x6788B8A3)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\i2c -I ..\User\led -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\i2c.o --omf_browse ..\output\i2c.crf --depend ..\output\i2c.d)
+I (..\User\i2c\I2C.h)(0x6788B3A3)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x67877B93)
 I (..\Libraries\CMSIS\core_cm3.h)(0x67877B93)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdint.h)(0x5E8E3CC2)

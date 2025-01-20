@@ -1,5 +1,4 @@
 ..\output\main.o: ..\User\main.c
-..\output\main.o: ..\User\usart\usart.h
 ..\output\main.o: ..\Libraries\CMSIS\stm32f10x.h
 ..\output\main.o: ..\Libraries\CMSIS\core_cm3.h
 ..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
@@ -29,5 +28,8 @@
 ..\output\main.o: ..\Libraries\FWlib\inc\stm32f10x_usart.h
 ..\output\main.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\output\main.o: ..\Libraries\FWlib\inc\misc.h
+..\output\main.o: ..\User\led\led.h
+..\output\main.o: ..\User\usart\usart.h
 ..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h
 ..\output\main.o: ..\User\i2c\I2C.h
+..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\string.h

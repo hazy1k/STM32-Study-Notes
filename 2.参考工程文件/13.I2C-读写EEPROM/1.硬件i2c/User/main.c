@@ -32,7 +32,7 @@ int main(void)
 uint8_t I2C_Test(void)
 {
 	uint16_t i;
-	printf("要写入的数据n\r");
+	printf("to write:\n\r");
 	for ( i=0; i <= 255; i++)
     {   
 		I2c_Buf_Write[i] = i; 
@@ -41,15 +41,15 @@ uint8_t I2C_Test(void)
         	printf("\n\r");    
     }
 	I2C_EE_BufferWrite(I2c_Buf_Write, EEP_Firstpage, 256); // 写入缓冲区的数据到EEPROM
-  	EEPROM_INFO("\n\r写入成功\r");  
-  	EEPROM_INFO("\n\rEEPROM读出的数据n\r");  
+  	EEPROM_INFO("\n\r successful \n\r");  
+  	EEPROM_INFO("\n\rEEPROM read: \n\r");  
   	I2C_EE_BufferRead(I2c_Buf_Read, EEP_Firstpage, 256);
 	for(i = 0; i < 256; i++) // 打印出来，看是否数据读写相同
 	{	
 		if(I2c_Buf_Read[i] != I2c_Buf_Write[i]) // 如果数据不相同
 		{
 			EEPROM_ERROR("0x%02X ", I2c_Buf_Read[i]);
-			EEPROM_ERROR("错误：两次读出的数据不相同\n\r");
+			EEPROM_ERROR("error:\n\r");
 			return 0;
 		}
     printf("0x%02X ", I2c_Buf_Read[i]); // 打印出来读出的数据
