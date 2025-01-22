@@ -10,7 +10,7 @@ typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
 #define countof(a) (sizeof(a)/sizeof(*(a)))
 #define TxBufferSize1 (countof(TxBuffer1)-1)
 #define RxBufferSize1 (countof(RxBuffer1)-1)
-#define BufferSize (countof(Tx_Buffer-1))
+#define BufferSize (countof(Tx_Buffer))
 
 // 配置SPI FLASH 相关参数
 #define FLASH_WriteAddress 0x00000 // 写地址
