@@ -25,11 +25,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_TiMbase.h"
-
+#include "TIMbase.h"
 
 extern volatile uint32_t time;
-
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -150,18 +148,14 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-/**
-  * @brief  This function handles TIM2 interrupt request.
-  * @param  None
-  * @retval None
-  */
-void  BASIC_TIM_IRQHandler (void)
+
+void TIM_BASE_IRQHandler(void)
 {
-	if ( TIM_GetITStatus( BASIC_TIM, TIM_IT_Update) != RESET ) 
-	{	
-		time++;
-		TIM_ClearITPendingBit(BASIC_TIM , TIM_FLAG_Update);  		 
-	}		 	
+  if(TIM_GetITStatus(TIM_BASE, TIM_IT_Update) != RESET) // 如果定时器产生计数溢出，也就是产生了中断
+  {
+    time++; // 1ms
+    TIM_ClearITPendingBit(TIM_BASE, TIM_IT_Update); // 清除中断标志位
+  }
 }
 
 /**
