@@ -2,7 +2,13 @@
 
 ## 1. 定时器分类
 
-STM32F1 系列中，除了互联型的产品，共有 8个定时器，分为基本定时器，通用定时器和高级定时器。 基本定时器 TIM6 和 TIM7 是一个 16位的只能向上计数的定时器，只能定时，没有外部 IO。 通用定时器 TIM2/3/4/5是一个 16位的可以向上/下计数的定时器，可以定时，可以输出比较，可以输入捕捉， 每个定时器有四个外部IO。高级定时器 TIM1/8是一个 16位的可以向上/下计数的定时器，可以定时，可以输出比较， 可以输入捕捉，还可以有三相电机互补输出信号，每个定时器有8 个外部 IO。更加具体的分类详情见：
+STM32F1 系列中，共有 8个定时器，分为基本定时器，通用定时器和高级定时器。 
+
+基本定时器 TIM6 和 TIM7 是一个 16位的只能向上计数的定时器，只能定时，没有外部 IO。 
+
+通用定时器 TIM2/3/4/5是一个 16位的可以向上/下计数的定时器，可以定时，可以输出比较，可以输入捕捉， 每个定时器有四个外部IO。
+
+高级定时器 TIM1/8是一个 16位的可以向上/下计数的定时器，可以定时，可以输出比较， 可以输入捕捉，还可以有三相电机互补输出信号，每个定时器有8 个外部 IO。更加具体的分类详情见：
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/TIMbas002.png)
 
@@ -30,7 +36,29 @@ STM32F1 系列中，除了互联型的产品，共有 8个定时器，分为基�
 
 ### 2.5 定时时间的计算
 
-定时器的定时时间等于计数器的中断周期乘以中断的次数。计数器在 CK_CNT的驱动下，计一个数的时间则是 CK_CLK的倒数， 等于：1/（TIMxCLK/(PSC+1)），产生一次中断的时间则等于：1/（CK_CLK * ARR）。如果在中断服务程序里面设置一个变量time， 用来记录中断的次数，那么就可以计算出我们需要的定时时间等于：1/CK_CLK* (ARR+1)*time。
+#### 2.5.1 定时器的时钟频率
+
+定时器计数器的时钟频率通常是由定时器时钟源（`TIMxCLK`）和预分频器（`PSC`）共同决定的。具体计算公式为：
+
+f<sub>CNT</sub>​ = f<sub>TIMxCLK</sub>​​ / PSC+1
+
+#### 2.5.2 定时器每次计数所需时间
+
+每次计数（即计数器增加 1）所需的时间是：
+
+T<sub>count</sub>​ = 1 / f<sub>CNT</sub>​​ = PSC+1​ / f​<sub>TIMxCLK</sub>
+
+#### 2.5.3 产生一次中断的时间（计数器溢出）
+
+定时器计数器从 0 计数到 `ARR` 时，会发生溢出并产生一个中断。这个过程的时间是：
+
+T<sub>interrupt</sub> ​= ARR+1 / f<sub>CNT</sub> = ​(ARR+1)×(PSC+1)​ / f<sub>TIMxCLK</sub>
+
+#### 2.5.4 在中断服务程序中的次数计数
+
+如果在中断服务程序中使用一个变量 `time` 来记录中断发生的次数，那么在发生 `time` 次中断后，定时器总的定时时间就是：
+
+T<sub>total</sub> ​= T<sub>interrupt</sub> ​× time = ​(ARR+1)×(PSC+1)​×time / f<sub>TIMxCLK</sub>
 
 ## 3. 定时器初始化结构体详解
 
@@ -124,12 +152,12 @@ TIM_TimeBaseInit(TIM1, &TIM_InitStruct);
 
 下面我们加大难度，配置 TIM2 和 GPIO 进行 LED 闪烁，即定时器产生一次中断，led翻转状态
 
-### 硬件设置
+### 4.1 硬件设置
 
 - **LED**: 连接到 GPIOA 的 PIN 5。
 - **定时器**: 使用 TIM2。
 
-### 示例代码
+### 4.2 示例代码
 
 1. **初始化 GPIO（LED）**
 
@@ -140,7 +168,7 @@ TIM_TimeBaseInit(TIM1, &TIM_InitStruct);
 
 void GPIO_Init(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
-    
+
     // 使能 GPIOA 时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
@@ -162,23 +190,18 @@ void GPIO_Init(void) {
 
 void TIM2_Init(void) {
     TIM_TimeBaseInitTypeDef TIM_InitStructure;
-    
     // 使能 TIM2 时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
     // 配置 TIM2
     TIM_InitStructure.TIM_Period = 999;            // 自动重载寄存器值
     TIM_InitStructure.TIM_Prescaler = 7199;         // 预分频器
     TIM_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_InitStructure);
-
     // 使能更新中断
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-    
     // 启动定时器
     TIM_Cmd(TIM2, ENABLE);
-
     // 配置并使能中断
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
@@ -195,11 +218,9 @@ void TIM2_Init(void) {
 void TIM2_IRQHandler(void) {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  // 清除中断标志
-
         GPIO_ToggleBits(GPIOA, GPIO_Pin_5);          // 切换 PA5 状态（LED）
     }
 }
-
 ```
 
 4. **主函数**
@@ -227,3 +248,5 @@ int main(void) {
 ---
 
 2024.9.10 第一次修订，后期不再维护
+
+2025.1.23 优化结构
