@@ -25,7 +25,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "SysTick.h"
 
+extern __IO uint32_t Delay_Time; 
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -137,6 +139,10 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+  if (Delay_Time != 0) 
+  {
+    Delay_Time--;  
+  }
 }
 
 /******************************************************************************/
