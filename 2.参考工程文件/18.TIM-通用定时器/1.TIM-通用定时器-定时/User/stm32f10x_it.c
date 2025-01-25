@@ -25,11 +25,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_GeneralTim.h" 
-
+#include "GeneralTim.h" 
 
 extern volatile uint32_t time;
-
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -155,12 +153,12 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-void  GENERAL_TIM_IRQHandler (void)
+void TIM_IRQHandler (void)
 {
-	if ( TIM_GetITStatus( GENERAL_TIM, TIM_IT_Update) != RESET ) 
+	if(TIM_GetITStatus(TIMx, TIM_IT_Update) != RESET) 
 	{	
 		time++;
-		TIM_ClearITPendingBit(GENERAL_TIM , TIM_FLAG_Update);  		 
+		TIM_ClearITPendingBit(TIMx, TIM_FLAG_Update);  		 
 	}		 	
 }
 
