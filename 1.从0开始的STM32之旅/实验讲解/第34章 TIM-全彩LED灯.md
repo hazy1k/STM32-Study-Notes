@@ -354,7 +354,7 @@ void TIM3_Config(void)
 
     // 配置 GPIO 引脚（假设引脚为 GPIOA 的 PA6, PA7, PA8）
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-    
+
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
@@ -362,7 +362,7 @@ void TIM3_Config(void)
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
+
     // 选择复用功能
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_2); // TIM3_CH1
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_2); // TIM3_CH2
@@ -400,7 +400,7 @@ int main(void)
 {
     // 系统初始化
     SystemInit();
-    
+
     // 配置 TIM3
     TIM3_Config();
 
@@ -427,8 +427,6 @@ void Delay(__IO uint32_t nTime)
     // 简单延时函数实现
     for (; nTime != 0; nTime--);
 }
-
-
 ```
 
 ### 代码说明
