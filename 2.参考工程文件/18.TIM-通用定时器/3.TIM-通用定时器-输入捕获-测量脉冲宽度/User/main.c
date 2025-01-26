@@ -1,35 +1,27 @@
-// TIM—通用-捕获-测量脉宽 应用
 #include "stm32f10x.h"
-#include "bsp_led.h"
-#include "bsp_usart.h"
-#include "bsp_GeneralTim.h"  
+#include "led.h"
+#include "usart.h"
+#include "GeneralTim.h"  
+
+extern volatile uint32_t Capture_Period;
+extern volatile uint32_t Caputure_Value;
+extern volatile uint8_t Capture_startflag;
+extern volatile uint8_t Capture_endflag;
 
 int main(void)
 {
 	uint32_t time;
-	
-	// TIM 计数器的驱动时钟
-	uint32_t TIM_PscCLK = 72000000 / (GENERAL_TIM_PSC+1);
-	// 串口初始化
+	uint32_t TIM_CNT_CLK = 72000000/(TIMx_Prescaler+1); // 计数器时钟频率1Mhz，预分频系数为71
+	LED_Init();
 	USART_Config();
-	// 定时器初始化
-	GENERAL_TIM_Init();
-	
-	printf ( "\r\n野火 STM32 输入捕获实验\r\n" );
-	printf ( "\r\n按下K1，测试K1按下的时间\r\n" );
-	
+	GTim_Init();
 	while(1)
 	{
-		if(TIM_ICUserValueStructure.Capture_FinishFlag == 1)
+		if(Capture_endflag == 1)
 		{
-			// 计算高电平时间的计数器的值
-			time = TIM_ICUserValueStructure.Capture_Period * (GENERAL_TIM_PERIOD+1) + 
-			       (TIM_ICUserValueStructure.Capture_CcrValue+1);
-			
-			// 打印高电平脉宽时间
-			printf ( "\r\n测得高电平脉宽时间：%d.%d s\r\n",time/TIM_PscCLK,time%TIM_PscCLK );
-			
-			TIM_ICUserValueStructure.Capture_FinishFlag = 0;			
-		}		
+			time = Capture_Period*(TIMx_Period+1)+(Caputure_Value+1);
+			printf("高电平时间：%d.%d s\r\n", time/TIM_CNT_CLK, time%TIM_CNT_CLK);
+			Capture_endflag = 0;
+		}
 	}
 }

@@ -25,7 +25,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_GeneralTim.h" 
+#include "GeneralTim.h" 
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -139,51 +139,40 @@ void SysTick_Handler(void)
 {
 }
 
-void GENERAL_TIM_INT_FUN(void)
+volatile uint32_t Capture_Period = 0;
+volatile uint32_t Caputure_Value =0 ;
+volatile uint8_t Capture_startflag = 0;
+volatile uint8_t Capture_endflag = 0;
+
+void TIM_IC_IRQHandler(void)
 {
-	// 当要被捕获的信号的周期大于定时器的最长定时时，定时器就会溢出，产生更新中断
-	// 这个时候我们需要把这个最长的定时周期加到捕获信号的时间里面去
-	if ( TIM_GetITStatus ( GENERAL_TIM, TIM_IT_Update) != RESET )               
-	{	
-		TIM_ICUserValueStructure.Capture_Period ++;		
-		TIM_ClearITPendingBit ( GENERAL_TIM, TIM_FLAG_Update ); 		
-	}
-
-	// 上升沿捕获中断
-	if ( TIM_GetITStatus (GENERAL_TIM, GENERAL_TIM_IT_CCx ) != RESET)
-	{
-		// 第一次捕获
-		if ( TIM_ICUserValueStructure.Capture_StartFlag == 0 )
-		{
-			// 计数器清0
-			TIM_SetCounter ( GENERAL_TIM, 0 );
-			// 自动重装载寄存器更新标志清0
-			TIM_ICUserValueStructure.Capture_Period = 0;
-      // 存捕获比较寄存器的值的变量的值清0			
-			TIM_ICUserValueStructure.Capture_CcrValue = 0;
-
-			// 当第一次捕获到上升沿之后，就把捕获边沿配置为下降沿
-			GENERAL_TIM_OCxPolarityConfig_FUN(GENERAL_TIM, TIM_ICPolarity_Falling);
-      // 开始捕获标准置1			
-			TIM_ICUserValueStructure.Capture_StartFlag = 1;			
-		}
-		// 下降沿捕获中断
-		else // 第二次捕获
-		{
-			// 获取捕获比较寄存器的值，这个值就是捕获到的高电平的时间的值
-			TIM_ICUserValueStructure.Capture_CcrValue = 
-			GENERAL_TIM_GetCapturex_FUN (GENERAL_TIM);
-
-			// 当第二次捕获到下降沿之后，就把捕获边沿配置为上升沿，好开启新的一轮捕获
-			GENERAL_TIM_OCxPolarityConfig_FUN(GENERAL_TIM, TIM_ICPolarity_Rising);
-      // 开始捕获标志清0		
-			TIM_ICUserValueStructure.Capture_StartFlag = 0;
-      // 捕获完成标志置1			
-			TIM_ICUserValueStructure.Capture_FinishFlag = 1;		
-		}
-
-		TIM_ClearITPendingBit (GENERAL_TIM,GENERAL_TIM_IT_CCx);	    
-	}		
+  // 如果捕获信号时间大于定时器最大周期，会产生定时器溢出，称之为更新中断
+  // 我们同样需要把这个时间加入到捕获信号的周期中
+  if(TIM_GetITStatus(TIMx, TIM_IT_Update) != RESET) // 更新中断
+  {
+    Capture_Period++;
+    TIM_ClearITPendingBit(TIMx, TIM_IT_Update);
+  }
+  if(TIM_GetITStatus(TIMx, TIM_IT_CC1) != RESET) // 上升沿捕获中断
+  {
+    if(Capture_startflag == 0)
+    {
+      TIM_SetCounter(TIMx, 0); // 重置定时器
+      Capture_Period = 0;
+      Caputure_Value = 0; // 存储捕获比较值
+      // 捕获到上升沿后，TIM开始捕获下降沿，从而得到高电平的时间
+      TIM_OC1PolarityConfig(TIMx, TIM_ICPolarity_Falling);
+      Capture_startflag = 1;
+    }
+    else // 捕获到下降沿
+    {
+      Caputure_Value = TIM_GetCapture1(TIMx); // 存储捕获比较值
+      TIM_OC1PolarityConfig(TIMx, TIM_ICPolarity_Rising); // 复位为上升沿捕获
+      Capture_startflag = 0;
+      Capture_endflag = 1;
+    }
+    TIM_ClearITPendingBit(TIMx, TIM_IT_CCx); // 清除中断标志位
+  }
 }
 
 /******************************************************************************/
