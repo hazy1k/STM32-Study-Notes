@@ -25,7 +25,6 @@ static void TIM_GPIO_Init(void)
   GPIO_Init(TIM_MASTER_PORT, &GPIO_InitStructure); // 初始化TIM2_CH3（PB10）
 }
 
-// 初始化定时器的工作模式（主从定时器模式）
 static void TIM_Mode_Init(void)
 {
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;

@@ -25,10 +25,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_AdvanceTim.h" 
-
-
-extern volatile uint32_t time;
+#include "AdvanceTim.h" 
 
 
 /** @addtogroup STM32F10x_StdPeriph_Template
@@ -155,15 +152,16 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-void  ADVANCE_TIM_IRQHandler (void)
+
+volatile uint32_t time = 0; // ms 计时变量 
+void ATIM_IRQHandler(void)
 {
-	if ( TIM_GetITStatus( ADVANCE_TIM, TIM_IT_Update) != RESET ) 
+	if(TIM_GetITStatus(ATMx, TIM_IT_Update) != RESET) 
 	{	
 		time++;
-		TIM_ClearITPendingBit(ADVANCE_TIM , TIM_FLAG_Update);  		 
+		TIM_ClearITPendingBit(ATMx , TIM_FLAG_Update);  		 
 	}		 	
 }
-
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

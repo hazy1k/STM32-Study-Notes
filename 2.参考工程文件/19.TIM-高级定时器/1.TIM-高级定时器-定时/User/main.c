@@ -1,24 +1,22 @@
-
-// 高级定时器TIMx,x[1,8]定时应用
 #include "stm32f10x.h"
-#include "bsp_led.h"
-#include "bsp_AdvanceTim.h" 
+#include "led.h"
+#include "AdvanceTim.h" 
+#include "usart.h"
 
-uint32_t time = 0; // ms 计时变量 
+extern volatile uint32_t time;
 
 int main(void)
 { 
-	LED_GPIO_Config();
-	
-	ADVANCE_TIM_Init();
-	
+	LED_Init();
+	ATIM_Config();
+	USART_Config();
   while(1)
   {
-    if(time == 1000 ) // 1000 * 1 ms = 1s 时间到 
+    if(time == 1000) // 1000 * 1 ms = 1s 时间到 
     {
       time = 0;
-			// LED1 取反      
-			LED1_TOGGLE; 
+			LED1_TOGGLE(); 
+			printf("这是由TIM1产生的1s定时器中断\r\n");
     }        
   }
 }
