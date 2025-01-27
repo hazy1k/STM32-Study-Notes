@@ -8,173 +8,125 @@
 
 ## 2. 软件设计
 
-### 2.1 编程目的
+### 2.1 编程大纲
 
-1. 定时器用到的GPIO 初始化
+1. TIM相关参数宏定义
 
-2. 定时器时基结构体TIM_TimeBaseInitTypeDef初始化
+2. TIM GPIO初始化
 
-3. 定时器输出比较结构体TIM_OCInitTypeDef初始化
+3. 时基结构、输出比较结构、死区结构初始化
 
-4. 定时器刹车和死区结构体TIM_BDTRInitTypeDef初始化
+### 2.2 代码分析
 
-## 2.2 代码分析
-
-- 宏定义
+#### 2.2.1 TIM相关参数宏定义
 
 ```c
-// 高级定时器TIM1相关参数宏定义
-#define ADVANCE_TIM               TIM1                   // 高级定时器选择
-#define ADVANCE_TIM_APBxClock_FUN RCC_APB2PeriphClockCmd // 高级定时器时钟使能函数
-#define ADVANCE_TIM_CLK           RCC_APB2Periph_TIM1    // 高级定时器时钟
-
-// PWM 信号的频率 F = TIM_CLK/{(ARR+1)*(PSC+1)}
-#define ADVANCE_TIM_PERIOD        (8-1)                  // 高级定时器计数周期
-#define ADVANCE_TIM_PSC           (9-1)                  // 高级定时器分频因子
-#define ADVANCE_TIM_PULSE         4                      // 高级定时器输出脉冲宽度
-
-// 中断向量定义
-#define ADVANCE_TIM_IRQ           TIM1_UP_IRQn           // 高级定时器更新中断
-#define ADVANCE_TIM_IRQHandler    TIM1_UP_IRQHandler     // 高级定时器更新中断处理函数
-
-// TIM1 输出比较通道
-#define ADVANCE_TIM_CH1_GPIO_CLK      RCC_APB2Periph_GPIOA// 通道1 GPIO时钟使能函数
-#define ADVANCE_TIM_CH1_PORT          GPIOA               // 通道1 GPIO端口
-#define ADVANCE_TIM_CH1_PIN           GPIO_Pin_8          // 通道1 GPIO引脚
-
-// TIM1 输出比较通道的互补通道
-#define ADVANCE_TIM_CH1N_GPIO_CLK     RCC_APB2Periph_GPIOB// 通道1N GPIO时钟使能函数
-#define ADVANCE_TIM_CH1N_PORT         GPIOB               // 通道1N GPIO端口
-#define ADVANCE_TIM_CH1N_PIN          GPIO_Pin_13         // 通道1N GPIO引脚
-
-// TIM1 输出比较通道的刹车通道
-#define ADVANCE_TIM_BKIN_GPIO_CLK     RCC_APB2Periph_GPIOB// 刹车通道 GPIO时钟使能函数
-#define ADVANCE_TIM_BKIN_PORT         GPIOB               // 刹车通道 GPIO端口
-#define ADVANCE_TIM_BKIN_PIN          GPIO_Pin_12         // 刹车通道 GPIO引脚
+/* TIMx */
+#define ATIMx TIM1
+#define ATIM_APBxClock RCC_APB2PeriphClockCmd
+#define ATIM_CLK RCC_APB2Periph_TIM1
+/* PWN信号 */
+// F = TIM_CLK/(ARR+1)*(PSC+1) = 72/8*9 = 1
+#define ATIM_Period 7
+#define ATIM_Prescaler 8
+#define ATIM_Pulse 4
+/* 输出比较通道 */
+#define ATIM_CH1_GPIO_CLK RCC_APB2Periph_GPIOA // PA8
+#define ATIM_CH1_GPIO_PORT GPIOA
+#define ATIM_CH1_GPIO_PIN GPIO_Pin_8
+/* 输出比通道的互补通道 */
+#define ATIM_CH1N_GPIO_CLK RCC_APB2Periph_GPIOB // PB13
+#define ATIM_CH1N_GPIO_PORT GPIOB
+#define ATIM_CH1N_GPIO_PIN GPIO_Pin_13
+/* 输出比较通道的刹车通道 */
+#define ATIM_BKIN_GPIO_CLK RCC_APB2Periph_GPIOB // PB12
+#define ATIM_BKIN_GPIO_PORT GPIOB
+#define ATIM_BKIN_GPIO_PIN GPIO_Pin_12
 ```
 
-使用宏定义非常方便程序升级、移植。有关每个宏的具体含义看程序注释即可。
-
-- 定时器复用功能引脚初始化
+#### 2.2.2 定时器复用功能引脚初始化
 
 ```c
-static void ADVANCE_TIM_GPIO_Config(void) 
+static void ATIM_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  // 输出比较通道 GPIO 初始化
-  RCC_APB2PeriphClockCmd(ADVANCE_TIM_CH1_GPIO_CLK, ENABLE);
-  GPIO_InitStructure.GPIO_Pin =  ADVANCE_TIM_CH1_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(ADVANCE_TIM_CH1_PORT, &GPIO_InitStructure);
-
-  // 输出比较通道互补通道 GPIO 初始化
-  RCC_APB2PeriphClockCmd(ADVANCE_TIM_CH1N_GPIO_CLK, ENABLE);
-  GPIO_InitStructure.GPIO_Pin =  ADVANCE_TIM_CH1N_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(ADVANCE_TIM_CH1N_PORT, &GPIO_InitStructure);
-
-  // 输出比较通道刹车通道 GPIO 初始化
-  RCC_APB2PeriphClockCmd(ADVANCE_TIM_BKIN_GPIO_CLK, ENABLE);
-  GPIO_InitStructure.GPIO_Pin =  ADVANCE_TIM_BKIN_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(ADVANCE_TIM_BKIN_PORT, &GPIO_InitStructure);
-
-  // BKIN引脚默认先输出低电平
-  GPIO_ResetBits(ADVANCE_TIM_BKIN_PORT, ADVANCE_TIM_BKIN_PIN);    
+    GPIO_InitTypeDef GPIO_InitStructure;
+    // 输出比较通道GPIO初始化
+    RCC_APB2PeriphClockCmd(ATIM_CH1_GPIO_CLK, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = ATIM_CH1_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(ATIM_CH1_GPIO_PORT, &GPIO_InitStructure);
+    // 输出比较通道的互补通道GPIO初始化
+    RCC_APB2PeriphClockCmd(ATIM_CH1N_GPIO_CLK, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = ATIM_CH1N_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(ATIM_CH1N_GPIO_PORT, &GPIO_InitStructure);
+    // 输出比较通道的刹车通道GPIO初始化
+    RCC_APB2PeriphClockCmd(ATIM_BKIN_GPIO_CLK, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = ATIM_BKIN_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(ATIM_BKIN_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_ResetBits(ATIM_BKIN_GPIO_PORT, ATIM_BKIN_GPIO_PIN); // BKIN默认是低电平状态  
 }
 ```
 
-ADVANCE_TIM_GPIO_Config()函数初始化了定时器用到的相关的GPIO，当使用不同的GPIO的时候，只需要修改头文件里面的宏定义即可，而不需要修改这个函数。
-
-- 定时器模式配置
+#### 2.2.3 定时器模式配置
 
 ```c
-// 定时器模式配置
-static void ADVANCE_TIM_Mode_Config(void)
+static void ATIM_Mode_Init(void)
 {
-    // 开启定时器时钟,即内部时钟CK_INT=72M
-    ADVANCE_TIM_APBxClock_FUN(ADVANCE_TIM_CLK,ENABLE);
-
-/*--------------------时基结构体初始化-------------------------*/
-    // 1.时基结构体初始化
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    // 2.自动重装载寄存器的值，累计TIM_Period+1个频率后产生一个更新或者中断
-    TIM_TimeBaseStructure.TIM_Period = ADVANCE_TIM_PERIOD;
-    // 3.驱动CNT计数器的时钟 = Fck_int/(psc+1)
-    TIM_TimeBaseStructure.TIM_Prescaler= ADVANCE_TIM_PSC;    
-    // 4.时钟分频因子 ，配置死区时间时需要用到
-    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;        
-    // 5.计数器计数模式，设置为向上计数
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;        
-    // 6.重复计数器的值，没用到不用管
-    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;    
-    // 7.初始化定时器
-    TIM_TimeBaseInit(ADVANCE_TIM, &TIM_TimeBaseStructure);
-
-/*--------------------输出比较结构体初始化-------------------*/
-    // 1.输出比较结构体初始化        
-    TIM_OCInitTypeDef  TIM_OCInitStructure;
-    // 2.配置为PWM模式1
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-    // 3.输出使能
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-    // 4.互补输出使能
-    TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable; 
-    // 5.设置占空比大小
-    TIM_OCInitStructure.TIM_Pulse = ADVANCE_TIM_PULSE;
-    // 6.输出通道电平极性配置
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-    // 7.互补输出通道电平极性配置
-    TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
-    // 8.输出通道空闲电平极性配置
-    TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
-    // 9.互补输出通道空闲电平极性配置
-    TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
-    // 10.初始化输出比较1
-    TIM_OC1Init(ADVANCE_TIM, &TIM_OCInitStructure);
-    TIM_OC1PreloadConfig(ADVANCE_TIM, TIM_OCPreload_Enable); // 使能预装载寄存器
-
-/*-------------------刹车和死区结构体初始化-------------------*/
-    // 有关刹车和死区结构体的成员具体可参考BDTR寄存器的描述
+    ATIM_APBxClock(ATIM_CLK, ENABLE); // 72MHz
+    // 时基结构初始化
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseStructure.TIM_Period = ATIM_Period; // 8-1
+    TIM_TimeBaseStructure.TIM_Prescaler = ATIM_Prescaler; // 9-1
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(ATIMx, &TIM_TimeBaseStructure);
+    // 输出比较结构初始化
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; // 配置为PWM1模式
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; // 输出使能
+    TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable; // 互补输出使能
+    TIM_OCInitStructure.TIM_Pulse = ATIM_Pulse; // 占空比4 
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
+    TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High; // 互补通道输出极性高
+    TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set; // 输出通道空闲状态置位
+    TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset; // 互补通道空闲状态复位
+    TIM_OC1Init(ATIMx, &TIM_OCInitStructure);
+    TIM_OC1PreloadConfig(ATIMx, TIM_OCPreload_Enable); // 预装载使能
+    // 死区结构初始化
     TIM_BDTRInitTypeDef TIM_BDTRInitStructure;
-    TIM_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable;
-    TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable;
-    TIM_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_1;
-    // 输出比较信号死区时间配置，具体如何计算可参考 BDTR:UTG[7:0]的描述
-    // 这里配置的死区时间为152ns
-    TIM_BDTRInitStructure.TIM_DeadTime = 11;
-    TIM_BDTRInitStructure.TIM_Break = TIM_Break_Enable;
-    // 当BKIN引脚检测到高电平的时候，输出比较信号被禁止，就好像是刹车一样
-    TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High;
-    TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
-    TIM_BDTRConfig(ADVANCE_TIM, &TIM_BDTRInitStructure);
-
-    // 使能计数器
-    TIM_Cmd(ADVANCE_TIM, ENABLE);    
-    // 主输出使能，当使用的是通用定时器时，这句不需要
-    TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
+    TIM_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable; // 允许重装载
+    TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable; // 允许停止
+    TIM_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_1; // 锁定
+    TIM_BDTRInitStructure.TIM_DeadTime = 11; // 死区时间11
+    TIM_BDTRInitStructure.TIM_Break = TIM_Break_Enable; // 允许死区
+    // 当BKIN引脚检测到高电平的时候，输出比较信号立即被禁止，直到下一个更新事件发生。
+    TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High; // 死区极性高
+    TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable; // 允许自动输出
+    TIM_BDTRConfig(ATIMx, &TIM_BDTRInitStructure);
+    TIM_Cmd(ATIMx, ENABLE);
+    TIM_CtrlPWMOutputs(ATIMx, ENABLE); // 使能PWM输出
 }
 ```
 
 ADVANCE_TIM_Mode_Config()函数中初始化了三个结构体，有关这三个结构体成员的具体含义可参考“定时器初始化结构体详解”小节， 剩下的程序参考注释阅读即可。如果需要修改PWM的周期和占空比，修改头文件里面的ADVANCE_TIM_PERIOD、 ADVANCE_TIM_PSC和ADVANCE_TIM_PULSE这三个宏即可。 PWM信号的频率的计算公司为：F =TIM_CLK/{(ARR+1)*(PSC+1)}， 其中TIM_CLK等于72MHZ，ARR即自动重装载寄存器的值，对应ADVANCE_TIM_PERIOD这个宏，PSC即计数器时钟的分频因子，对应ADVANCE_TIM_PSC这个宏。
 
-- 主函数
+#### 2.2.4 主函数
 
 ```c
 // TIM—高级定时器-PWM互补输出带死区时间应用
 #include "stm32f10x.h"
-#include "bsp_led.h"
-#include "bsp_AdvanceTim.h"  
+#include "led.h"
+#include "AdvanceTim.h"  
 
 int main(void)
-{    
-    // 高级定时器初始化
-    ADVANCE_TIM_Init();
-
+{
+  ATIMx_Config();
   while(1)
   {      
   }
@@ -226,8 +178,6 @@ TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
 TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
 TIM_OC1Init(ADVANCE_TIM, &TIM_OCInitStructure);
 TIM_OC1PreloadConfig(ADVANCE_TIM, TIM_OCPreload_Enable);
-
-
 ```
 
 - `TIM_OCMode`：配置为PWM模式1，用于产生PWM信号。
@@ -273,7 +223,7 @@ TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
 
 ---
 
-### **基本原理**
+### 3.1**基本原理**
 
 1. **PWM信号生成**：
    
@@ -287,7 +237,7 @@ TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
    
    - 死区时间用于避免PWM信号的两个互补输出同时导通，防止短路。它在两个互补信号之间引入一个小的时间间隔。
 
-### **详细代码示例**
+### **3.2 详细代码示例**
 
 以下是一个高级定时器的配置示例（以STM32系列为例）：
 
@@ -298,17 +248,14 @@ void TIM_Config(void) {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     TIM_OCInitTypeDef TIM_OCInitStructure;
     TIM_BDTRInitTypeDef TIM_BDTRInitStructure;
-
     // 1. 使能定时器时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM1, ENABLE);
-
     // 2. 定时器时基配置
     TIM_TimeBaseStructure.TIM_Period = 999;          // 自动重装载寄存器周期
     TIM_TimeBaseStructure.TIM_Prescaler = 83;         // 预分频器
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-
     // 3. 输出比较配置
     TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -320,7 +267,6 @@ void TIM_Config(void) {
     TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
     TIM_OC1Init(TIM1, &TIM_OCInitStructure);
     TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-
     // 4. 刹车和死区时间配置
     TIM_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable;
     TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable;
@@ -330,15 +276,13 @@ void TIM_Config(void) {
     TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High;
     TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
     TIM_BDTRConfig(TIM1, &TIM_BDTRInitStructure);
-
     // 5. 使能定时器
     TIM_Cmd(TIM1, ENABLE);
     TIM_CtrlPWMOutputs(TIM1, ENABLE);
 }
-
 ```
 
-### **应用**
+### **3.2 应用**
 
 - **电机控制**：在电机驱动中，PWM信号用于控制电机的速度和转向，刹车功能保护电机免受过流损坏。
 - **风扇控制**：通过PWM信号调节风扇的转速。
@@ -347,3 +291,5 @@ void TIM_Config(void) {
 ---
 
 2024.9.14 第一次修订，后期不再维护
+
+2025.1.26 修订代码
