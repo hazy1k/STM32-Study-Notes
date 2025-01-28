@@ -25,8 +25,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_AdvanceTim.h" 
-#include "bsp_usart.h"
+#include "AdvanceTim.h" 
+#include "usart.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -140,34 +140,27 @@ void SysTick_Handler(void)
 {
 }
 
-__IO uint16_t IC2Value = 0;
-__IO uint16_t IC1Value = 0;
-__IO float DutyCycle = 0;
-__IO float Frequency = 0;
+__IO uint16_t IC2Value = 0; // 捕获频率
+__IO uint16_t IC1Value = 0; // 捕获占空比
+__IO float DutyCycle = 0;   // 计算占空比
+__IO float Frequency = 0;   // 计算频率
 
 /*
  * 如果是第一个上升沿中断，计数器会被复位，锁存到CCR1寄存器的值是0，CCR2寄存器的值也是0
  * 无法计算频率和占空比。当第二次上升沿到来的时候，CCR1和CCR2捕获到的才是有效的值。其中
  * CCR1对应的是周期，CCR2对应的是占空比。
  */
-void ADVANCE_TIM_IRQHandler(void)
+void ATIM_IRQHandler(void)
 {
-  /* 清除中断标志位 */
-  TIM_ClearITPendingBit(ADVANCE_TIM, TIM_IT_CC1);
-
-  /* 获取输入捕获值 */
-  IC1Value = TIM_GetCapture1(ADVANCE_TIM);
-  IC2Value = TIM_GetCapture2(ADVANCE_TIM);
-	printf("IC1Value = %d  IC2Value = %d ",IC1Value,IC2Value);
-	
+  TIM_ClearITPendingBit(ATIMx, TIM_IT_CC1);
+  IC1Value = TIM_GetCapture1(ATIMx);
+  IC2Value = TIM_GetCapture2(ATIMx);
+	printf("IC1Value = %d  IC2Value = %d ",IC1Value,IC2Value); // 输出捕获值
   // 注意：捕获寄存器CCR1和CCR2的值在计算占空比和频率的时候必须加1，因为计数器是从 0 开始计数的。
 	if (IC1Value != 0)
   {
-    /* 占空比计算 */
-    DutyCycle = (float)((IC2Value+1) * 100) / (IC1Value+1);
-
-    /* 频率计算 */
-    Frequency = (72000000/(ADVANCE_TIM_PSC+1))/(float)(IC1Value+1);
+    DutyCycle = (float)((IC2Value+1) * 100) / (IC1Value+1); // 计算占空比
+    Frequency = (72000000/(ATIM_Prescaler+1))/(float)(IC1Value+1); // 计算频率
 		printf("占空比：%0.2f%%   频率：%0.2fHz\n",DutyCycle,Frequency);
   }
   else
