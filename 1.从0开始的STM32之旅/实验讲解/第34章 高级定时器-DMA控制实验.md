@@ -6,65 +6,77 @@ TIM和DMA均输入内部资源，无需硬件设计，还使用了按键，已�
 
 ## 2. 软件设计
 
-- 高级定时器及通道宏定义
+### 2.1 编程大纲
+
+1. TIM和DMA相关参数宏定义
+
+2. TIM GPIO及DMA Mode配置
+
+3. TIM Mode配置
+
+4. 主函数测
+
+### 2.2 代码分析
+
+#### 2.2.1 相关参数宏定义
 
 ```c
-// 定时器
-#define ADVANCE_TIM     TIM1
-#define ADVANCE_TIM_CLK RCC_APB2Periph_TIM1                      
+#ifndef __ATIM_H
+#define __ATIM_H
 
-// TIM1 输出比较通道
-#define ADVANCE_TIM_CH1_GPIO_CLK RCC_APB2Periph_GPIOA
-#define ADVANCE_TIM_CH1_PORT     GPIOA
-#define ADVANCE_TIM_CH1_PIN      GPIO_Pin_8
+#include "stm32f10x.h"
+
+/* TIM1输出比较通道1 */
+#define ATIMx TIM1
+#define ATIM_CLK RCC_APB2Periph_TIM1
+#define ATIM_CH1_GPIO_CLK RCC_APB2Periph_GPIOA
+#define ATIM_CH1_GPIO_PORT GPIOA
+#define ATIM_CH1_GPIO_PIN GPIO_Pin_8
+
+/* DMA配置*/
+#define ATIM_DMA_ADDRESS TIM1_BASE+0x34
+#define ATIM_DMA_BufferSize 3
+#define ATIM_DMA_CLK RCC_AHBPeriph_DMA1
+#define ATIM_DMA_Channel DMA1_Channel2
+
+void ATIMx_Init(void);
+
+#endif /* __ATIM_H */
+
 ```
 
-宏定义使用的定时器还有输出通道
-
-- DMA相关参数宏定义
+#### 2.2.2 高级定时器初始化，DMA初始化
 
 ```c
-// DMA配置  
-#define TIM_DMA_ADDRESS TIM1_BASE+0x34
-#define TIM_DMA_BUFSIZE 3
-#define TIM_DMA_CLK     RCC_AHBPeriph_DMA1
-#define TIM_DMA_STREAM  DMA1_Channel2
-```
-
-1. **`TIM_DMA_ADDRESS`**：
-   
-   - 这个宏定义了定时器的寄存器地址，通常用于配置DMA的外设寄存器地址。`TIM1_BASE` 是定时器1的基地址，`0x34` 是CCR寄存器的偏移量。此寄存器用于存储PWM的比较值。
-
-2. **`TIM_DMA_BUFSIZE`**：
-   
-   - 定义了DMA缓冲区的大小，这里是3。意味着你将配置一个可以存储3个数据值的缓冲区。
-
-3. **`TIM_DMA_CLK`**：
-   
-   - 使能DMA1时钟的宏定义。`RCC_AHBPeriph_DMA1`表示DMA1的时钟源。
-
-4. **`TIM_DMA_STREAM`**：
-   
-   - 选择DMA通道，`DMA1_Channel2` 是DMA1的第2通道，通常用于TIM1的输出比较。
-- 高级定时器初始化
-
-```c
-// 高级定时器GPIO初始化
-static void TIMx_GPIO_Config(void) 
+static void ATIM_GPIO_Init(void)
 {
-  // 定义一个GPIO_InitTypeDef类型的结构体
+  // CH1 GPIO Configuration
   GPIO_InitTypeDef GPIO_InitStructure;
+  RCC_APB2PeriphClockCmd(ATIM_CH1_GPIO_CLK, ENABLE);
+  GPIO_InitStructure.GPIO_Pin = ATIM_CH1_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(ATIM_CH1_GPIO_PORT, &GPIO_InitStructure);
+  // DMA Configuration
   DMA_InitTypeDef DMA_InitStructure;
-  // 开启定时器相关的GPIO外设时钟
-  RCC_APB2PeriphClockCmd(ADVANCE_TIM_CH1_GPIO_CLK, ENABLE);
-  // 定时器功能引脚初始化                                                              
-  GPIO_InitStructure.GPIO_Pin = ADVANCE_TIM_CH1_PIN;    
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;    
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(ADVANCE_TIM_CH1_PORT, &GPIO_InitStructure);
+  RCC_AHBPeriphClockCmd(ATIM_DMA_CLK, ENABLE);
+  DMA_DeInit(ATIM_DMA_Channel);
+  // DMA配置
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(ATIM_DMA_ADDRESS); // 设置DMA源地址：TIM的CCR寄存器
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)ATIM_Buffer; // 设置DMA目的地址：ATIM_Buffer
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST; // 设置DMA传输方向：从内存到外设
+  DMA_InitStructure.DMA_BufferSize = ATIM_DMA_BufferSize; // 设置DMA传输数据长度
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+  DMA_Init(ATIM_DMA_Channel, &DMA_InitStructure);
+}
+
 ```
 
-- DMA初始化
+
 
 ```c
  // DMA初始化
@@ -99,170 +111,85 @@ static void TIMx_GPIO_Config(void)
 }
 ```
 
-- 高级定时器模式配置
+#### 2.2.3 高级定时器模式配置
 
 ```c
-static void TIM_Mode_Config(void)
+static void ATIM_Mode_Init(void)
 {
+  // 时基结构初始化
   TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+  RCC_APB2PeriphClockCmd(ATIM_CLK, ENABLE);
+  TIM_TimeBaseStructure.TIM_Period = 1000-1;
+  TIM_TimeBaseStructure.TIM_Prescaler = 7200-1;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+  TIM_TimeBaseInit(ATIMx, &TIM_TimeBaseStructure);
+  // 输出PWM模式配置
   TIM_OCInitTypeDef  TIM_OCInitStructure;
-
-  // 开启TIMx_CLK,x[1,8] 
-  RCC_APB2PeriphClockCmd(ADVANCE_TIM_CLK, ENABLE); 
-
-  /* 累计 TIM_Period个后产生一个更新或者中断*/        
-  //当定时器从0计数到1023，即为1024次，为一个定时周期
-  TIM_TimeBaseStructure.TIM_Period = 1024-1;
-  // 高级控制定时器时钟源TIMxCLK = HCLK=72MHz 
-  // 设定定时器频率为=TIMxCLK/(TIM_Prescaler+1)=100000Hz
-  TIM_TimeBaseStructure.TIM_Prescaler = 7200-1;        
-  // 采样时钟分频
-  TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;
-  // 计数方式
-  TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up;
-  // 重复计数器
-  TIM_TimeBaseStructure.TIM_RepetitionCounter=0;    
-  // 初始化定时器TIMx, x[1,8]
-  TIM_TimeBaseInit(ADVANCE_TIM, &TIM_TimeBaseStructure);
-
-  /*PWM模式配置*/
-  // 配置为PWM模式1
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-  // 输出使能
-  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;    
+  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_Pulse = 0;
-  // 输出通道电平极性配置    
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-  TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
-  // 使能通道1
-  TIM_OC1Init(ADVANCE_TIM, &TIM_OCInitStructure);
-  TIM_OC1PreloadConfig(ADVANCE_TIM, TIM_OCPreload_Enable);
-
-  // 使能定时器
-  TIM_Cmd(ADVANCE_TIM, ENABLE);    
-  // 使能DMA
-  DMA_Cmd(TIM_DMA_STREAM, ENABLE);
-
-  // TIM-DMA使能
-  TIM_DMACmd(ADVANCE_TIM, TIM_DMA_CC1, ENABLE);    
-  // 主动输出使能
-  TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
+  TIM_OC1Init(ATIMx, &TIM_OCInitStructure);
+  TIM_OC1PreloadConfig(ATIMx, TIM_OCPreload_Enable);
+  TIM_Cmd(ATIMx, ENABLE);
+  // DMA使能
+  DMA_Cmd(ATIM_DMA_Channel, ENABLE);
+  TIM_DMACmd(ATIMx, TIM_DMA_CC1, ENABLE);
+  TIM_CtrlPWMOutputs(ATIMx, ENABLE); // 使能PWM输出
 }
 ```
 
-该高级定时器涉及了DMA协助，我们有必要详解一下：
-
-1. **开启定时器时钟**
-
-```c
-RCC_APB2PeriphClockCmd(ADVANCE_TIM_CLK, ENABLE);
-```
-
-使能定时器的时钟。这里 `ADVANCE_TIM_CLK` 是定时器的时钟源，具体值依赖于使用的定时器。
-
-2. **定时器时间基数配置**
-
-```c
-TIM_TimeBaseStructure.TIM_Period = 1024 - 1;
-TIM_TimeBaseStructure.TIM_Prescaler = 7200 - 1;
-TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-TIM_TimeBaseInit(ADVANCE_TIM, &TIM_TimeBaseStructure);
-```
-
-- `TIM_Period = 1023`：定时器计数从 0 到 1023，总计 1024 个计数周期。
-- `TIM_Prescaler = 7199`：定时器的时钟频率由 `TIMxCLK` 除以 7200 得到。这设置了定时器的频率为 100 kHz（`72 MHz / (7200)`）。
-- `TIM_ClockDivision = TIM_CKD_DIV1`：设置时钟分频系数。
-- `TIM_CounterMode = TIM_CounterMode_Up`：定时器向上计数。
-- `TIM_RepetitionCounter = 0`：重复计数器用于高级定时器。
-3. **PWM模式配置**
-
-```c
-TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-TIM_OCInitStructure.TIM_Pulse = 0;
-TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
-TIM_OC1Init(ADVANCE_TIM, &TIM_OCInitStructure);
-TIM_OC1PreloadConfig(ADVANCE_TIM, TIM_OCPreload_Enable);
-```
-
-- `TIM_OCMode = TIM_OCMode_PWM1`：配置PWM模式1。
-- `TIM_OutputState = TIM_OutputState_Enable`：使能输出。
-- `TIM_Pulse = 0`：设置PWM信号的初始占空比为0。
-- `TIM_OCPolarity = TIM_OCPolarity_High`：PWM信号的极性为高。
-- `TIM_OCIdleState = TIM_OCIdleState_Set`：定时器在空闲状态下输出为低电平。
-- `TIM_OC1Init` 和 `TIM_OC1PreloadConfig`：初始化并启用通道1的预装载功能，以实现PWM输出。
-4. **使能定时器和DMA**
-
-```c
-TIM_Cmd(ADVANCE_TIM, ENABLE);
-DMA_Cmd(TIM_DMA_STREAM, ENABLE);
-TIM_DMACmd(ADVANCE_TIM, TIM_DMA_CC1, ENABLE);
-TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
-```
-
-- `TIM_Cmd`：使能定时器。
-
-- `DMA_Cmd`：使能DMA流。
-
-- `TIM_DMACmd`：使能定时器与DMA的通道1之间的DMA请求。
-
-- `TIM_CtrlPWMOutputs`：使能定时器的主PWM输出，使PWM信号可以输出到外部引脚。
-
-- 主函数
+#### 2.2.4 主函数
 
 ```c
 #include "stm32f10x.h"
-#include "./tim/bsp_advance_tim.h"
-#include "./key/bsp_key.h" 
+#include "atim.h"
+#include "key.h" 
 
-extern uint16_t aSRC_Buffer[3];
+extern uint16_t ATIM_Buffer[3];
 
 int main(void)
-{    
-  Key_GPIO_Config();
-  //初始化高级控制定时器，设置PWM模式
-  TIMx_Configuration();
-
+{
+  KEY_GPIO_Init();
+  ATIMx_Init();
   while(1)
-  {       
-        // 扫描KEY1 
-        if(Key_Scan(KEY1_GPIO_PORT, KEY1_GPIO_PIN) == KEY_ON) // 按键1按下
-        {
-            aSRC_Buffer[0] = 1000;
-            aSRC_Buffer[1] = 1000;
-            aSRC_Buffer[2] = 100;
-        }   
-       // 扫描KEY2
-       if(Key_Scan(KEY2_GPIO_PORT,KEY2_GPIO_PIN) == KEY_ON) // 按键2按下
-       {
-            aSRC_Buffer[0] = 300;
-            aSRC_Buffer[1] = 300;
-            aSRC_Buffer[2] = 100;
-       }   
+  {
+    if(KEY_Scan(KEY1_GPIO, KEY1_GPIO_PIN) == KEY_ON)
+    {
+      ATIM_Buffer[0] = 800;
+      ATIM_Buffer[1] = 800;
+      ATIM_Buffer[2] = 100;
+    }
+    if(KEY_Scan(KEY2_GPIO, KEY2_GPIO_PIN) == KEY_ON)
+    {
+      ATIM_Buffer[0] = 300;
+      ATIM_Buffer[1] = 300;
+      ATIM_Buffer[2] = 100;
+    }
   }
 }
+
 ```
 
 检查按键按下后，修改数组的值，从而改变PWM波形
 
 ## 3. 小结
 
-### 实验目标
+### 3.1 实验目标
 
 1. 配置高级定时器生成PWM信号。
 2. 使用DMA来自动更新PWM的占空比。
 3. 按下不同的按键来改变PWM信号的占空比。
 
-### 硬件要求
+### 3.2 硬件要求
 
 1. STM32微控制器（例如STM32F4系列）。
 2. 两个按键，连接到GPIO端口。
 3. 一个LED或示波器，连接到PWM输出引脚以观察PWM信号。
 
-### 实验步骤
+### 3.3 实验步骤
 
 #### 1. 系统时钟配置
 
@@ -288,7 +215,7 @@ int main(void)
 
 实现主程序逻辑，管理按键输入和PWM波形更新。
 
-### 代码示例
+### 3.4 代码示例
 
 以下代码示例基于STM32F4系列微控制器，使用HAL库（硬件抽象层）来配置硬件资源。根据你的具体微控制器型号和开发环境，你可能需要调整代码。
 
@@ -432,7 +359,7 @@ void DMA2_Stream5_IRQHandler(void)
 }
 ```
 
-### 代码解释
+### 3.5 代码解释
 
 1. **`MX_TIM1_Init`**: 初始化定时器1为PWM模式，设置PWM周期和初始占空比。
 
@@ -447,3 +374,5 @@ void DMA2_Stream5_IRQHandler(void)
 ---
 
 2024.9.14 第一次修订，后期不再维护
+
+2025.1.28 修订代码
