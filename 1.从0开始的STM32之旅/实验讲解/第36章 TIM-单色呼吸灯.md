@@ -1,4 +1,4 @@
-# 第三十五章 TIM-单色呼吸灯
+# 第三十六章 TIM-单色呼吸灯
 
 ## 1. 硬件设计
 
@@ -8,48 +8,45 @@
 
 ### 2.1 编程大纲
 
-1) 初始化PWM输出通道，初始化PWM工作模式；
+1. TIM相关参数宏定义
 
-2) 计算获取PWM数据表；
+2. 初始化PWM输出通道，初始化PWM工作模式
 
-3) 编写中断服务函数，在中断服务函数根据PWM数据表切换比较寄存器的值；
+3. 计算获取PWM数据表；
+
+4. 编写中断服务函数，在中断服务函数根据PWM数据表切换比较寄存器的值
+
+5. 主函数测试
 
 ### 2.2 代码分析
 
-- 定时器参数宏定义
+#### 2.2.1 定时器及通道相关参数宏定义
 
 ```c
-#define BRE_TIMx                    TIM3
-#define BRE_TIM_APBxClock_FUN       RCC_APB1PeriphClockCmd
-#define BRE_TIM_CLK                 RCC_APB1Periph_TIM3
-#define BRE_TIM_GPIO_APBxClock_FUN  RCC_APB2PeriphClockCmd
-#define BRE_TIM_GPIO_CLK            (RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO)
+/* TIM配置 */
+#define RED_TIMx TIM3
+#define RED_APBxClock RCC_APB1PeriphClockCmd
+#define RED_TIM_CLK RCC_APB1Periph_TIM3
+#define RED_TIM_GPIO_APBxClock RCC_APB2PeriphClockCmd
+#define RED_TIM_GPIO_CLK (RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO)
+/* 红灯引脚重映射 */
+#define RED_GPIO_REMAP_FUN() GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
+#define RED_GPIO_PORT GPIOB
+#define RED_GPIO_PIN GPIO_Pin_5
+#define RED_TIM_OCxInit TIM_OC2Init
+#define RED_TIM_OCxPreloadConfig TIM_OC2PreloadConfig
+#define RED_CCRx CCR2
+/* 中断配置 */
+#define RED_TIM_IRQ TIM3_IRQn
+#define RED_TIM_IRQHandler TIM3_IRQHandler
 ```
 
-- 通道宏定义
+#### 2.2.2 PWM表
 
 ```c
-// 红灯的引脚需要重映射
-#define  BRE_GPIO_REMAP_FUN()     GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);                 
-#define  BRE_TIM_LED_PORT         GPIOB
-#define  BRE_TIM_LED_PIN          GPIO_Pin_5
-#define  BRE_TIM_OCxInit          TIM_OC2Init          // 通道选择，1~4
-#define  BRE_TIM_OCxPreloadConfig TIM_OC2PreloadConfig 
-#define  BRE_CCRx                 CCR2
-#define  BRE_TIMx_IRQn            TIM3_IRQn            // 中断
-#define  BRE_TIMx_IRQHandler      TIM3_IRQHandler
-```
+__IO uint16_t period_class = 10; // 输出波形的频率
 
-为方便切换LED灯的颜色，它定义了三组宏，通过修改代码中的“#define LIGHT_COLOR RED_LIGHT”语句， 可以切换使用红、绿、蓝三种颜色的呼吸灯。
-
-在每组宏定义中，与全彩LED灯实验中的类似，定义了定时器编号、定时器时钟使能库函数、引脚重映射操作、GPIO端口和引脚号、 通道对应的比较寄存器名以及中断通道和中断服务函数名。
-
-与全彩LED灯实验不同，本实验中定时器的比较寄存器CCRx在控制呼吸灯的单个周期内需要切换为PWM表中不同的数值，所以需要利用定时器中断。
-
-- PWM表
-
-```c
-// LED亮度等级 PWM表,指数曲线 ，此表使用工程目录下的python脚本index_wave.py生成
+// PWM表
 uint16_t indexWave[] = {
 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4,
 4, 5, 5, 6, 7, 8, 9, 10, 11, 13,
@@ -66,82 +63,66 @@ uint16_t indexWave[] = {
 2, 2, 2, 2, 1, 1, 1, 1
 };
 
-//计算PWM表有多少个元素
-uint16_t POINT_NUM = sizeof(indexWave) / sizeof(indexWave[0]); 
+uint16_t PWM_Num = sizeof(indexWave)/sizeof(indexWave[0]); // PWM波形元素个数
 ```
 
-- TIM GPIO初始化
+#### 2.2.3 TIM输出PWM模式配置
 
 ```c
-// 配置TIM复用输出PWM时用到的I/O
-static void TIMx_GPIO_Config(void) 
+static void TIM_NVIC_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  RCC_APB2PeriphClockCmd(BRE_TIM_GPIO_CLK, ENABLE);      // 使能GPIO时钟 
-  BRE_TIM_GPIO_APBxClock_FUN(BRE_TIM_GPIO_CLK, ENABLE ); // 使能GPIO时钟
-  BRE_GPIO_REMAP_FUN(); // 使能GPIO映射
-
-  // 配置呼吸灯用到的引脚
-  GPIO_InitStructure.GPIO_Pin =  BRE_TIM_LED_PIN ;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;    // 复用推挽输出
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init( BRE_TIM_LED_PORT, &GPIO_InitStructure );
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	NVIC_InitStructure.NVIC_IRQChannel = RED_TIM_IRQ;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 }
-```
 
-由于本实验直接使用定时器输出通道的脉冲信号控制LED灯，此处代码把GPIO相关的引脚配置成了复用推挽输出模式。其中由于红灯使用的引脚需要用到第二功能， 本代码使用宏BRE_GPIO_REMAP_FUN ()进行了该引脚的功能重定义操作
-
-- NVIC初始化
-
-```c
-// 配置嵌套向量中断控制器NVIC
-static void NVIC_Config_PWM(void)
+static void TIM_GPIO_Init(void)
 {
-  NVIC_InitTypeDef NVIC_InitStructure;
-
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1); // 设置中断优先级组1
-
-  // 配置TIM3_IRQ中断为中断源
-  NVIC_InitStructure.NVIC_IRQChannel = BRE_TIMx_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; // 抢占优先级0
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2; // 子优先级2
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RED_TIM_GPIO_CLK, ENABLE);
+	RED_TIM_GPIO_APBxClock(RED_TIM_GPIO_CLK, ENABLE);
+	RED_GPIO_REMAP_FUN(); // 重新映射GPIO
+	// 呼吸灯使用到的引脚配置
+	GPIO_InitStructure.GPIO_Pin = RED_GPIO_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 复用推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(RED_GPIO_PORT, &GPIO_InitStructure);
 }
-```
 
-- TIM输出PWM模式配置
-
-```c
-static void TIMx_Mode_Config(void)
+static void TIM_Mode_Init(void)
 {
-  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-  TIM_OCInitTypeDef  TIM_OCInitStructure;                                                                                
-
-  // 设置TIM3CLK 时钟
-  BRE_TIM_APBxClock_FUN(BRE_TIM_CLK, ENABLE); 
-
-  // 基本定时器配置   
-  TIM_TimeBaseStructure.TIM_Period = (1024-1);;              // 当定时器从0计数到 TIM_Period+1 ，为一个定时周期
-  TIM_TimeBaseStructure.TIM_Prescaler = (200-1);             // 设置预分频
-  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1 ;   // 设置时钟分频系数：不分频(这里用不到)
-  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;// 向上计数模式
-  TIM_TimeBaseInit(BRE_TIMx, &TIM_TimeBaseStructure);
-
-  // PWM模式配置 
-  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;            // 配置为PWM模式1
-  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;// 使能输出
-  TIM_OCInitStructure.TIM_Pulse = 0;                           // 设置初始PWM脉冲宽度为0    
-  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;     // 当定时器计数值小于CCR1_Val时为低电平
-
-  BRE_TIM_OCxInit(BRE_TIMx, &TIM_OCInitStructure );            // 使能通道
-  BRE_TIM_OCxPreloadConfig(BRE_TIMx, TIM_OCPreload_Enable);    // 使能预装载    
-  TIM_ARRPreloadConfig(BRE_TIMx, ENABLE);                      // 使能TIM重载寄存器ARR
-  TIM_Cmd(BRE_TIMx, ENABLE);                                   // 使能定时器    
-  TIM_ITConfig(BRE_TIMx, TIM_IT_Update, ENABLE);               // 使能update中断
-  NVIC_Config_PWM();                                           // 配置中断优先级        
+	RED_APBxClock(RED_TIM_CLK, ENABLE);
+	// 时基配置
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+	TIM_TimeBaseStructure.TIM_Period = (1024-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (200-1);
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(RED_TIMx, &TIM_TimeBaseStructure);
+	// PWM模式配置
+	TIM_OCInitTypeDef TIM_OCInitStructure;
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = 0;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+	RED_TIM_OCxInit(RED_TIMx, &TIM_OCInitStructure);
+	RED_TIM_OCxPreloadConfig(RED_TIMx, TIM_OCPreload_Enable);
+	TIM_ARRPreloadConfig(RED_TIMx, ENABLE); // 预装载寄存器
+	TIM_Cmd(RED_TIMx, ENABLE);
+	TIM_ITConfig(RED_TIMx, TIM_IT_Update, ENABLE);
 }
+
+void breathing_init(void)
+{
+	TIM_NVIC_Init();
+	TIM_GPIO_Init();
+	TIM_Mode_Init();
+}
+
 ```
 
 本配置主体与全彩LED灯实验中的类似，代码中初始化了控制RGB灯用的定时器，它被配置为向上计数， PWM通道输出也被配置成当计数器CNT的值小于输出比较寄存器CCRx的值时，PWM通道输出低电平，点亮LED灯。 在函数的最后还使能了定时器中断，每当定时器的一个计数周期完成时，产生中断，配合中断服务函数， 即可切换CCRx比较寄存器的值。
@@ -156,17 +137,65 @@ static void TIMx_Mode_Config(void)
 
 最终，拟合曲线的周期由TIMPeriod、PWM表的点数、TIM_Prescaler以及下面中断服务函数的period_cnt比较值共同决定， 本工程需要调整这些参数使得拟合曲线的周期约为3秒，从而达到较平缓的呼吸效果。
 
+#### 2.2.4 TIM更新中断服务函数
+
+```c
+extern uint16_t indexWave[];
+
+/* 呼吸灯中断服务函数 */
+void RED_TIM_IRQHandler(void)
+{	
+	static uint16_t pwm_index = 0;	// 用于PWM查表
+	static uint16_t period_cnt = 0;	// 用于计算周期数
+	if (TIM_GetITStatus(RED_TIMx, TIM_IT_Update) != RESET) // TIM_IT_Update
+ 	{			
+		period_cnt++;
+		RED_TIMx->RED_CCRx = indexWave[pwm_index];	// 根据PWM表修改定时器的比较寄存器值
+		if(period_cnt > period_class)				 				
+		{				
+			pwm_index++;
+			//若PWM表已到达结尾，重新指向表头
+			if(pwm_index >=  PWM_Num)			
+			{
+				pwm_index=0;								
+			}	
+			period_cnt=0;	
+		}	
+		else
+		{
+		}		
+	TIM_ClearITPendingBit(RED_TIMx, TIM_IT_Update);
+	}
+}
+```
+
+#### 2.2.5 主函数测试
+
+```c
+#include "stm32f10x.h"
+#include "breathing.h"
+
+int main(void)
+{			
+	breathing_init();
+	while(1)
+	{
+	}		
+}
+
+```
+
 ## 3. 小结
 
 本章实际上就是利用TIM控制高低电平时间来模拟一个呼吸灯，稍微总结一下：
 
-### 实现步骤
+### 3.1 实现步骤
 
 1. **配置 TIM 定时器**：设置一个定时器产生 PWM 信号。
 2. **配置 PWM 输出**：通过 PWM 信号调节 LED 的亮度。
 3. **实现呼吸效果**：在主循环中调整 PWM 的占空比，使 LED 的亮度随时间变化。
 
-### 示例代码
+### 3.2 示例代码
 
 以下是如何用 TIM3 产生单色呼吸灯的示例代码。假设你使用的是 STM32F103 系列单片机。
 
@@ -250,7 +279,7 @@ int main(void)
 }
 ```
 
-### 代码说明
+### 3.3 代码说明
 
 1. **TIM 配置**：配置 TIM3 为 PWM 模式，并设置 PWM 频率为 1 kHz。
 2. **GPIO 配置**：将 GPIOA 的 PA6 引脚设置为 TIM3 的 PWM 输出引脚。
@@ -260,3 +289,5 @@ int main(void)
 ---
 
 2024.9.17 第一次修订，后期不再维护
+
+2025.1.28 优化代码，去除条件编译
