@@ -71,58 +71,57 @@ uint16_t PWM_Num = sizeof(indexWave)/sizeof(indexWave[0]); // PWM波形元素个
 ```c
 static void TIM_NVIC_Init(void)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-	NVIC_InitStructure.NVIC_IRQChannel = RED_TIM_IRQ;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_InitStructure.NVIC_IRQChannel = RED_TIM_IRQ;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 static void TIM_GPIO_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RED_TIM_GPIO_CLK, ENABLE);
-	RED_TIM_GPIO_APBxClock(RED_TIM_GPIO_CLK, ENABLE);
-	RED_GPIO_REMAP_FUN(); // 重新映射GPIO
-	// 呼吸灯使用到的引脚配置
-	GPIO_InitStructure.GPIO_Pin = RED_GPIO_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 复用推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(RED_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RED_TIM_GPIO_CLK, ENABLE);
+    RED_TIM_GPIO_APBxClock(RED_TIM_GPIO_CLK, ENABLE);
+    RED_GPIO_REMAP_FUN(); // 重新映射GPIO
+    // 呼吸灯使用到的引脚配置
+    GPIO_InitStructure.GPIO_Pin = RED_GPIO_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 复用推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(RED_GPIO_PORT, &GPIO_InitStructure);
 }
 
 static void TIM_Mode_Init(void)
 {
-	RED_APBxClock(RED_TIM_CLK, ENABLE);
-	// 时基配置
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructure.TIM_Period = (1024-1);
-	TIM_TimeBaseStructure.TIM_Prescaler = (200-1);
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(RED_TIMx, &TIM_TimeBaseStructure);
-	// PWM模式配置
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
-	RED_TIM_OCxInit(RED_TIMx, &TIM_OCInitStructure);
-	RED_TIM_OCxPreloadConfig(RED_TIMx, TIM_OCPreload_Enable);
-	TIM_ARRPreloadConfig(RED_TIMx, ENABLE); // 预装载寄存器
-	TIM_Cmd(RED_TIMx, ENABLE);
-	TIM_ITConfig(RED_TIMx, TIM_IT_Update, ENABLE);
+    RED_APBxClock(RED_TIM_CLK, ENABLE);
+    // 时基配置
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseStructure.TIM_Period = (1024-1);
+    TIM_TimeBaseStructure.TIM_Prescaler = (200-1);
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(RED_TIMx, &TIM_TimeBaseStructure);
+    // PWM模式配置
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_Pulse = 0;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+    RED_TIM_OCxInit(RED_TIMx, &TIM_OCInitStructure);
+    RED_TIM_OCxPreloadConfig(RED_TIMx, TIM_OCPreload_Enable);
+    TIM_ARRPreloadConfig(RED_TIMx, ENABLE); // 预装载寄存器
+    TIM_Cmd(RED_TIMx, ENABLE);
+    TIM_ITConfig(RED_TIMx, TIM_IT_Update, ENABLE);
 }
 
 void breathing_init(void)
 {
-	TIM_NVIC_Init();
-	TIM_GPIO_Init();
-	TIM_Mode_Init();
+    TIM_NVIC_Init();
+    TIM_GPIO_Init();
+    TIM_Mode_Init();
 }
-
 ```
 
 本配置主体与全彩LED灯实验中的类似，代码中初始化了控制RGB灯用的定时器，它被配置为向上计数， PWM通道输出也被配置成当计数器CNT的值小于输出比较寄存器CCRx的值时，PWM通道输出低电平，点亮LED灯。 在函数的最后还使能了定时器中断，每当定时器的一个计数周期完成时，产生中断，配合中断服务函数， 即可切换CCRx比较寄存器的值。
@@ -144,28 +143,28 @@ extern uint16_t indexWave[];
 
 /* 呼吸灯中断服务函数 */
 void RED_TIM_IRQHandler(void)
-{	
-	static uint16_t pwm_index = 0;	// 用于PWM查表
-	static uint16_t period_cnt = 0;	// 用于计算周期数
-	if (TIM_GetITStatus(RED_TIMx, TIM_IT_Update) != RESET) // TIM_IT_Update
- 	{			
-		period_cnt++;
-		RED_TIMx->RED_CCRx = indexWave[pwm_index];	// 根据PWM表修改定时器的比较寄存器值
-		if(period_cnt > period_class)				 				
-		{				
-			pwm_index++;
-			//若PWM表已到达结尾，重新指向表头
-			if(pwm_index >=  PWM_Num)			
-			{
-				pwm_index=0;								
-			}	
-			period_cnt=0;	
-		}	
-		else
-		{
-		}		
-	TIM_ClearITPendingBit(RED_TIMx, TIM_IT_Update);
-	}
+{    
+    static uint16_t pwm_index = 0;    // 用于PWM查表
+    static uint16_t period_cnt = 0;    // 用于计算周期数
+    if (TIM_GetITStatus(RED_TIMx, TIM_IT_Update) != RESET) // TIM_IT_Update
+     {            
+        period_cnt++;
+        RED_TIMx->RED_CCRx = indexWave[pwm_index];    // 根据PWM表修改定时器的比较寄存器值
+        if(period_cnt > period_class)                                 
+        {                
+            pwm_index++;
+            //若PWM表已到达结尾，重新指向表头
+            if(pwm_index >=  PWM_Num)            
+            {
+                pwm_index=0;                                
+            }    
+            period_cnt=0;    
+        }    
+        else
+        {
+        }        
+    TIM_ClearITPendingBit(RED_TIMx, TIM_IT_Update);
+    }
 }
 ```
 
@@ -176,13 +175,12 @@ void RED_TIM_IRQHandler(void)
 #include "breathing.h"
 
 int main(void)
-{			
-	breathing_init();
-	while(1)
-	{
-	}		
+{            
+    breathing_init();
+    while(1)
+    {
+    }        
 }
-
 ```
 
 ## 3. 小结
