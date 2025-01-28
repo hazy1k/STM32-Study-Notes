@@ -204,8 +204,11 @@ TIM_CtrlPWMOutputs(ADVANCE_TIM, ENABLE);
 ```
 
 - `TIM_Cmd`：使能定时器。
+
 - `DMA_Cmd`：使能DMA流。
+
 - `TIM_DMACmd`：使能定时器与DMA的通道1之间的DMA请求。
+
 - `TIM_CtrlPWMOutputs`：使能定时器的主PWM输出，使PWM信号可以输出到外部引脚。
 
 - 主函数
@@ -427,7 +430,6 @@ void DMA2_Stream5_IRQHandler(void)
 {
     HAL_DMA_IRQHandler(&hdma_tim1_up);
 }
-
 ```
 
 ### 代码解释
@@ -445,5 +447,3 @@ void DMA2_Stream5_IRQHandler(void)
 ---
 
 2024.9.14 第一次修订，后期不再维护
-
-
