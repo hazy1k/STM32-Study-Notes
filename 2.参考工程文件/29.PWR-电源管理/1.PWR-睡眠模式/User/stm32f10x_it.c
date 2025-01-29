@@ -25,31 +25,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./led/bsp_led.h"
-#include "./usart/bsp_usart.h"
-#include "./Key/bsp_exti.h"
+#include "led.h"
+#include "usart.h"
+#include "Key.h"
 
-
-/** @addtogroup STM32F10x_StdPeriph_Template
-  * @{
-  */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
-/******************************************************************************/
-/*            Cortex-M3 Processor Exceptions Handlers                         */
-/******************************************************************************/
-
-/**
-  * @brief  This function handles NMI exception.
-  * @param  None
-  * @retval None
-  */
 void NMI_Handler(void)
 {
 }
@@ -133,43 +112,26 @@ void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
-{
-}
-
-
-
-
 
 void KEY1_IRQHandler(void)
 {
-  //确保是否产生了EXTI Line中断
-	if(EXTI_GetITStatus(KEY1_INT_EXTI_LINE) != RESET) 
+	if(EXTI_GetITStatus(KEY1_EXTI_LINE) != RESET) 
 	{
-		LED_BLUE;		
+		LED_BLUE();		
 		printf("\r\n KEY1 按键中断唤醒 \r\n");    
-		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
+		EXTI_ClearITPendingBit(KEY1_EXTI_LINE);     
 	}  
 }
 
 void KEY2_IRQHandler(void)
 {
-  //确保是否产生了EXTI Line中断
-	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
+	if(EXTI_GetITStatus(KEY2_EXTI_LINE) != RESET) 
 	{
-		LED_BLUE;
+		LED_BLUE();
 		printf("\r\n KEY2 按键中断唤醒 \r\n");   
-    //清除中断标志位
-		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
+		EXTI_ClearITPendingBit(KEY2_EXTI_LINE);     
 	}  
 }
-
-
 
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
