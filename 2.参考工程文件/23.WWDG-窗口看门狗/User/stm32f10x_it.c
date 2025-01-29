@@ -25,7 +25,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "bsp_led.h"
+#include "led.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -139,22 +139,12 @@ void SysTick_Handler(void)
 {
 }
 
-// WWDG 中断复服务程序，如果发生了此中断，表示程序已经出现了故障，
-// 这是一个死前中断。在此中断服务程序中应该干最重要的事，
-// 比如保存重要的数据等，这个时间具体有多长，要
-// 由WDGTB的值决定：
-// WDGTB:0   113us
-// WDGTB:1   227us
-// WDGTB:2   455us
-// WDGTB:3   910us
 void WWDG_IRQHandler(void)
 {
-	// 清除中断标志位
-	WWDG_ClearFlag();
-	
-	//LED2亮，点亮LED只是示意性的操作，
-	//真正使用的时候，这里应该是做最重要的事情
-	LED2(ON); 
+  WWDG_ClearFlag();
+	// LED2亮，点亮LED只是示意性的操作，
+	// 真正使用的时候，这里应该是做最重要的事情
+	LED2_ON(); 
 }
 
 /******************************************************************************/
