@@ -25,9 +25,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./led/bsp_led.h"
-#include "./usart/bsp_usart.h"
-#include "./key/bsp_exti.h"
+#include "led.h"
+#include "usart.h"
+#include "key.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -132,42 +132,27 @@ void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
-{
-}
-
 
 
 void KEY1_IRQHandler(void)
 {
-  //确保是否产生了EXTI Line中断
-	if(EXTI_GetITStatus(KEY1_INT_EXTI_LINE) != RESET) 
+	if(EXTI_GetITStatus(KEY1_EXTI_LINE) != RESET) 
 	{
-		LED_BLUE;
-		//由于停止唤醒后使用的是HSI时钟，与原来使用的HSE时钟时的频率不一致，会影响波特率，若此处直接printf会乱码	
-		//printf("\r\n KEY1 按键中断唤醒 \r\n");    
-		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);     
+		LED_BLUE();
+		// 由于停止唤醒后使用的是HSI时钟，与原来使用的HSE时钟时的频率不一致，会影响波特率，若此处直接printf会乱码	
+		// printf("\r\n KEY1 按键中断唤醒 \r\n");    
+		EXTI_ClearITPendingBit(KEY1_EXTI_LINE);     
 	}  
 }
 
 void KEY2_IRQHandler(void)
 {
-  //确保是否产生了EXTI Line中断
-	if(EXTI_GetITStatus(KEY2_INT_EXTI_LINE) != RESET) 
+	if(EXTI_GetITStatus(KEY2_EXTI_LINE) != RESET) 
 	{
-		LED_BLUE;
-		//由于停止唤醒后使用的是HSI时钟，与原来使用的HSE时钟时的频率不一致，会影响波特率，若此处直接printf会乱码
-		//printf("\r\n KEY2 按键中断唤醒 \r\n");   
-    //清除中断标志位
-		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);     
+		LED_BLUE();
+		EXTI_ClearITPendingBit(KEY2_EXTI_LINE);     
 	}  
 }
-
 
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */

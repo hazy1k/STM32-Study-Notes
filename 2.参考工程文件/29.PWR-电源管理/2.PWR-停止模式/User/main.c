@@ -1,109 +1,63 @@
+#include "led.h"
+#include "usart.h"
+#include "key.h"
 #include "stm32f10x.h"
-#include "./led/bsp_led.h"
-#include "./key/bsp_exti.h" 
-#include "./usart/bsp_usart.h"
 
-static void Delay(__IO u32 nCount);
-static void SYSCLKConfig_STOP(void);
+static void Delay(__IO uint32_t nCount)	
+{
+	for(; nCount != 0; nCount--);
+}
+
+static void SYSConfig_STOP(void)
+{
+	RCC_HSEConfig(RCC_HSE_ON); // ä½¿èƒ½HSE
+	while(RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET); // ç­‰å¾…HSEå°±ç»ª
+	RCC_PLLCmd(ENABLE); // ä½¿èƒ½PLL
+	while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET); // ç­‰å¾…PLLå°±ç»ª
+	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK); // é€‰æ‹©PLLä½œä¸ºç³»ç»Ÿæ—¶é’Ÿæº
+	while(RCC_GetSYSCLKSource() != 0x08); // ç­‰å¾…ç³»ç»Ÿæ—¶é’Ÿæºåˆ‡æ¢åˆ°PLL
+}
 
 int main(void)
-{	
-
-	RCC_ClocksTypeDef clock_status_wakeup,clock_status_config;
-	uint8_t clock_source_wakeup,clock_source_config; 
-	
-	LED_GPIO_Config();	
-    USART_Config();		
-	
-	// ³õÊ¼»¯°´¼üÖĞ¶Ï£¬°´ÏÂ°´¼üºó»á½øÈëÖĞ¶Ï·şÎñ³ÌĞò
-	EXTI_Key_Config(); 
-	printf("\r\n ÊµÑéËµÃ÷£º\r\n");
-	printf("\r\n 1.±¾³ÌĞòÖĞ£¬ÂÌµÆ±íÊ¾STM32Õı³£ÔËĞĞ£¬ºìµÆ±íÊ¾Í£Ö¹×´Ì¬£¬À¶µÆ±íÊ¾¸Õ´ÓÍ£Ö¹×´Ì¬±»»½ĞÑ\r\n");
-	printf("\r\n 2.ÔÚÍ£Ö¹×´Ì¬ÏÂ£¬¿ÉÊ¹ÓÃKEY1»òKEY2»½ĞÑ\r\n");
-	printf("\r\n 3.±¾ÊµÑéÖ´ĞĞÕâÑùÒ»¸öÑ­»·£º\r\n ------¡·ÁÁÂÌµÆ(Õı³£ÔËĞĞ)->ÁÁºìµÆ(Í£Ö¹Ä£Ê½)->°´KEY1»òKEY2»½ĞÑ->ÁÁÀ¶µÆ(¸Õ±»»½ĞÑ)-----¡·\r\n");
-	printf("\r\n 4.ÔÚÍ£Ö¹×´Ì¬ÏÂ£¬DAPÏÂÔØÆ÷ÎŞ·¨¸øSTM32ÏÂÔØ³ÌĞò£¬\r\n ¿É°´KEY1¡¢KEY2»½ĞÑºóÏÂÔØ£¬\r\n »ò°´¸´Î»¼üÊ¹Ğ¾Æ¬´¦ÓÚ¸´Î»×´Ì¬£¬È»ºóÔÚµçÄÔÉÏµã»÷ÏÂÔØ°´Å¥£¬ÔÙÊÍ·Å¸´Î»°´¼ü£¬¼´¿ÉÏÂÔØ\r\n");
-
-  while(1)
-  {	
-	printf("\r\n STM32Õı³£ÔËĞĞ£¬ÁÁÂÌµÆ\r\n");
-	LED_GREEN;	
-	Delay(0x3FFFFF);
-		
-	// ÈÎÎñÖ´ĞĞÍê±Ï£¬½øÈëÍ£Ö¹½µµÍ¹¦ºÄ
-	printf("\r\n ½øÈëÍ£Ö¹Ä£Ê½£¬°´KEY1»òKEY2°´¼ü¿É»½ĞÑ\r\n");
-	//Ê¹ÓÃºìµÆÖ¸Ê¾£¬½øÈëÍ£Ö¹×´Ì¬
-	LED_RED;
-		
-	// ½øÈëÍ£Ö¹Ä£Ê½£¬ÉèÖÃµçÑ¹µ÷½ÚÆ÷ÎªµÍ¹¦ºÄÄ£Ê½£¬µÈ´ıÖĞ¶Ï»½ĞÑ 
-	PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);	
-		
-	// µÈ´ıÖĞ¶Ï»½ĞÑ  K1»òK2°´¼üÖĞ¶Ï	
-	// »ñÈ¡¸Õ±»»½ĞÑÊ±µÄÊ±ÖÓ×´Ì¬	
-	// Ê±ÖÓÔ´
-	clock_source_wakeup = RCC_GetSYSCLKSource ();
-	// Ê±ÖÓÆµÂÊ
-	RCC_GetClocksFreq(&clock_status_wakeup);	
-	//´ÓÍ£Ö¹Ä£Ê½ÏÂ±»»½ĞÑºóÊ¹ÓÃµÄÊÇHSIÊ±ÖÓ£¬´Ë´¦ÖØÆôHSEÊ±ÖÓ,Ê¹ÓÃPLLCLK
-	SYSCLKConfig_STOP();
-		
-	// »ñÈ¡ÖØĞÂÅäÖÃºóµÄÊ±ÖÓ×´Ì¬	
-	// Ê±ÖÓÔ´
-	clock_source_config = RCC_GetSYSCLKSource ();
-	// Ê±ÖÓÆµÂÊ
-	RCC_GetClocksFreq(&clock_status_config);
-	
-	// ÒòÎª¸Õ»½ĞÑµÄÊ±ºòÊ¹ÓÃµÄÊÇHSIÊ±ÖÓ£¬»áÓ°Ïì´®¿Ú²¨ÌØÂÊ£¬Êä³ö²»¶Ô£¬ËùÒÔÔÚÖØĞÂÅäÖÃÊ±ÖÓÔ´ºó²ÅÊ¹ÓÃ´®¿ÚÊä³ö¡£
-	printf("\r\nÖØĞÂÅäÖÃºóµÄÊ±ÖÓ×´Ì¬£º\r\n");
-	printf(" SYSCLKÆµÂÊ:%d,\r\n HCLKÆµÂÊ:%d,\r\n PCLK1ÆµÂÊ:%d,\r\n PCLK2ÆµÂÊ:%d,\r\n Ê±ÖÓÔ´:%d (0±íÊ¾HSI£¬8±íÊ¾PLLCLK)\n", 
+{
+	RCC_ClocksTypeDef clock_status_wakeup;
+	RCC_ClocksTypeDef clock_status_config;
+	uint8_t clock_source_wakeup;
+	uint8_t clock_source_config;
+	LED_Init();
+	USART_Config();
+	KEY_EXTI_Init();
+	while(1)
+	{
+		printf("Green light on, program running normally\r\n");
+		LED_GREEN();
+		Delay(0xFFFFFF);
+		printf("Red light on, entering STOP mode\r\n");
+		LED_RED();
+		PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI); // è¿›å…¥åœæ­¢æ¨¡å¼
+		// è·å–åˆšå”¤é†’æ—¶çš„æ—¶é’Ÿæº
+		clock_source_wakeup = RCC_GetSYSCLKSource();
+		RCC_GetClocksFreq(&clock_status_wakeup);
+		// ä»åœæ­¢æ¨¡å¼å”¤é†’åä½¿ç”¨çš„æ˜¯HSIæ—¶é’Ÿï¼Œæ‰€ä»¥éœ€è¦é‡æ–°é…ç½®æ—¶é’Ÿ
+		SYSConfig_STOP();
+		clock_source_config = RCC_GetSYSCLKSource();
+		RCC_GetClocksFreq(&clock_status_config);
+		// æ‰“å°ä¸¤ç§æƒ…å†µçš„æ—¶é’ŸçŠ¶æ€
+	 	printf("\r\nClock status after reconfiguration:\r\n");
+		printf("SYSCLK frequency: %d,\r\n HCLK frequency: %d,\r\n PCLK1 frequency: %d,\r\n PCLK2 frequency: %d,\r\n Clock source: %d (0 means HSI, 8 means PLLCLK)\n", 
 			clock_status_config.SYSCLK_Frequency, 
 			clock_status_config.HCLK_Frequency, 
 			clock_status_config.PCLK1_Frequency, 
 			clock_status_config.PCLK2_Frequency, 
 			clock_source_config);
-			
-	printf("\r\n¸Õ»½ĞÑµÄÊ±ÖÓ×´Ì¬£º\r\n");	
-	printf(" SYSCLKÆµÂÊ:%d,\r\n HCLKÆµÂÊ:%d,\r\n PCLK1ÆµÂÊ:%d,\r\n PCLK2ÆµÂÊ:%d,\r\n Ê±ÖÓÔ´:%d (0±íÊ¾HSI£¬8±íÊ¾PLLCLK)\n", 
+		printf("\r\nClock status just after wakeup:\r\n");	
+		printf("SYSCLK frequency: %d,\r\n HCLK frequency: %d,\r\n PCLK1 frequency: %d,\r\n PCLK2 frequency: %d,\r\n Clock source: %d (0 means HSI, 8 means PLLCLK)\n", 
 			clock_status_wakeup.SYSCLK_Frequency, 
 			clock_status_wakeup.HCLK_Frequency, 
 			clock_status_wakeup.PCLK1_Frequency, 
 			clock_status_wakeup.PCLK2_Frequency, 
 			clock_source_wakeup);
-		
-	//Ö¸Ê¾µÆ
-	LED_BLUE;	
-	Delay(0x1FFFFF);		
-	printf("\r\n ÒÑÍË³öÍ£Ö¹Ä£Ê½\r\n");
-  }
-}
-
-static void Delay(__IO uint32_t nCount)	 //¼òµ¥µÄÑÓÊ±º¯Êı
-{
-	for(; nCount != 0; nCount--);
-}
-
-// Í£»ú»½ĞÑºóÅäÖÃÏµÍ³Ê±ÖÓ: Ê¹ÄÜ HSE, PLL
-// ²¢ÇÒÑ¡ÔñPLL×÷ÎªÏµÍ³Ê±ÖÓ.
-static void SYSCLKConfig_STOP(void)
-{
-  // Ê¹ÄÜ HSE
-  RCC_HSEConfig(RCC_HSE_ON);
-  // µÈ´ı HSE ×¼±¸¾ÍĞ÷
-  while (RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET)
-  {
-
-  }
-  // Ê¹ÄÜ PLL 
-  RCC_PLLCmd(ENABLE);
-  // µÈ´ı PLL ×¼±¸¾ÍĞ÷
-  while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-  {
-
-  }
-  // Ñ¡ÔñPLL×÷ÎªÏµÍ³Ê±ÖÓÔ´
-  RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-  // µÈ´ıPLL±»Ñ¡ÔñÎªÏµÍ³Ê±ÖÓÔ´ 
-  while (RCC_GetSYSCLKSource() != 0x08)
-  {
-
-  }
+		Delay(0xFFFFFF);
+		printf("Test finished\r\n");	
+	}
 }

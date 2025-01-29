@@ -21,11 +21,6 @@
 #define LED3_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
 #define LED3_GPIO_PIN		GPIO_Pin_1			        /* 连接到SCL时钟线的GPIO */
 
-
-/** the macro definition to trigger the led on or off 
-  * 1 - off
-  *0 - on
-  */
 #define ON  0
 #define OFF 1
 
@@ -117,4 +112,4 @@
 
 void LED_GPIO_Config(void);
 
-#endif /* __LED_H */
+#endif
