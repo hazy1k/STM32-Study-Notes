@@ -171,16 +171,16 @@ int main(void)
 void IWDG_Config(void) {
     // 使能写访问
     IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-    
+
     // 设置预分频器为64
     IWDG_SetPrescaler(IWDG_Prescaler_64);
-    
+
     // 设置重装载值
     IWDG_SetReload(0xFFF); // 设置为最大值，约12秒超时（根据时钟频率）
-    
+
     // 重装载计数器
     IWDG_ReloadCounter();
-    
+
     // 启动IWDG
     IWDG_Enable();
 }
@@ -188,7 +188,7 @@ void IWDG_Config(void) {
 int main(void) {
     // 初始化IWDG
     IWDG_Config();
-    
+
     // 主循环
     while (1) {
         // 模拟正常工作
@@ -196,7 +196,7 @@ int main(void) {
 
         // 定期重装载看门狗
         IWDG_ReloadCounter();
-        
+
         // 为了测试故障，模拟一次故障
         // 可以注释掉下面这一行以进行正常运行测试
         // if (/* some condition to simulate fault */) {
@@ -204,7 +204,6 @@ int main(void) {
         // }
     }
 }
-
 ```
 
 ### 说明
@@ -229,5 +228,3 @@ int main(void) {
 ---
 
 2024.9.19 第一次修订，后期不再维护
-
-
