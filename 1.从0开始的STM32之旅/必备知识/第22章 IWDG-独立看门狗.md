@@ -42,15 +42,15 @@ STM32有两个看门狗，一个是独立看门狗另外一个是窗口看门狗
 
 更多内容可以参考：[【STM32F103ZET6开发板】第2-7讲：IWDG独立看门狗 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/644072211)
 
-## 4. 举例
+## 4. 简单举例
 
-### 步骤
+### 4.1 步骤
 
 1. **启用 IWDG 时钟**。
 2. **配置 IWDG 计数器的预分频和重载值**。
 3. **定期喂狗**，以防止复位。
 
-### 示例代码
+### 4.2 示例代码
 
 以下是一个简单的示例代码，演示如何在 STM32F103 中使用 IWDG。
 
@@ -60,12 +60,10 @@ STM32有两个看门狗，一个是独立看门狗另外一个是窗口看门狗
 void IWDG_Config(void) {
     // 使能 IWDG 时钟
     RCC->APB1ENR |= RCC_APB1ENR_IWDGEN; // 使能 IWDG 时钟
-
     // 配置 IWDG
     IWDG->KR = 0x5555; // 解锁 IWDG
     IWDG->PR = 0x03;   // 预分频器：64
     IWDG->RLR = 1000;  // 重载值（最大计数值）
-
     IWDG->KR = 0xAAAA; // 启动 IWDG
 }
 
@@ -75,24 +73,19 @@ void IWDG_Feed(void) {
 
 int main(void) {
     // 系统初始化代码（如时钟设置等）
-
     IWDG_Config(); // 配置独立看门狗
-
     while (1) {
         // 主循环代码
-
         // 定期喂狗
         IWDG_Feed();
-
         // 模拟一些工作，比如延时
         for (volatile uint32_t i = 0; i < 100000; i++);
-
         // 如果需要测试看门狗复位，可以注释掉上面的 IWDG_Feed 调用
     }
 }
 ```
 
-### 代码说明
+### 4.3 代码说明
 
 1. **IWDG_Config 函数**：
    
@@ -111,3 +104,5 @@ int main(void) {
 ---
 
 2024.9.18 第一次修订，后期不再维护
+
+2025.1.29 简化内容

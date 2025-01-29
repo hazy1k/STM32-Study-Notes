@@ -255,7 +255,6 @@ GPIO_Init(); // 初始化LED
 void FeedWatchdog() {
     WWDG_SetCounter(127); // 重装载
 }
-
 ```
 
 **主循环**：
@@ -279,5 +278,3 @@ while (1) {
 ---
 
 2024.9.19 第一次修订，后期不再维护
-
-

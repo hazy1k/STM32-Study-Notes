@@ -1,4 +1,4 @@
-# 第三十八章 IWDG超时实验
+# 第三十九章 IWDG超时实验
 
 ## 1. 硬件设计
 
@@ -12,21 +12,32 @@ IWDG属于单片机内部资源，不需要外部电路，需要一个外部的�
 
 ## 2. 软件设计
 
-- IWDG配置函数
+### 2.1 编程大纲
+
+1. iwdg初始化函数
+
+2. 喂狗函数
+
+3. 主函数测试
+
+### 2.2 代码分析
+
+#### 2.2.1 IWDG配置函数
 
 ```c
-void IWDG_Config(uint8_t prv ,uint16_t rlv)
+// 前置知识，iwdg超时时间计算
+/*
+    T = prv/40*rlv (s)
+    prv为预分频器值，prv取值可以是[4,8,16,32,64,128,256]
+    rlv为重载寄存器的值，取值范围为：0~0xFFF
+    举例：T = 64/40*625 = 1s
+*/
+void IWDG_Config(uint8_t prv, uint16_t rlv)
 {
-    // 使能 预分频寄存器PR和重装载寄存器RLR可写
-    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-    // 设置预分频器值
-    IWDG_SetPrescaler(prv);
-    // 设置重装载寄存器值
-    IWDG_SetReload(rlv);
-    // 把重装载寄存器的值放到计数器中
-    IWDG_ReloadCounter();
-    // 使能 IWDG
-    IWDG_Enable();
+    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable); // 使能寄存器可写
+    IWDG_SetPrescaler(prv); // 设置预分频器
+    IWDG_SetReload(rlv); // 设置重载寄存器
+    IWDG_Enable(); // 使能IWDG
 }
 ```
 
@@ -75,65 +86,43 @@ IWDG配置函数有两个形参，prv用来设置预分频的值，取值可以�
 
 这些宏在stm32f10x_iwdg.h中定义，宏展开是8位的16进制数，具体作用是配置配置预分频寄存器IWDG_PR，获得各种分频系数。 形参rlv用来设置重装载寄存器IWDG_RLR的值，取值范围为0~0XFFF。溢出时间Tout = prv/40 * rlv(s)， prv可以是[4,8,16,32,64,128,256]。如果我们需要设置1s的超时溢出，prv可以取IWDG_Prescaler_64，rlv取625， 即调用:IWDG_Config(IWDG_Prescaler_64 ,625)。Tout=64/40*625=1s。
 
-- 喂狗函数
+#### 2.2.2 喂狗函数
 
 ```c
 void IWDG_Feed(void)
 {
-    // 把重装载寄存器的值放到计数器中，喂狗，防止IWDG复位
-    // 当计数器的值减到0的时候会产生系统复位
-    IWDG_ReloadCounter();
+    IWDG_ReloadCounter(); // 重载计数器
 }
 ```
 
-- 主函数
+#### 2.2.3 主函数测试
 
 ```c
+#include "key.h"
+#include "led.h"
+#include "iwdg.h"
+
 int main(void)
-{    
-  // 配置LED GPIO，并关闭LED
-  LED_GPIO_Config();    
-  Delay(0X8FFFFF);
-  // 检查是否为独立看门狗复位
-  if(RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET)
-  {
-    // 独立看门狗复位
-    // 亮红灯 
-    LED_RED;
-
-    // 清除标志
-    RCC_ClearFlag();
-
-        /*如果一直不喂狗，会一直复位，加上前面的延时，会看到红灯闪烁
-        在1s 时间内喂狗的话，则会持续亮绿灯*/
-  }
-  else
-  {
-    // 不是独立看门狗复位(可能为上电复位或者手动按键复位之类的) 
-    // 亮蓝灯 
-    LED_BLUE;
-  }
-    // 配置按键GPIO
-    Key_GPIO_Config();
-    // IWDG 1s 超时溢出
-    IWDG_Config(IWDG_Prescaler_64, 625);
-    /*
-    while部分是我们在项目中具体需要写的代码，这部分的程序可以用独立看门狗来监控,如果我们知道这部分代码的执行时间，比如是500ms，那么我们可以设置独立看门狗的
-    溢出时间是600ms，比500ms多一点，如果要被监控的程序没有跑飞正常执行的话，那么执行完毕之后就会执行喂狗的程序，如果程序跑飞了那程序就会超时，到达不了喂狗
-    的程序,此时就会产生系统复位。但是也不排除程序跑飞了又跑回来了，刚好喂狗了，歪打正着。所以要想更精确的监控程序，可以使用窗口看门狗，窗口看门狗规定必须在
-    规定的窗口时间内喂狗。
-    */
-    while(1)                        
-    {    
-    // 这里添加需要被监控的代码，如果有就去掉按键模拟喂狗，把按键扫描程序去掉
+{
+    LED_Init();
+    Key_Init();
+    IWDG_Config(IWDG_Prescaler_64 , 625); // IWDG 1s timeout
+    if(RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET) // Check if the reset was caused by IWDG reset
+    {
+        LED_RED();
+        RCC_ClearFlag(); 
+    }
+    else
+    {
+        LED_BLUE();
+    }
+    while(1)
+    {
         if(Key_Scan(KEY1_GPIO_PORT, KEY1_GPIO_PING) == KEY_ON)
         {
-            // 喂狗，如果不喂狗，系统则会复位，复位后亮红灯，如果在1s
-            // 时间内准时喂狗的话，则会亮绿灯
-            IWDG_Feed(); // 喂狗
-            //喂狗后亮绿灯
-            LED_GREEN;
-        }   
+            IWDG_Feed();
+            LED_GREEN();
+        }
     }
 }
 ```
@@ -146,24 +135,24 @@ int main(void)
 
 看门狗可以理解为一个监控器，我们监控一个地方，如果程序正常不做反应，如出现错误则看门狗复位，我们可以简单回顾一下：
 
-### 实验目的
+### 3.1 实验目的
 
 1. 理解独立看门狗的工作原理。
 2. 实现一个基本的看门狗定时器程序，确保程序在正常运行时不复位，异常情况下能够复位微控制器。
 
-### 实验环境
+### 3.2 实验环境
 
 - 开发板：STM32F103
 - 开发工具：Keil uVision 或 STM32CubeIDE
 - 硬件连接：无特别连接，只需开发板和电脑。
 
-### 实验步骤
+### 3.3 实验步骤
 
 1. **初始化IWDG**: 配置IWDG的预分频器和重装载值。
 2. **主程序逻辑**: 在主循环中，定期重装载IWDG。
 3. **故障模拟**: 人为制造故障（如进入死循环），观察微控制器复位。
 
-### 代码示例
+### 3.4 代码示例
 
 ```c
 #include "stm32f10x.h" // 包含STM32F10x库头文件
@@ -206,7 +195,7 @@ int main(void) {
 }
 ```
 
-### 说明
+### 3.5 说明
 
 1. **IWDG_Config() 函数**:
    
@@ -220,7 +209,7 @@ int main(void) {
    - 在正常情况下，定期调用`IWDG_ReloadCounter()`以防止复位。
    - 你可以通过条件控制模拟一个故障，例如进入一个死循环。
 
-### 故障测试
+### 3.6 故障测试
 
 - 运行程序，观察在正常情况下微控制器不会复位。
 - 注释掉`IWDG_ReloadCounter()`的调用或强制进入死循环，观察微控制器是否复位。
@@ -228,3 +217,5 @@ int main(void) {
 ---
 
 2024.9.19 第一次修订，后期不再维护
+
+2025.1.29 修订代码

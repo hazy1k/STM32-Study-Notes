@@ -30,14 +30,14 @@
 #define TIM_APBxClock_FUN RCC_APB1PeriphClockCmd
 #define TIM_CLK           RCC_APB1Periph_TIM3
 #define TIM_GPIO_CLK      (RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO)
-#define GPIO_REMAP_FUN()  GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE); 				
+#define GPIO_REMAP_FUN()  GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);                 
 
 /* 三色灯通道定义 */
 #define RED_TIM_LED_PORT GPIOB
 #define RED_TIM_LED_PIN  GPIO_Pin_5
 #define RED_TIM_OCxInit          TIM_OC2Init            
 #define RED_TIM_OCxPreloadConfig TIM_OC2PreloadConfig
-#define RED_CCRx CCR2		
+#define RED_CCRx CCR2        
 #define GREEN_TIM_LED_PORT GPIOB
 #define GREEN_TIM_LED_PIN  GPIO_Pin_0
 #define GREEN_TIM_OCxInit          TIM_OC3Init            
@@ -83,120 +83,119 @@ const uint16_t indexWave[] = {
 ```c
 static void TIM_NVIC_Init(void)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-  	NVIC_InitStructure.NVIC_IRQChannel = TIMx_IRQ;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+      NVIC_InitStructure.NVIC_IRQChannel = TIMx_IRQ;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 static void TIM_GPIO_Init(void) 
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(TIM_GPIO_CLK, ENABLE); 
-	GPIO_REMAP_FUN();
-  	GPIO_InitStructure.GPIO_Pin = RED_TIM_LED_PIN ;	
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 复用推挽输出
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(RED_TIM_LED_PORT, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GREEN_TIM_LED_PIN ;
-	GPIO_Init(GREEN_TIM_LED_PORT, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = BLUE_TIM_LED_PIN ;
-	GPIO_Init(BLUE_TIM_LED_PORT, &GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(TIM_GPIO_CLK, ENABLE); 
+    GPIO_REMAP_FUN();
+      GPIO_InitStructure.GPIO_Pin = RED_TIM_LED_PIN ;    
+      GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 复用推挽输出
+      GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(RED_TIM_LED_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GREEN_TIM_LED_PIN ;
+    GPIO_Init(GREEN_TIM_LED_PORT, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = BLUE_TIM_LED_PIN ;
+    GPIO_Init(BLUE_TIM_LED_PORT, &GPIO_InitStructure);
 }
 
 static void TIM_Mode_Init(void)
 {
-	TIM_APBxClock_FUN(TIM_CLK, ENABLE); 
-	// 时基结构初始化
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructure.TIM_Period = (512-1);       							 
-	TIM_TimeBaseStructure.TIM_Prescaler = (10-1);	    							
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1 ;			
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  	
-	TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
-	// PWM模式初始化
-  	TIM_OCInitTypeDef TIM_OCInitStructure;																				
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;	    				
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;	
-	TIM_OCInitStructure.TIM_Pulse = 0;				 						  				
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;  	  
-  	RED_TIM_OCxInit(TIMx, &TIM_OCInitStructure );	
-	RED_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);	
-  	GREEN_TIM_OCxInit(TIMx, &TIM_OCInitStructure);	
-  	GREEN_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);	
-  	BLUE_TIM_OCxInit(TIMx, &TIM_OCInitStructure);	
-  	BLUE_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);							
-  	TIM_ARRPreloadConfig(TIMx, ENABLE); // 使能TIM重载寄存器ARR
-    TIM_Cmd(TIMx, ENABLE);                   										
-	TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);										
+    TIM_APBxClock_FUN(TIM_CLK, ENABLE); 
+    // 时基结构初始化
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseStructure.TIM_Period = (512-1);                                    
+    TIM_TimeBaseStructure.TIM_Prescaler = (10-1);                                    
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1 ;            
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;      
+    TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
+    // PWM模式初始化
+      TIM_OCInitTypeDef TIM_OCInitStructure;                                                                                
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;                        
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;    
+    TIM_OCInitStructure.TIM_Pulse = 0;                                                           
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;        
+      RED_TIM_OCxInit(TIMx, &TIM_OCInitStructure );    
+    RED_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);    
+      GREEN_TIM_OCxInit(TIMx, &TIM_OCInitStructure);    
+      GREEN_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);    
+      BLUE_TIM_OCxInit(TIMx, &TIM_OCInitStructure);    
+      BLUE_TIM_OCxPreloadConfig(TIMx, TIM_OCPreload_Enable);                            
+      TIM_ARRPreloadConfig(TIMx, ENABLE); // 使能TIM重载寄存器ARR
+    TIM_Cmd(TIMx, ENABLE);                                                           
+    TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);                                        
 }
 
 void SPWM_Init(void)
 {
-	TIM_NVIC_Init();
-	TIM_GPIO_Init();
-	TIM_Mode_Init();
+    TIM_NVIC_Init();
+    TIM_GPIO_Init();
+    TIM_Mode_Init();
 }
-
 ```
 
 #### 2.2.4 定时器中断服务函数
 
 ```c
 void TIMx_IRQHandler(void)
-{	
-	static uint16_t pwm_index = 0;	  // 用于PWM查表
-	static uint16_t period_cnt = 0;		// 用于计算周期数
-	static uint16_t amplitude_cnt = 0;// 用于计算幅值等级
-	if (TIM_GetITStatus(TIMx, TIM_IT_Update) != RESET)
- 	{		
-		amplitude_cnt++;
-		if(amplitude_cnt > (AMPLITUDE_CLASS-1))		 						
-		{		
-			period_cnt++;
-			if(period_cnt > period_class)
-			{				
-				pwm_index++;									
-				if(pwm_index >= PWM_Num)			
-				{
-					pwm_index=0;								
-				}	
-				period_cnt = 0;											
-			}
-			amplitude_cnt=0;									
-		}
-		else
-		{	
-      if(((rgb_color&0xFF0000)>>16) >= amplitude_cnt)		
-      {		
-			  TIMx->RED_CCRx = indexWave[pwm_index]; // 根据PWM表修改定时器的比较寄存器值
+{    
+    static uint16_t pwm_index = 0;      // 用于PWM查表
+    static uint16_t period_cnt = 0;        // 用于计算周期数
+    static uint16_t amplitude_cnt = 0;// 用于计算幅值等级
+    if (TIM_GetITStatus(TIMx, TIM_IT_Update) != RESET)
+     {        
+        amplitude_cnt++;
+        if(amplitude_cnt > (AMPLITUDE_CLASS-1))                                 
+        {        
+            period_cnt++;
+            if(period_cnt > period_class)
+            {                
+                pwm_index++;                                    
+                if(pwm_index >= PWM_Num)            
+                {
+                    pwm_index=0;                                
+                }    
+                period_cnt = 0;                                            
+            }
+            amplitude_cnt=0;                                    
+        }
+        else
+        {    
+      if(((rgb_color&0xFF0000)>>16) >= amplitude_cnt)        
+      {        
+              TIMx->RED_CCRx = indexWave[pwm_index]; // 根据PWM表修改定时器的比较寄存器值
       }
-			else
+            else
       {
-				TIMx->RED_CCRx = 0;	// 比较寄存器值为0，通道输出高电平，该通道LED灯灭
+                TIMx->RED_CCRx = 0;    // 比较寄存器值为0，通道输出高电平，该通道LED灯灭
       }
-			if(((rgb_color&0x00FF00)>>8) >= amplitude_cnt)
-      {				
-				TIMx->GREEN_CCRx = indexWave[pwm_index];	
+            if(((rgb_color&0x00FF00)>>8) >= amplitude_cnt)
+      {                
+                TIMx->GREEN_CCRx = indexWave[pwm_index];    
       }
-			else
+            else
       {
-				TIMx->GREEN_CCRx = 0;
-      }	
-			if((rgb_color&0x0000FF) >= amplitude_cnt)
-      {				
-				TIMx->BLUE_CCRx = indexWave[pwm_index];
-      }	
-			else
+                TIMx->GREEN_CCRx = 0;
+      }    
+            if((rgb_color&0x0000FF) >= amplitude_cnt)
+      {                
+                TIMx->BLUE_CCRx = indexWave[pwm_index];
+      }    
+            else
       {
-				TIMx->BLUE_CCRx = 0;	
-      }	
-		}					
-	TIM_ClearITPendingBit(TIMx, TIM_IT_Update);
-	}
+                TIMx->BLUE_CCRx = 0;    
+      }    
+        }                    
+    TIM_ClearITPendingBit(TIMx, TIM_IT_Update);
+    }
 }
 ```
 
@@ -209,14 +208,13 @@ void TIMx_IRQHandler(void)
 __IO uint32_t rgb_color = 0x008080;
 
 int main(void)
-{			
-	SPWM_Init();
-	while(1)
-	{
-	
-	}		
-}
+{            
+    SPWM_Init();
+    while(1)
+    {
 
+    }        
+}
 ```
 
 ## 3. 小结
