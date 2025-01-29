@@ -2,7 +2,7 @@
 ..\..\output\bsp_iwdg.o: ..\..\User\iwdg\bsp_iwdg.h
 ..\..\output\bsp_iwdg.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\bsp_iwdg.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\bsp_iwdg.o: E:\dianzi\KEILARM\ARM\ARMCC\Bin\..\include\stdint.h
+..\..\output\bsp_iwdg.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\bsp_iwdg.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\bsp_iwdg.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\bsp_iwdg.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h
