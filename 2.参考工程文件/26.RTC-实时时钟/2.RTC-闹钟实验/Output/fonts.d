@@ -2,7 +2,7 @@
 ..\..\output\fonts.o: ..\..\User\./font/fonts.h
 ..\..\output\fonts.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\fonts.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\fonts.o: E:\dianzi\MDK\ARM\AC5\Bin\..\include\stdint.h
+..\..\output\fonts.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\fonts.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\fonts.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\fonts.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h

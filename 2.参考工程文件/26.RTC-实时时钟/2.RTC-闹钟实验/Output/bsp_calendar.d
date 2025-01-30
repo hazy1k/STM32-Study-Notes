@@ -2,7 +2,7 @@
 ..\..\output\bsp_calendar.o: ..\..\User\./rtc/bsp_calendar.h
 ..\..\output\bsp_calendar.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\bsp_calendar.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\bsp_calendar.o: E:\dianzi\MDK\ARM\AC5\Bin\..\include\stdint.h
+..\..\output\bsp_calendar.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\bsp_calendar.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\bsp_calendar.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\bsp_calendar.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h

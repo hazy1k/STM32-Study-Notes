@@ -31,3 +31,4 @@
 ..\output\main.o: ..\User\usart\usart.h
 ..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h
 ..\output\main.o: ..\User\adc\ADC.h
+..\output\main.o: ..\User\SysTick\SysTick.h
