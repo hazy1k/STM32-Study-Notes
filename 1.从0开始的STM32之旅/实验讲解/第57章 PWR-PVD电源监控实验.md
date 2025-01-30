@@ -22,46 +22,46 @@
 
 ## 2. 软件设计
 
-### 2.1 编程目标
+### 2.1 编程大纲
 
-- 初始化PVD中断；
+1. 初始化PVD中断，设置PVD电压监控等级并使能PVD
 
-- 设置PVD电压监控等级并使能PVD；
+2. PVD中断服务函数
 
-- 编写PVD中断服务函数，处理紧急任务。
+3. 主函数测试
 
 ### 2.2 代码分析
 
-- 初始化PVD
+#### 2.2.1 初始化PVD设置电压阈值
 
 ```c
-// 配置PCD
+#include "pvd.h"
+
 void PVD_Config(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
   EXTI_InitTypeDef EXTI_InitStructure;
-  // 使能 PWR 时钟
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+  /* 中断配置 */
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-  // 使能 PVD 中断
   NVIC_InitStructure.NVIC_IRQChannel = PVD_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
-  // 配置 EXTI16线(PVD 输出) 来产生上升下降沿中断
-  EXTI_ClearITPendingBit(EXTI_Line16); // 清除中断标志位
-  EXTI_InitStructure.EXTI_Line = EXTI_Line16; // 选择 EXTI 线
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; // 中断模式
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling; // 上升沿和下降沿触发中断
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE; // 使能中断线
+  /* EXTI配置 */
+  EXTI_ClearITPendingBit(EXTI_Line16);
+  EXTI_InitStructure.EXTI_Line = EXTI_Line16;
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure);
-  // 配置PVD级别PWR_PVDLevel_2V6 (PVD检测电压的阈值为2.6V，VDD电压低于2.6V时产生PVD中断)
-  // 具体级别根据自己的实际应用要求配置
-  PWR_PVDLevelConfig(PWR_PVDLevel_2V6); // 配置PVD检测电压阈值
-  // 使能PVD输出
+  /* PVD配置 */
+  PWR_PVDLevelConfig(PWR_PVDLevel_2V6); // 设置电压阈值
   PWR_PVDCmd(ENABLE);
 }
+
+
 ```
 
 在这段代码中，执行的流程如下：
@@ -73,56 +73,52 @@ void PVD_Config(void)
 3. 使用库函数PWR_PVDLevelConfig设置PVD监控的电压阈值等级， 各个阈值等级表示的电压值请查阅表
 
 4. 最后使用库函数PWR_PVDCmd使能PVD功能。
-- PVD中断服务函数
+
+#### 2.2.2 PVD中断服务函数
 
 ```c
 void PVD_IRQHandler(void)
 {
-        // 检测是否产生了PVD警告信号
-        if(PWR_GetFlagStatus (PWR_FLAG_PVDO)==SET)            
-        {
-            // 亮红灯，实际应用中应进入紧急状态处理
-            LED_RED;     
-      }
-    // 清除中断信号
-    EXTI_ClearITPendingBit(EXTI_Line16);
+	if(PWR_GetFlagStatus(PWR_FLAG_PVDO) == SET) // 电源管理器检测到PVD电压低于设定值			
+	{
+		LED_RED(); 	
+	}
+  EXTI_ClearITPendingBit(EXTI_Line16);
 }
 ```
 
-- 主函数
+#### 2.2.3 主函数
 
 ```c
 #include "stm32f10x.h"
-#include "./led/bsp_led.h"
-#include "./key/bsp_key.h" 
-#include "./usart/bsp_usart.h"
-#include "./pvd/bsp_pvd.h"
+#include "led.h"
+#include "key.h" 
+#include "usart.h"
+#include "pvd.h"
 
 int main(void)
-{    
-    LED_GPIO_Config();    
-    // 亮绿灯，表示正常运行
-    LED_GREEN; 
-    // 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
-    PVD_Config();
-
-  while(1)
-  {                    
-        /*正常运行的程序*/
-  }
+{	
+	LED_Init();	
+	LED_GREEN(); 
+	// 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
+	PVD_Config();
+	while(1)
+	{					
+	}
 }
+
 ```
 
 本电源监控实验的main函数执行流程比较简单，仅调用了PVD_Config配置监控功能，当VDD供电电压正常时，板子亮绿灯， 当电压低于阈值时，会跳转到中断服务函数中， 板子亮红灯
 
 ## 3. 小结
 
-### 实验目标
+### 3.1 实验目标
 
 - 理解PVD（电源电压检测器）的工作原理。
 - 实现电源电压监控功能，当电压低于设定值时触发警报。
 
-### 实验步骤
+### 3.2 实验步骤
 
 #### 1. 硬件连接
 
@@ -228,3 +224,5 @@ void Delay(uint32_t time)
 ---
 
 2024.9.15 第一次修订，后期不再维护
+
+2025.1.30 优化内容
