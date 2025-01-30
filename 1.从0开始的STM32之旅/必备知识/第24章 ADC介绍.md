@@ -1,10 +1,6 @@
 # 第二十四章 ADC介绍
 
-## 1. ADC简介
-
-STM32f103 系列有3个ADC，精度为12位，每个ADC最多有16个外部通道。其中ADC1和ADC2都有16个外部通道， ADC3根据CPU引脚的不同通道数也不同，一般都有8个外部通道。ADC的模式非常多，功能非常强大，具体的我们在功能框图中分析每个部分的功能。
-
-## 2. ADC功能框图剖析
+## 1. ADC功能框图剖析
 
 <img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/ADC002.png" title="" alt="" width="413">
 
@@ -12,9 +8,9 @@ STM32f103 系列有3个ADC，精度为12位，每个ADC最多有16个外部通�
 
 ### 2.1 电压输入范围
 
-ADC输入范围为：V<sub>REF- ≤ V<sub>IN ≤ V<sub>REF+。由V<sub>REF-、 V<sub>REF+ 、V<sub>DDA 、V<sub>SSA、这四个外部引脚决定。
+ADC输入范围为：V<sub>REF</sub>- ≤ V<sub>IN</sub> ≤ V<sub>REF+</sub>。由V<sub>REF-</sub>、 V<sub>REF+</sub> 、V<sub>DDA</sub> 、V<sub>SSA</sub>这四个外部引脚决定。
 
-我们在设计原理图的时候一般把V<sub>SSA和V<sub>REF-接地， 把V<sub>REF+和V<sub>DDA 接3V3，得到ADC的输入电压范围为：0~3.3V。
+我们在设计原理图的时候一般把V<sub>SSA</sub>和V<sub>REF-</sub>接地， 把V<sub>REF+</sub>和V<sub>DDA</sub>接3V3，得到ADC的输入电压范围为：0~3.3V。
 
 如果我们想让输入的电压范围变宽，去到可以测试负电压或者更高的正电压，我们可以在外部加一个电压调理电路， 把需要转换的电压抬升或者降压到0~3.3V，这样ADC就可以测量。
 
@@ -34,7 +30,7 @@ ADC输入范围为：V<sub>REF- ≤ V<sub>IN ≤ V<sub>REF+。由V<sub>REF-、
 
 注入，可以理解为插入，插队的意思，是一种不安分的通道。它是一种在规则通道转换的时候强行插入要转换的一种通道。 如果在规则通道转换过程中，有注入通道插队，那么就要先转换完注入通道，等注入通道转换完成后，再回到规则通道的转换流程。 这点跟中断程序很像，都是不安分的主。所以，注入通道只有在规则通道存在时才会出现。
 
-## 2.3 转换顺序
+### 2.3 转换顺序
 
 - 规则顺序
 
@@ -139,7 +135,7 @@ ADC_NbrOfChannel：AD转换通道数目，根据实际设置即可。
 
 ---
 
-### 例子：配置 ADC 进行多通道扫描转换
+### 3.1 例子：配置 ADC 进行多通道扫描转换
 
 假设我们需要采集两个通道（例如，PA0 和 PA1），以连续模式运行，并使用定时器作为触发信号。
 
@@ -148,10 +144,8 @@ ADC_NbrOfChannel：AD转换通道数目，根据实际设置即可。
 
 void ADC_Config(void) {
     ADC_InitTypeDef ADC_InitStruct;
-
     // 使能 ADC 时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-
     // 配置 ADC 初始化结构体
     ADC_InitStruct.ADC_Mode = ADC_Mode_Independent; // 独立模式
     ADC_InitStruct.ADC_ScanConvMode = ENABLE;      // 启用扫描模式
@@ -159,17 +153,13 @@ void ADC_Config(void) {
     ADC_InitStruct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1; // 定时器1触发
     ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right; // 右对齐
     ADC_InitStruct.ADC_NbrOfChannel = 2; // 采集两个通道
-
     // 初始化 ADC
     ADC_Init(ADC1, &ADC_InitStruct);
-
     // 配置通道
     ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
     ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_3Cycles);
-
     // 启动 ADC
     ADC_Cmd(ADC1, ENABLE);
-
     // 启动定时器（假设已配置好）
     TIM_Cmd(TIM1, ENABLE);
 }
@@ -186,7 +176,7 @@ int main(void) {
 }
 ```
 
-### 说明
+### 3.2 说明
 
 - **ADC_Mode** 设置为独立模式，表示该 ADC 独立工作。
 - **ADC_ScanConvMode** 和 **ADC_ContinuousConvMode** 启用扫描和连续模式，使 ADC 自动切换并持续读取通道。
@@ -199,3 +189,5 @@ int main(void) {
 ---
 
 2024.9.19 第一次修订，后期不再维护
+
+2025.1.30 简化
