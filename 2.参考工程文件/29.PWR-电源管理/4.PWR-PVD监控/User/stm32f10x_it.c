@@ -25,9 +25,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./key/bsp_key.h"
-#include "./usart/bsp_usart.h"
-#include "./led/bsp_led.h"   
+#include "key.h"
+#include "usart.h"
+#include "led.h"   
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -155,14 +155,11 @@ void SysTick_Handler(void)
   */
 void PVD_IRQHandler(void)
 {
-		// 检测是否产生了PVD警告信号
-		if(PWR_GetFlagStatus (PWR_FLAG_PVDO)==SET)			
-		{
-			// 亮红灯，实际应用中应进入紧急状态处理
-			LED_RED; 	
-	  }
-    // 清除中断信号
-    EXTI_ClearITPendingBit(EXTI_Line16);
+	if(PWR_GetFlagStatus(PWR_FLAG_PVDO) == SET) // 电源管理器检测到PVD电压低于设定值			
+	{
+		LED_RED(); 	
+	}
+  EXTI_ClearITPendingBit(EXTI_Line16);
 }
 /**
   * @brief  This function handles PPP interrupt request.

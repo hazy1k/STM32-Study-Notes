@@ -40,3 +40,9 @@ void LED_GPIO_Config(void)
     /* 关闭所有led灯	*/
 		GPIO_SetBits(LED3_GPIO_PORT, LED3_GPIO_PIN);
 }
+
+void assert_failed(uint8_t* file, uint32_t line)
+{
+	// 断言错误时执行的代码
+	LED1_ON;
+}
