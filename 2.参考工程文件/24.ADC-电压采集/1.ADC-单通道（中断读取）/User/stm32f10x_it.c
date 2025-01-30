@@ -25,9 +25,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "adc.h"
 
-#include "bsp_adc.h"
-extern __IO uint16_t ADC_ConvertedValue;
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -132,19 +131,10 @@ void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
-{
-}
-
-
+extern __IO uint16_t ADC_ConvertedValue;
 void ADC_IRQHandler(void)
 {	
-	if (ADC_GetITStatus(ADCx,ADC_IT_EOC)==SET) 
+	if(ADC_GetITStatus(ADCx, ADC_IT_EOC) == SET)  
 	{
 		// 读取ADC的转换值
 		ADC_ConvertedValue = ADC_GetConversionValue(ADCx);

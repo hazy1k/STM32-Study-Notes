@@ -15,6 +15,6 @@
 
 version: "2.0"
 options:
-    ADC-单通道-中断读取:
+    ADC:
         files: {}
         virtualPathFiles: {}
