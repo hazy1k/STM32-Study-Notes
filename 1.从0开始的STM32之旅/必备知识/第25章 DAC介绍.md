@@ -10,17 +10,15 @@ STM32具有片上DAC外设，它的分辨率可配置为8位或12位的数字输
 
 <img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC002.jpeg" title="" alt="" width="833">
 
-整个DAC模块围绕框图下方的“数字至模拟转换器x”展开，它的左边分别是参考电源的引脚：V<sub>DDA、 V<sub>SSA及V<sub>ref+， 其中STM32的DAC规定了它的参考电压:math:V_{ref +}输入范围为2.4——3.3V。 “数字至模拟转换器x”的输入为DAC的数据寄存器“DORx”的数字编码，经过它转换得的模拟信号由图中右侧的“DAC_OUTx”输出。 而数据寄存器“DORx”又受“控制逻辑”支配，它可以控制数据寄存器加入一些伪噪声信号或配置产生三角波信号。图中的左上角为DAC的触发源， DAC根据触发源的信号来进行DAC转换，其作用就相当于DAC转换器的开关，它可以配置的触发源为外部中断源触发、定时器触发或软件控制触发。 如本章实验中需要控制正弦波的频率，就需要定时器定时触发DAC进行数据转换。
+整个DAC模块围绕框图下方的“数字至模拟转换器x”展开，它的左边分别是参考电源的引脚：V<sub>DDA</sub>、 V<sub>SSA</sub>及V<sub>ref+</sub>， 其中STM32的DAC规定了它的参考电压输入范围为2.4—3.3V。 “数字至模拟转换器x”的输入为DAC的数据寄存器“DORx”的数字编码，经过它转换得的模拟信号由图中右侧的“DAC_OUTx”输出。 而数据寄存器“DORx”又受“控制逻辑”支配，它可以控制数据寄存器加入一些伪噪声信号或配置产生三角波信号。图中的左上角为DAC的触发源， DAC根据触发源的信号来进行DAC转换，其作用就相当于DAC转换器的开关，它可以配置的触发源为外部中断源触发、定时器触发或软件控制触发。 如本章实验中需要控制正弦波的频率，就需要定时器定时触发DAC进行数据转换。
 
 ### 2.1 参考电压
 
-与ADC外设类似，DAC也使用V<sub>REF+引脚作为参考电压， 在设计原理图的时候一般把VSSA接地，把VREF+和VDDA 接3.3V， 可得到DAC的输出电压范围为：0~3.3V。
-
-如果想让输出的电压范围变宽，可以在外部加一个电压调理电路，把0~3.3V的DAC输出抬升到特定的范围即可。
+与ADC外设类似，DAC也使用V<sub>REF+</sub>引脚作为参考电压， 在设计原理图的时候一般把VSSA接地，把V<sub>REF+</sub>和V<sub>DDA</sub> 接3.3V， 可得到DAC的输出电压范围为：0~3.3V。如果想让输出的电压范围变宽，可以在外部加一个电压调理电路，把0~3.3V的DAC输出抬升到特定的范围即可。
 
 ### 2.2 数模转换及输出通道
 
-框图中的“数字至模拟转换器x”是核心部件，整个DAC外设都围绕它而展开。它以左边的V<sub>REF+作为参考电源， 以DAC的数据寄存器“DORx”的数字编码作为输入，经过它转换得的模拟信号由右侧的“DAC_OUTx”通道输出。其中各个部件中的“x”是指设备的标号， 在STM32中具有2个这样的DAC部件，每个DAC有1个对应的输出通道连接到特定的引脚，即：PA4-通道1，PA5-通道2，为避免干扰，使用DAC功能时， DAC通道引脚需要被配置成模拟输入功能（AIN）。
+框图中的“数字至模拟转换器x”是核心部件，整个DAC外设都围绕它而展开。它以左边的V<sub>REF+</sub>作为参考电源， 以DAC的数据寄存器“DORx”的数字编码作为输入，经过它转换得的模拟信号由右侧的“DAC_OUTx”通道输出。其中各个部件中的“x”是指设备的标号， 在STM32中具有2个这样的DAC部件，每个DAC有1个对应的输出通道连接到特定的引脚，即：PA4-通道1，PA5-通道2，为避免干扰，使用DAC功能时， DAC通道引脚需要被配置成模拟输入功能（AIN）。
 
 ### 2.3 触发源及DHRx寄存器
 
@@ -67,9 +65,7 @@ typedef struct {
 
 ## 4. 实例
 
-### 示例：输出三角波信号
-
-#### 1. 包含头文件
+#### 4.1 包含头文件
 
 确保你包含了所需的头文件
 
@@ -77,7 +73,7 @@ typedef struct {
 #include "stm32f4xx.h"  // 根据你的具体STM32型号调整
 ```
 
-#### 2. DAC初始化函数
+#### 4.2 DAC初始化函数
 
 我们需要一个函数来初始化DAC：
 
@@ -85,10 +81,10 @@ typedef struct {
 void DAC_Init(void) {
     // 启用DAC时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
-    
+
     // DAC配置
     DAC_InitTypeDef DAC_InitStruct;
-    
+
     DAC_InitStruct.DAC_Trigger = DAC_Trigger_T6_TRGO; // 定时器6触发
     DAC_InitStruct.DAC_WaveGeneration = DAC_WaveGeneration_Triangle; // 生成三角波
     DAC_InitStruct.DAC_LFSRUnmask_TriangleAmplitude = DAC_TriangleAmplitude_2047; // 三角波幅值
@@ -102,7 +98,7 @@ void DAC_Init(void) {
 }
 ```
 
-#### 3. 定时器配置
+#### 4.3 定时器配置
 
 为了生成三角波，需要配置一个定时器作为DAC的触发源：
 
@@ -120,16 +116,16 @@ void Timer_Config(void) {
 
     // 初始化定时器
     TIM_TimeBaseInit(TIM6, &TIM_InitStruct);
-    
+
     // 启用定时器更新中断
     TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
-    
+
     // 启动定时器
     TIM_Cmd(TIM6, ENABLE);
 }
 ```
 
-#### 4. 主函数
+#### 4.4 主函数
 
 将上述函数在主函数中调用：
 
@@ -148,7 +144,7 @@ int main(void) {
 }
 ```
 
-#### 5. 处理中断
+#### 4.5 处理中断
 
 如果需要在定时器溢出时更新DAC输出，可以实现一个中断服务程序：
 
@@ -158,7 +154,7 @@ void TIM6_DAC_IRQHandler(void) {
     if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET) {
         // 清除中断标志
         TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
-        
+
         // 更新DAC输出值（简单的例子，实际中可能需要更复杂的波形计算）
         static uint32_t triangle_value = 0;
         triangle_value = (triangle_value + 1) % 4096; // 更新值范围0-4095
@@ -167,12 +163,10 @@ void TIM6_DAC_IRQHandler(void) {
 }
 ```
 
-### 说明
 
-- **DAC_Init**：初始化DAC的参数，包括触发方式和波形生成。
-- **Timer_Config**：配置定时器，作为DAC的触发源。
-- **TIM6_DAC_IRQHandler**：在定时器溢出时更新DAC的输出值，从而生成三角波。
 
 ---
 
 2024.9.22 第一次修订，后期不再维护
+
+2025.1.31 修补内容

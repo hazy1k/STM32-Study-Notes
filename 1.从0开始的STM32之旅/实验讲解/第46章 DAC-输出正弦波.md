@@ -1,4 +1,4 @@
-# 第四十五章 DAC-输出正弦波
+# 第四十六章 DAC-输出正弦波
 
 ## 1. 硬件设计
 
@@ -14,21 +14,21 @@ PA5引脚连接到FLASH芯片的CLK引脚中，这可能会干扰DAC实验输出
 
 ## 2. 软件设计
 
-### 2.1 编程目标
+### 2.1 编程大纲
 
-1) 计算获取正弦波数据表；
+1) DAC配置通道
 
-2) 根据正弦波数据表的周期内点数和周期计算定时器触发间隔；
+2) 定时器配置
 
-3) 初始化DAC输出通道，初始化DAC工作模式；
+3) DMA配置
 
-4) 配置触发DAC用的定时器；
+4) 初始化DAC工作模式
 
-5) 配置DMA自动转运正弦波数据表。
+5) 主函数测试
 
 ### 2.2 代码分析
 
-- 生成正弦波数据表
+#### 2.2.1 生成正弦波数据表
 
 要输出正弦波，实质是要控制DAC以v=sin(t)的正弦函数关系输出电压，其中v为电压输出，t为时间。
 
@@ -63,9 +63,7 @@ Python脚本的实现原理就是前面介绍的正弦波数据表的制作过�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/DAC006.png)
 
-- DAC宏定义
-
-制作好正弦波数据表后，开始使用MDK编写STM32的DAC工程，首先设置好相关的宏
+#### 2.2.2 DAC宏定义
 
 ```c
 // DAC DHR12RD寄存器，12位、右对齐、双通道
@@ -78,34 +76,27 @@ Python脚本的实现原理就是前面介绍的正弦波数据表的制作过�
 
 与DAC控制相关的引脚固定是PA4和PA5，就不使用宏定义了，在源代码中会直接使用引脚号操作。
 
-- DAC GPIO和模式配置
+#### 2.2.3 DAC GPIO和模式配置
 
 ```c
-// 使能DAC的时钟，初始化GPIO
 static void DAC_Config(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
-  DAC_InitTypeDef  DAC_InitStructure;
-  // 使能GPIOA时钟
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);    
-  // 使能DAC时钟
+	DAC_InitTypeDef  DAC_InitStructure;
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
-  // DAC的GPIO配置，模拟输入
-  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4 | GPIO_Pin_5;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4|GPIO_Pin_5;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   // 配置DAC 通道1
-  DAC_InitStructure.DAC_Trigger = DAC_Trigger_T2_TRGO;           // 使用TIM2作为触发源
-  DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_None;// 不使用波形发生器
-  DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Disable; // 不使用DAC输出缓冲
+  DAC_InitStructure.DAC_Trigger = DAC_Trigger_T2_TRGO;						// 使用TIM2作为触发源
+  DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_None;	// 不使用波形发生器
+  DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Disable;	// 不使用DAC输出缓冲
   DAC_Init(DAC_Channel_1, &DAC_InitStructure);
   // 配置DAC 通道2
   DAC_Init(DAC_Channel_2, &DAC_InitStructure);
-  // 使能通道1 由PA4输出
   DAC_Cmd(DAC_Channel_1, ENABLE);
-  // 使能通道2 由PA5输出 
   DAC_Cmd(DAC_Channel_2, ENABLE);
-  // 使能DAC的DMA请求 
   DAC_DMACmd(DAC_Channel_2, ENABLE);
 }
 ```
@@ -120,23 +111,19 @@ static void DAC_Config(void)
 
 初始化完DAC后，需要配置触发用的定时器，设定每次触发的间隔，以达到控制正弦波周期的目的。
 
+#### 2.2.4 TIM配置
+
 ```c
-// 配置TIM
 static void DAC_TIM_Config(void)
 {
-  TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
-  // 使能TIM2时钟，TIM2CLK 为72M
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-  // TIM2通用定时器配置
-  // TIM_TimeBaseStructInit(&TIM_TimeBaseStructure); 
-  TIM_TimeBaseStructure.TIM_Period = (20-1);                 // 定时周期 20  
-  TIM_TimeBaseStructure.TIM_Prescaler = 0x0;                 // 预分频，不分频 72M / (0+1) = 72M
-  TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;             // 时钟分频系数
-  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;// 向上计数模式
+  TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;	
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); 
+  TIM_TimeBaseStructure.TIM_Period = (20-1);       			
+  TIM_TimeBaseStructure.TIM_Prescaler = 0x0;       						
+  TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;    					
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
-  // 配置TIM2触发源
   TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);
-  // 使能TIM2
   TIM_Cmd(TIM2, ENABLE);
 }
 ```
@@ -147,30 +134,25 @@ static void DAC_TIM_Config(void)
 
 在实际应用中，可以根据工程里的正弦波点数和定时器配置生成特定频率的正弦波。
 
-- DMA配置
+#### 2.2.5 DMA配置
 
 ```c
-// 配置DMA
 static void DAC_DMA_Config(void)
-{    
-  DMA_InitTypeDef  DMA_InitStructure;
-  // 使能DMA2时钟
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
-  // 配置DMA2
-  DMA_InitStructure.DMA_PeripheralBaseAddr = DAC_DHR12RD_ADDRESS;        // 外设数据地址 寄存器 DHR12RD 的地址12位、右对齐、双通道
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&DualSine12bit ;      // 内存数据地址 DualSine12bit
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;                     // 数据传输方向内存至外设
-  DMA_InitStructure.DMA_BufferSize = POINT_NUM;                          // 缓存大小为POINT_NUM字节    
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;       // 外设数据地址固定    
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                // 内存数据地址自增
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;// 外设数据以字为单位
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;        // 内存数据以字为单位    
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;                        // 循环模式
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;                    // 高DMA通道优先级
-  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;                           // 非内存至内存模式    
+{	
+	DMA_InitTypeDef  DMA_InitStructure;
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = DAC_DHR12RD_ADDRESS;	 // 外设数据地址 寄存器 DHR12RD 的地址12位、右对齐、双通道
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&DualSine12bit; // 内存数据地址 DualSine12bit
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;							 // 数据传输方向内存至外设
+  DMA_InitStructure.DMA_BufferSize = PWM_Num;													
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;				
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;									
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;				
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;													
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;											
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;														
   DMA_Init(DMA2_Channel4, &DMA_InitStructure);
-
-  // 使能DMA2-14通道
   DMA_Cmd(DMA2_Channel4, ENABLE);
 }
 ```
@@ -181,18 +163,18 @@ static void DAC_DMA_Config(void)
 
 经过这样的配置后，定时器每间隔一定的时间就会触发DMA搬运双通道正弦波表的一个数据到DAC双通道寄存器进行转换， 每完成一个周期后DMA重新开始循环，从而达到连续输出波形的目的。
 
-- 主函数
+#### 2.2.6 主函数
 
 ```c
+#include "stm32f10x.h"
+#include "dac.h"
+
 int main(void)
 {
-    // 初始化DAC，开始DAC转换
-    DAC_Mode_Init();
-    while (1);
-    {
-    
-    }
+	DAC_Mode_Init();
+  	while(1);	 
 }
+
 ```
 
 本工程的主函数非常简单，直接调用DAC_Mode_Init即可完成所有的配置，此时再使用示波器测量PA4、PA5引脚可查看其输出的波形。
@@ -201,12 +183,12 @@ int main(void)
 
 DAC输出波形配置倒是不难，我们同时还运用了定时器和DMA传输，看起来有点复杂，实际上就是对前面几章的综合运用而已，下面我们来简单回顾一下整个流程：
 
-### 硬件要求
+### 3.1 硬件要求
 
 - STM32微控制器（如STM32F4系列）
 - 示波器或其他测量设备连接到DAC输出
 
-### 实验设计
+### 3.2 实验设计
 
 #### 1. 硬件连接
 
@@ -242,7 +224,7 @@ void DAC_Init() {
     DAC_InitStruct.DAC_WaveGeneration = DAC_WaveGeneration_None;
     DAC_InitStruct.DAC_OutputBuffer = DAC_OutputBuffer_Enable;
     DAC_Init(DAC_Channel_1, &DAC_InitStruct);
-    
+
     DAC_Cmd(DAC_Channel_1, ENABLE); // 启用DAC通道1
 }
 
@@ -256,7 +238,7 @@ void TIM_Init() {
     TIM_InitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_InitStruct.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM6, &TIM_InitStruct);
-    
+
     TIM_SelectOutputTrigger(TIM6, TIM_TRIGER_UPDATE); // 选择触发方式
     TIM_Cmd(TIM6, ENABLE); // 启动TIM6
 }
@@ -298,14 +280,8 @@ int main(void) {
 }
 ```
 
-### 说明
-
-1. **正弦波生成**：`generate_sine_wave()`函数生成正弦波样本。
-2. **DAC初始化**：`DAC_Init()`函数初始化DAC，配置触发方式和输出缓冲。
-3. **TIM初始化**：`TIM_Init()`函数配置定时器，设置自动重装载和预分频器。
-4. **DMA初始化**：`DMA_Init()`函数设置DMA，配置内存和外设地址。
-5. **主程序**：在`main()`中依次调用初始化函数，并在主循环中保持运行。
-
 ---
 
 2024.9.23 第一次修订，后期不再维护
+
+2025.1.31 修补内容
