@@ -1,43 +1,26 @@
 #include "stm32f10x.h"
-#include "bsp_usart.h"
-#include "bsp_adc.h"
-
-// ADC1转换的电压值通过MDA方式传到SRAM
-extern __IO uint32_t ADC_ConvertedValue[NOFCHANEL];
-
-// 局部变量，用于保存转换计算后的电压值 	 
-float ADC_ConvertedValueLocal[NOFCHANEL*2];        
-
-// 软件延时
-void Delay(__IO uint32_t nCount)
-{
-  for(; nCount != 0; nCount--);
-} 
-
+#include "ADC.h"
+#include "SysTick.h"
+#include "usart.h"
+// 双模式时，ADC1和ADC2转换的数据都存放在ADC1的数据寄存器，
+// ADC1的在低十六位，ADC2的在高十六位
+extern __IO uint32_t ADC_ConvertedValue[1];
+float ADC_Result[2];
 int main(void)
-{		
-	uint16_t temp0=0 ,temp1=0;
-	// 配置串口
-	USART_Config();
-	// ADC 初始化
+{
 	ADCx_Init();
-	printf("\r\n ----这是一个双ADC规则同步采集实验----\r\n");
-	while (1)
-	{	
-    	// 取出ADC1数据寄存器的高16位，这个是ADC2的转换数据
-		temp0 = (ADC_ConvertedValue[0]&0XFFFF0000) >> 16;
-		// 取出ADC1数据寄存器的低16位，这个是ADC1的转换数据
-		temp1 = (ADC_ConvertedValue[0]&0XFFFF);	
-		
-		ADC_ConvertedValueLocal[0] =(float) temp0/4096*3.3;
-		ADC_ConvertedValueLocal[1] =(float) temp1/4096*3.3;
-		
-		printf("\r\n ADCx_1 value = %f V \r\n",
-		        ADC_ConvertedValueLocal[1]);
-		printf("\r\n ADCx_2 value = %f V \r\n",
-		        ADC_ConvertedValueLocal[0]);
-		
-		printf("\r\n\r\n");
-		Delay(0xffffee); 		 
+	USART_Config();
+	SysTick_Init();
+	uint16_t temp_h = 0, temp_l = 0;
+	while(1)
+	{
+		temp_h = (ADC_ConvertedValue[0]&0xFFFF0000) >> 16;
+		temp_l = (ADC_ConvertedValue[0]&0xFFFF);
+		ADC_Result[0] = (float)temp_h/4096*3.3;
+		ADC_Result[1] = (float)temp_l/4096*3.3;
+		printf("ADC_1 of Vref = %f V\r\n", ADC_Result[0]);
+		printf("ADC_2 of Vref = %f V\r\n", ADC_Result[1]);
+		ADC_ClearFlag(ADCx_1, ADC_FLAG_EOC);
+		Delay_ms(5000);
 	}
 }
