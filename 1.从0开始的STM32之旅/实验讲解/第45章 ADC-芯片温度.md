@@ -1,4 +1,4 @@
-# 第四十四章 ADC-芯片温度
+# 第四十五章 ADC-芯片温度
 
 ## 1. 硬件设计
 
@@ -10,114 +10,115 @@
 
 ## 2. 软件设计
 
-- 温度参数宏定义
+### 2.1 编程大纲
+
+1. 温度参数宏定义
+
+2. ADC采集内部温度传感器
+
+3. 主函数测试
+
+### 2.2 代码分析
+
+#### 2.2.1 温度参数宏定义
 
 ```c
-// 对于12位的ADC，3.3V的ADC值为0xfff,温度为25度时对应的电压值为1.43V即0x6EE
-#define V25  0x6EE     
-// 斜率 每摄氏度4.3mV 对应每摄氏度0x05
-#define AVG_SLOPE 0x05 
+// 12位的ADC，3.3V的ADC值为0xFFF, 温度25°时对应的电压值为1.43V即0x6EE
+#define V25 0x6EE
+// 斜率每摄氏度4.3mv，对应每摄氏度0x05
+#define ADC_K 0x05
+#define ADC1_DR_Address ((uint32_t)ADC1_BASE+0x4c)
 ```
 
-- ADC1 GPIO配置
+#### 2.2.2 ADC模式配置
 
 ```c
-// ADC1 GPIO配置
-static void ADC1_GPIO_Config(void)               
-{
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);   // DMA1时钟使能
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); // ADC1时钟使能
+#include "ADC.h"
 
+__IO uint16_t ADC_ConvertedValue;
+
+static void ADC_GPIO_Init(void)
+{
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+}
+
+static void ADC_Mode_Init(void)
+{
+    DMA_InitTypeDef DMA_InitStructure;
+    ADC_InitTypeDef ADC_InitStructure;
+    /* DMA1 channel1 configuration */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;
+    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&ADC_ConvertedValue;
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    DMA_InitStructure.DMA_BufferSize = 1;
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+    DMA_Cmd(DMA1_Channel1, ENABLE);
+    /* ADC1 configuration */
+    ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+    ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+    ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+    ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+    ADC_InitStructure.ADC_NbrOfChannel = 1;
+    ADC_Init(ADC1, &ADC_InitStructure);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div8);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_239Cycles5);
+    ADC_TempSensorVrefintCmd(ENABLE);
+    ADC_DMACmd(ADC1, ENABLE);
+    ADC_Cmd(ADC1, ENABLE);
+    ADC_ResetCalibration(ADC1);
+    while(ADC_GetResetCalibrationStatus(ADC1));
+    ADC_StartCalibration(ADC1);
+    while(ADC_GetCalibrationStatus(ADC1));
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+}
+
+void ADCx_Init(void)
+{
+    ADC_GPIO_Init();
+    ADC_Mode_Init();
 }
 ```
 
-- 配置ADC1的工作模式为DMA模式
+#### 2.2.3 主函数测试
 
 ```c
-// 配置ADC1的工作模式为DMA模式
-static void ADC1_Mode_Config(void)
-{
-  DMA_InitTypeDef DMA_InitStructure;
-  ADC_InitTypeDef ADC_InitStructure;
-  // DMA1通道1配置
-  DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;                // 外设基地址
-  DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&ADC_ConvertedValue;           // AD转换值所存放的内存基地址（就是给个地址）
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;                         // 外设作为数据传输的来源    
-  DMA_InitStructure.DMA_BufferSize = 1;                                      // 定义指定DMA通道 DMA缓存的大小
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;           // 外设地址寄存器不变
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;                   // 内存地址寄存器不变
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;// 数据宽度为16位
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;        // 数据宽度为16位
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;                            // 工作在循环模式下
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;                        // 高优先级
-  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;                               // 没有设置为内存到内存的传输
-  DMA_Init(DMA1_Channel1, &DMA_InitStructure);                               // DMA1通道1初始化
-  DMA_Cmd(DMA1_Channel1, ENABLE);                                            // 使能DMA1通道1
-  // ADC1配置
-  ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;                 // 独立工作模式
-  ADC_InitStructure.ADC_ScanConvMode = ENABLE;                       // 多通道
-  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;                 // 连续转换
-  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;// 由软件触发启动
-  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;             // 数据右对齐
-  ADC_InitStructure.ADC_NbrOfChannel = 1;                            // 仅一个通道转换
-  ADC_Init(ADC1, &ADC_InitStructure);                                // ADC1初始化
-  //配置ADC时钟，为PCLK2的8分频，即9Hz
-  RCC_ADCCLKConfig(RCC_PCLK2_Div8); 
-  //设置采样通道IN16, 设置采样时间
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_239Cycles5);    
-  //使能温度传感器和内部参考电压   
-  ADC_TempSensorVrefintCmd(ENABLE);                                    
-  ADC_DMACmd(ADC1, ENABLE);  // 使能DMA模式
-  ADC_Cmd(ADC1, ENABLE);     // 使能ADC1   
-  ADC_ResetCalibration(ADC1);// 复位校准寄存器                                          
-  while(ADC_GetResetCalibrationStatus(ADC1));  // 等待校准结束                        
-  ADC_StartCalibration(ADC1); // 开始校准                                        
-  while(ADC_GetCalibrationStatus(ADC1)); // 等待校准结束          
-  ADC_SoftwareStartConvCmd(ADC1, ENABLE); // 启动ADC转换
-}                                                
-```
-
-- 主函数
-
-```c
-// 通过ADC1通道16获取芯片内部温度，并通过串口打印到电脑串口调试助手显示
 #include "stm32f10x.h"
-#include "./usart/bsp_usart.h"
-#include "./temp/bsp_tempad.h"
-// ADC1转换的电压值通过MDA方式传到sram
-extern __IO u16 ADC_ConvertedValue;
-//计算后的温度值
-u16 Current_Temp;     
+#include "ADC.h"
+#include "usart.h"
+#include "SysTick.h"
 
-void Delay(__IO u32 nCount)
-{
-  for(; nCount != 0; nCount--);
-} 
+extern __IO uint16_t ADC_ConvertedValue;
+uint16_t ADC_Result;
+uint16_t ADC_Result1;
 
 int main(void)
-{         
+{
+    ADCx_Init();
     USART_Config();
-    Temp_ADC1_Init();
-    printf("\r\n 这是一个内部温度传感器实验 \r\n");
-    printf( "\r\n Print current Temperature  \r\n");    
-  while (1)
-  { 
-    Delay(0xffffee);      // 延时 
-    // 计算方法1                                                                       
-     // Current_Temp= (1.43- ADC_ConvertedValue*3.3/4096)*1000 / 4.3+ 25 ;
-    //计算方法2
-    Current_Temp = (V25-ADC_ConvertedValue)/AVG_SLOPE+25;    
-    //10进制显示
-    printf("\r\n The IC current tem= %3d ℃\r\n", Current_Temp);          
-    //16进制显示                          
-     // printf("\r\n The current temperature= %04x \r\n", Current_Temp);         
-  }
+    SysTick_Init();
+    while(1)
+    {
+        Delay_ms(2000);
+        ADC_Result1 = (V25-ADC_ConvertedValue)/ADC_K+25;
+        ADC_Result = (1.43-ADC_ConvertedValue*3.3/4096)*1000/4.3+25;
+        printf("ADC内部传感器温度: %3d °C\r\n", ADC_Result);
+        printf("ADC Result: %d °C\r\n",ADC_Result1);
+    }
 }
 ```
 
 ## 3. 小结
 
-### 实验步骤
+### 3.1 实验步骤
 
 #### 1. 硬件准备
 
@@ -133,7 +134,7 @@ int main(void)
 1. **引入标准库**: 确保你已引入STM32标准外设库。
 2. **配置ADC和DMA**: 通过寄存器设置来配置ADC和DMA。
 
-### 代码示例
+### 3.2 代码示例
 
 ```c
 #include "stm32f10x.h" // 引入STM32标准库头文件
@@ -226,18 +227,8 @@ void DMA1_Channel1_IRQHandler(void) {
 }
 ```
 
-### 代码解释
-
-1. **库文件**: 包含了STM32标准库的必要头文件。
-2. **缓冲区定义**: 定义了一个数组用于存储温度数据。
-3. **时钟配置**: 使能ADC和DMA的时钟。
-4. **GPIO配置**: 设置PA0引脚为模拟输入，连接到ADC。
-5. **ADC配置**: 设置ADC的分辨率、转换模式等参数。
-6. **DMA配置**: 设置DMA的工作模式、数据方向等。
-7. **启动ADC**: 软件启动ADC转换。
-8. **主循环**: 这里可以处理获取到的温度数据。
-9. **中断处理**: 可以在DMA中断处理函数中进行数据处理。
-
 ---
 
 2024.9.21 第一次修订，后期不再维护
+
+2025.1.30 修订代码
