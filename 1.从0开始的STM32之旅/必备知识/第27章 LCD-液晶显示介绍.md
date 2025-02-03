@@ -1,20 +1,6 @@
 # 第二十七章 LCD-液晶显示介绍
 
-## 1. LED和OLED显示器简介
-
-LED点阵彩色显示器的单个像素点内包含红绿蓝三色LED灯，显示原理类似我们实验板上的LED彩灯， 通过控制红绿蓝颜色的强度进行混色，实现全彩颜色输出，多个像素点构成一个屏幕。由于每个像素点都是LED灯自发光的， 所以在户外白天也显示得非常清晰，但由于LED灯体积较大，导致屏幕的像素密度低，所以它一般只适合用于广场上的巨型显示器。 相对来说，单色的LED点阵显示器应用得更广泛，如公交车上的信息展示牌、店招等，见图：
-
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD004.jpg)
-
-新一代的OLED显示器与LED点阵彩色显示器的原理类似， 但由于它采用的像素单元是“有机发光二极管”(Organic Light Emitting Diode)， 所以像素密度比普通LED点阵显示器高得多
-
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD005.jpg)
-
-OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速度快等优点。待到生产工艺更加成熟时， 必将取代现在液晶显示器的地位
-
-![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD006.jpg)
-
-## 2. 液晶控制原理
+## 1. 液晶控制原理
 
 图是两种适合于STM32芯片使用的显示屏，我们以它为例讲解控制液晶屏的基本原理。
 
@@ -26,7 +12,7 @@ OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速�
 
 <img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD008.jpg" title="" alt="" width="851">
 
-### 2.1 液晶面板的控制信号
+### 1.1 液晶面板的控制信号
 
 本章我们主要讲解如何控制液晶面板，液晶面板的控制信号线即图中液晶面板引出的FPC排线， 其说明见表， 液晶面板通过这些信号线与液晶控制器通讯，使用这种通讯信号的被称为RGB接口(RGB Interface)。
 
@@ -54,7 +40,7 @@ OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速�
 
 > 数据使能信号DE(Data Enable)用于表示数据的有效性，当DE信号线为高电平时，RGB信号线表示的数据有效。
 
-### 2.2 液晶数据传输时序
+### 1.2 液晶数据传输时序
 
 通过上述信号线向液晶屏传输像素数据时，各信号线的时序见图。图中表示的是向液晶屏传输一帧图像数据的时序，中间省略了多行及多个像素点。
 
@@ -70,17 +56,11 @@ OLED显示器不需要背光源、对比度高、轻薄、视角广及响应速�
 
 在这些时间参数控制的区域，数据使能信号线“DE”都为低电平，RGB数据线的信号无效，当“DE”为高电平时，表示的数据有效，传输的数据会直接影响液晶屏的显示区域。
 
-## 3. 显存
-
-液晶屏中的每个像素点都是数据，在实际应用中需要把每个像素点的数据缓存起来，再传输给液晶屏，一般会使用SRAM或SDRAM性质的存储器， 而这些专门用于存储显示数据的存储器，则被称为显存。显存一般至少要能存储液晶屏的一帧显示数据，如分辨率为800x480的液晶屏， 使用RGB888格式显示，它的一帧显示数据大小为：3x800x480=1152000字节；若使用RGB565格式显示，一帧显示数据大小为：2x800x480=768000字节。
-
-一般来说，外置的液晶控制器会自带显存，而像STM32F429等集成液晶控制器的芯片可使用内部SRAM或外扩SDRAM用于显存空间。
-
-## 4. 使用STM32的FSMC模拟8080接口时序
+## 2. 使用STM32的FSMC模拟8080接口时序
 
 ILI9341的8080通讯接口时序可以由STM32使用普通I/O接口进行模拟，但这样效率太低，STM32提供了一种特别的控制方法——使用FSMC接口实现8080时序。
 
-### 4.1 FSMC简介
+### 2.1 FSMC简介
 
 STM32F1系列芯片使用FSMC外设来管理扩展的存储器， FSMC是Flexible Static Memory Controller的缩写，译为灵活的静态存储控制器。 它可以用于驱动包括SRAM、NOR FLASH以及NAND FLSAH类型的存储器，不能驱动如SDRAM这种动态的存储器而在STM32F429系列的控制器中， 它具有FMC外设，支持控制SDRAM存储器。
 
@@ -90,7 +70,7 @@ FSMC外设的结构见图：
 
 <img src="https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD016.jpeg" title="" alt="" width="1078">
 
-#### 4.1.1 通讯引脚
+#### 2.1.1 通讯引脚
 
 在框图的右侧是FSMC外设相关的控制引脚，由于控制不同类型存储器的时候会有一些不同的引脚，看起来有非常多， 其中地址线FSMC_A和数据线FSMC_D是所有控制器都共用的。这些FSMC引脚具体对应的GPIO端口及引脚号可在《STM32F103规格书》中搜索查找到，不在此列出。
 
@@ -100,9 +80,9 @@ FSMC外设的结构见图：
 
 在控制LCD时，使用的是类似异步、地址与数据线独立的NOR FLASH控制方式，所以实际上CLK、NWAIT、NADV引脚并没有使用到。
 
-其中比较特殊的FSMC_NE是用于控制存储器芯片的片选控制信号线，STM32具有FSMC_NE1/2/3/4号引脚，不同的引脚对应STM32内部不同的地址区域。 例如，当STM32访问0x68000000-0x6BFFFFFF地址空间时，FSMC_NE3引脚会自动设置为低电平，由于它一般连接到外部存储器的片选引脚且低电平有效， 所以外部存储器的片选被使能，而访问0x60000000-0x63FFFFFF地址时，FSMC_NE1会输出低电平。当使用不同的FSMC_NE引脚连接外部存储器时， STM32访问外部存储的地址不一样，从而达到控制多个外部存储器芯片的目的。各引脚对应的地址会在后面“FSMC的地址映射”小节讲解。
+其中比较特殊的FSMC_NE是用于控制存储器芯片的片选控制信号线，STM32具有FSMC_NE1/2/3/4号引脚，不同的引脚对应STM32内部不同的地址区域。 例如，当STM32访问0x68000000-0x6BFFFFFF地址空间时，FSMC_NE3引脚会自动设置为低电平，由于它一般连接到外部存储器的片选引脚且低电平有效， 所以外部存储器的片选被使能，而访问0x60000000-0x63FFFFFF地址时，FSMC_NE1会输出低电平。当使用不同的FSMC_NE引脚连接外部存储器时， STM32访问外部存储的地址不一样，从而达到控制多个外部存储器芯片的目的。
 
-#### 4.1.2 存储器控制器
+#### 2.1.2 存储器控制器
 
 上面不同类型的引脚是连接到FSMC内部对应的存储控制器中的。NOR/PSRAM/SRAM设备使用相同的控制器，NAND/PC卡设备使用相同的控制器， 不同的控制器有专用的寄存器用于配置其工作模式。
 
@@ -114,11 +94,11 @@ FSMC外设的结构见图：
 
 - FMC_BWTR写时序寄存器与FMC_BTR寄存器控制的参数类似，它专门用于控制写时序的时间参数。
 
-#### 4.1.3 时钟控制逻辑
+#### 2.1.3 时钟控制逻辑
 
 FSMC外设挂载在AHB总线上，时钟信号来自于HCLK(默认72MHz)，控制器的同步时钟输出就是由它分频得到。 例如，NOR控制器的FSMC_CLK引脚输出的时钟，它可用于与同步类型的NOR FLASH芯片进行同步通讯， 它的时钟频率可通过FSMC_BTR寄存器的CLKDIV位配置，可以配置为HCLK的1/2或1/3，也就是说，若它与同步类型的NOR FLASH通讯时， 同步时钟最高频率为36MHz。本示例中的NOR FLASH为异步类型的存储器，不使用同步时钟信号，所以时钟分频配置不起作用。
 
-## 5. FSMC的地址映射
+## 3. FSMC的地址映射
 
 FSMC连接好外部的存储器并初始化后，就可以直接通过访问地址来读写数据，这种地址访问与I2C EEPROM、SPI FLASH的不一样， 后两种方式都需要控制I2C或SPI总线给存储器发送地址，然后获取数据；在程序里，这个地址和数据都需要分开使用不同的变量存储， 并且访问时还需要使用代码控制发送读写命令。而使用FSMC外接存储器时，其存储单元是映射到STM32的内部寻址空间的；在程序里， 定义一个指向这些地址的指针，然后就可以通过指针直接修改该存储单元的内容，FSMC外设会自动完成数据访问过程， 读写命令之类的操作不需要程序控制，访问示例代码：
 
@@ -143,7 +123,7 @@ FSMC把整个External RAM存储区域分成了4个Bank区域，并分配了地�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD018.jpg)
 
-## 6. FSMC控制异步NOR FLASH的时序
+## 4. FSMC控制异步NOR FLASH的时序
 
 FSMC外设支持输出多种不同的时序以便于控制不同的存储器，它具有ABCD四种模式，下面我们仅针对控制异步NOR FLASH使用的模式B进行讲解， 见图
 
@@ -161,7 +141,7 @@ FSMC外设支持输出多种不同的时序以便于控制不同的存储器，�
 
 当FSMC外设被配置成正常工作，并且外部接了NOR FLASH时， 若向0x60000000地址写入数据如0xABCD，FSMC会自动在各信号线上产生相应的电平信号， 写入数据。FSMC会控制片选信号NE1选择相应的NOR芯片，然后使用地址线A[25:0]输出0x60000000，在NWE写使能信号线上发出低电平的写使能信号， 而要写入的数据信号0xABCD则从数据线D[15:0]输出，然后数据就被保存到NOR FLASH中了。
 
-## 7. 用FSMC模拟8080时序
+## 5. 用FSMC模拟8080时序
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/LCD021.jpeg)
 
@@ -181,7 +161,7 @@ FSMC外设支持输出多种不同的时序以便于控制不同的存储器，�
 
 注意：在实际控制时，以上地址计算方式还不完整，还需要注意HADDR内部地址与FSMC地址信号线的转换，关于这部分内容在代码讲解时再详细举例说明。
 
-## 8. NOR FLASH时序结构体
+## 6. NOR FLASH时序结构体
 
 在讲解程序前，再来了解一下与FSMC NOR FLASH控制相关的结构体。
 
@@ -260,7 +240,6 @@ FSMC_ReadWriteTiming.FSMC_DataSetupTime = 3; // 读操作数据建立时间
 ```c
 // 定义 FSMC 时序结构体
 FSMC_NORSRAMTimingInitTypeDef FSMC_Timing;
-
 // 配置地址建立时间
 FSMC_Timing.FSMC_AddressSetupTime = 2; // 地址建立时间设置为2个时钟周期
 // 配置地址保持时间
@@ -275,12 +254,10 @@ FSMC_Timing.FSMC_CLKDivision = 1; // 时钟分频设置为1
 FSMC_Timing.FSMC_DataLatency = 0; // 数据延迟设置为0
 // 配置访问模式
 FSMC_Timing.FSMC_AccessMode = FSMC_AccessMode_A; // 设置访问模式为A
-
 // 定义 FSMC 初始化结构体
 FSMC_NORSRAMInitTypeDef FSMC_Init;
-
-// 选择银行
-FSMC_Init.FSMC_Bank = FSMC_Bank1_NORSRAM1; // 选择第1个NORSRAM银行
+// 选择bank
+FSMC_Init.FSMC_Bank = FSMC_Bank1_NORSRAM1; // 选择第1个NORSRAM
 // 启用地址数据复用
 FSMC_Init.FSMC_DataAddressMux = FSMC_DataAddressMux_Enable; // 启用地址和数据复用
 // 配置存储器类型为NOR
@@ -301,7 +278,7 @@ FSMC_Init.FSMC_WriteTiming = &FSMC_Timing; // 设置写时序为上面配置的�
 FSMC_NORSRAMInit(&FSMC_Init);
 ```
 
-## 9. FSMC初始化结构体
+## 7. FSMC初始化结构体
 
 ```c
 typedef struct
@@ -478,7 +455,6 @@ FSMC_NORSRAMInitStruct.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
 FSMC_NORSRAMInitStruct.FSMC_WaitSignal = FSMC_WaitSignal_Enable;
 FSMC_NORSRAMInitStruct.FSMC_ExtendedMode = FSMC_ExtendedMode_Disable;
 FSMC_NORSRAMInitStruct.FSMC_WriteBurst = FSMC_WriteBurst_Enable;
-
 // 初始化 FSMC
 FSMC_NORSRAMInit(&FSMC_NORSRAMInitStruct); 
 // 这个示例展示了如何配置 FSMC 控制器以连接到一个 16 位宽的 NOR Flash 存储器，
@@ -488,3 +464,5 @@ FSMC_NORSRAMInit(&FSMC_NORSRAMInitStruct);
 ---
 
 2024.9.26 第一次修订，后期不再维护
+
+2025.2.1 简化内容
