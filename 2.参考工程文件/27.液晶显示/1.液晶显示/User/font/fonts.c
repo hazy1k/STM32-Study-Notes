@@ -1,4 +1,4 @@
-#include "./font/fonts.h"
+#include "fonts.h"
 /*
  * 常用ASCII表，偏移量32，大小:16（高度）* 8 （宽度）
  */
