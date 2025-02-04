@@ -701,7 +701,7 @@ I (..\Libraries\FWlib\inc\stm32f10x_spi.h)(0x67877B96)
 I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x67877B96)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x67877B96)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B96)
-F (..\User\main.c)(0x67A0928B)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O2 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\font -I ..\User\lcd -I ..\User\SysTick -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\main.o --omf_browse ..\output\main.crf --depend ..\output\main.d)
+F (..\User\main.c)(0x67A1DA20)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O2 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\font -I ..\User\lcd -I ..\User\SysTick -I ..\User\usart-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\main.o --omf_browse ..\output\main.crf --depend ..\output\main.d)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x67877B96)
 I (..\Libraries\CMSIS\core_cm3.h)(0x67877B96)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdint.h)(0x5E8E3CC2)

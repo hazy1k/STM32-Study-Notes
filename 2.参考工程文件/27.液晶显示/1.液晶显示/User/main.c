@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 static void LCD_Test(void);	
-static void Delay ( __IO uint32_t nCount );
+static void Delay (__IO uint32_t nCount);
 
 int main(void)
 {
