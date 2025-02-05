@@ -1,4 +1,4 @@
-# 第五十七章 PWR-PVD电源监控实验
+# 第五十九章 PWR-PVD电源监控实验
 
 ## 1. 硬件设计
 
@@ -60,8 +60,6 @@ void PVD_Config(void)
   PWR_PVDLevelConfig(PWR_PVDLevel_2V6); // 设置电压阈值
   PWR_PVDCmd(ENABLE);
 }
-
-
 ```
 
 在这段代码中，执行的流程如下：
@@ -79,10 +77,10 @@ void PVD_Config(void)
 ```c
 void PVD_IRQHandler(void)
 {
-	if(PWR_GetFlagStatus(PWR_FLAG_PVDO) == SET) // 电源管理器检测到PVD电压低于设定值			
-	{
-		LED_RED(); 	
-	}
+    if(PWR_GetFlagStatus(PWR_FLAG_PVDO) == SET) // 电源管理器检测到PVD电压低于设定值            
+    {
+        LED_RED();     
+    }
   EXTI_ClearITPendingBit(EXTI_Line16);
 }
 ```
@@ -97,16 +95,15 @@ void PVD_IRQHandler(void)
 #include "pvd.h"
 
 int main(void)
-{	
-	LED_Init();	
-	LED_GREEN(); 
-	// 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
-	PVD_Config();
-	while(1)
-	{					
-	}
+{    
+    LED_Init();    
+    LED_GREEN(); 
+    // 配置PVD，当电压过低时，会进入中断服务函数，亮红灯
+    PVD_Config();
+    while(1)
+    {                    
+    }
 }
-
 ```
 
 本电源监控实验的main函数执行流程比较简单，仅调用了PVD_Config配置监控功能，当VDD供电电压正常时，板子亮绿灯， 当电压低于阈值时，会跳转到中断服务函数中， 板子亮红灯
