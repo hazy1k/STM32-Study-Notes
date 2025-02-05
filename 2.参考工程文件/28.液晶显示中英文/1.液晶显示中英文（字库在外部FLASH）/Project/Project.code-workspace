@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "flash.h": "c",
+            "lcd.h": "c",
+            "stm32f10x.h": "c",
+            "fonts.h": "c",
+            "usart.h": "c",
+            "stdio.h": "c"
+        }
+    },
+    "extensions": {}
+}
