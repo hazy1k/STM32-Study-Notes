@@ -1,9 +1,8 @@
-#ifndef _PALETTE_H
-#define _PALETTE_H
+#ifndef __PALETTE_H
+#define __PALETTE_H
 
 #include "stm32f10x.h"
-#include "./lcd/bsp_ili9341_lcd.h"
- 
+#include "ili9341.h"
 
 #define COLOR_BLOCK_WIDTH   40
 #define COLOR_BLOCK_HEIGHT  28

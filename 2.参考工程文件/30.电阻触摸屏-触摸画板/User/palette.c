@@ -1,10 +1,9 @@
 #include "palette.h"
-#include "./lcd/bsp_xpt2046_lcd.h"
-#include "./lcd/bsp_ili9341_lcd.h"
- 
+#include "xpt2046.h"
+#include "ili9341.h"
+
 /*按钮结构体数组*/
 Touch_Button button[BUTTON_NUM];
-
 /*画笔参数*/
 Brush_Style brush;
 

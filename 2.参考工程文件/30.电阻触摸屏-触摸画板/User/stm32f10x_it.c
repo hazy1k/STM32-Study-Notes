@@ -25,9 +25,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./lcd/bsp_xpt2046_lcd.h"
-#include "./led/bsp_led.h"   
-#include "./usart/bsp_usart.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
