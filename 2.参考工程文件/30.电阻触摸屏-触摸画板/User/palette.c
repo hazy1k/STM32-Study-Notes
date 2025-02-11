@@ -17,52 +17,28 @@ static void Command_Clear_Palette(void *btn);
 
 static void LCD_DrawUniLineCircle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,uint8_t thick );
 
-
-
-/**
-* @brief  Palette_Init 画板初始化
-* @param  无
-* @retval 无
-*/
+// 画板初始化
 void Palette_Init(uint8_t LCD_Mode)
 {
   
   uint8_t i;
-
-	ILI9341_GramScan ( LCD_Mode );
-	
+	ILI9341_GramScan(LCD_Mode);
   /* 整屏清为白色 */
 	LCD_SetBackColor(CL_WHITE);
   ILI9341_Clear(0,0,LCD_X_LENGTH,LCD_Y_LENGTH);	
-
-  
   /* 初始化按钮 */
   Touch_Button_Init();
-  
   /* 描绘按钮 */
   for(i=0;i<BUTTON_NUM;i++)
   {
     button[i].draw_btn(&button[i]);
   }
-  
-	
   /* 初始化画笔 */
   brush.color = CL_BLACK;
   brush.shape = LINE_SINGLE_PIXCEL;
-	
 	LCD_SetTextColor(brush.color);
-
-
 }
-
-
-
-
-/**
-* @brief  Touch_Button_Init 初始化按钮参数
-* @param  无
-* @retval 无
-*/
+// 初始化按钮参数
 void Touch_Button_Init(void)
 {
   /*第一列，主要为颜色按钮*/
@@ -138,7 +114,6 @@ void Touch_Button_Init(void)
   button[7].draw_btn = Draw_Clear_Button ;
   button[7].btn_command = Command_Clear_Palette ;
   
-  
   /*第二列，主要为画刷按钮*/
   button[8].start_x = BUTTON_START_X + COLOR_BLOCK_WIDTH;
   button[8].start_y = 0;
@@ -212,13 +187,7 @@ void Touch_Button_Init(void)
   button[15].draw_btn = Draw_Shape_Button ;
   button[15].btn_command = Command_Select_Brush ;
 }
-
-/**
-* @brief  Touch_Button_Down 按键被按下时调用的函数，由触摸屏调用
-* @param  x 触摸位置的x坐标
-* @param  y 触摸位置的y坐标
-* @retval 无
-*/
+// 按键被按下时调用的函数，由触摸屏调用
 void Touch_Button_Down(uint16_t x,uint16_t y)
 {
   uint8_t i;
@@ -245,13 +214,7 @@ void Touch_Button_Down(uint16_t x,uint16_t y)
   }
 
 }
-
-/**
-* @brief  Touch_Button_Up 按键被释放时调用的函数，由触摸屏调用
-* @param  x 触摸最后释放时的x坐标
-* @param  y 触摸最后释放时的y坐标
-* @retval 无
-*/
+// 按键被释放时调用的函数，由触摸屏调用
 void Touch_Button_Up(uint16_t x,uint16_t y)
 {
    uint8_t i; 
@@ -271,22 +234,11 @@ void Touch_Button_Up(uint16_t x,uint16_t y)
     }  
 
 }
-
-/**
-* @brief  Draw_Trail 在画板区域描绘触摸轨迹
-* @param  pre_x 上一点的x坐标
-* @param  pre_y 上一点的y坐标
-* @param  x     最新一点的x坐标
-* @param  y     最新一点的y坐标
-* @param  brush 画刷参数
-* @retval 无
-*/
+// 在画板区域描绘触摸轨迹
 void Draw_Trail(int16_t pre_x,int16_t pre_y,int16_t x,int16_t y,Brush_Style* brush)
 {
   /*设置画板区域为活动窗口,bsp_lcd.c驱动还没有这样的函数，用于限制绘画窗口*/
 //  RA8875_SetActiveWindow(PALETTE_START_X,PALETTE_START_Y,PALETTE_END_X,PALETTE_END_Y);
-  
-	
   /*触摸位置在画板区域*/
   if(x>PALETTE_START_X && pre_x>PALETTE_START_X )
   {
@@ -400,16 +352,8 @@ void Draw_Trail(int16_t pre_x,int16_t pre_y,int16_t x,int16_t y,Brush_Style* bru
   
   /*退出局限画板的绘图窗口，bsp_lcd.c驱动还没有这样的函数，用于限制绘画窗口*/
 //  RA8875_SetActiveWindow(0,0,LCD_X_LENGTH,LCD_Y_LENGTH);
-
-
 }
-
-
-/**
-* @brief  Draw_Color_Button 颜色按钮的描绘函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 颜色按钮的描绘函数
 static void Draw_Color_Button(void *btn)
 {
   Touch_Button *ptr = (Touch_Button *)btn;
@@ -441,13 +385,7 @@ static void Draw_Color_Button(void *btn)
 															ptr->end_y - ptr->start_y,0);
   
 }
-
-
-/**
-* @brief  Draw_Clear_Button 清屏按钮的描绘函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 清屏按钮的描绘函数
 static void Draw_Clear_Button(void *btn)
 {
   Touch_Button *ptr = (Touch_Button *)btn;
@@ -462,8 +400,6 @@ static void Draw_Clear_Button(void *btn)
 															ptr->end_x - ptr->start_x,
 															ptr->end_y - ptr->start_y,1);
     
-
-		
 		LCD_SetColors(CL_RED,CL_BUTTON_GREY);
 		/*选择字体，使用中英文显示时，尽量把英文选择成8*16的字体，
 		*中文字体大小是16*16的，需要其它字体请自行制作字模*/
@@ -503,18 +439,12 @@ static void Draw_Clear_Button(void *btn)
 														ptr->end_y - ptr->start_y,0);
   
 }
-
-/**
-* @brief  Draw_Shape_Button 笔刷按钮的描绘函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 笔刷按钮的描绘函数
 static void Draw_Shape_Button(void *btn)
 {
   Touch_Button *ptr = (Touch_Button *)btn;
   
    uint16_t i;
-  
     /* 背景颜色 没按下时为灰色，按下时为白色*/                  
     if(ptr->touch_flag ==0 )
     {
@@ -525,18 +455,15 @@ static void Draw_Shape_Button(void *btn)
 																ptr->end_x - ptr->start_x,
 																ptr->end_y - ptr->start_y,1);
       
-
 			 /*显示文字时的背景颜色*/     
 			LCD_SetColors(CL_BLUE4,CL_BUTTON_GREY);
 			ILI9341_DrawRectangle(	ptr->start_x,
 																ptr->start_y,
 																ptr->end_x - ptr->start_x,
 																ptr->end_y - ptr->start_y,0);
-
     }
     else
     {
-
 			LCD_SetColors(CL_WHITE,CL_WHITE);
 			ILI9341_DrawRectangle(	ptr->start_x,
 																ptr->start_y,
@@ -551,117 +478,80 @@ static void Draw_Shape_Button(void *btn)
 																ptr->end_x - ptr->start_x,
 																ptr->end_y - ptr->start_y,0);
     }
-  
 	LCD_SetColors(CL_BLACK,CL_WHITE);	
   /*根据画刷形状描绘按钮图案*/
  switch(ptr->para)
   {
-    		
     case LINE_SINGLE_PIXCEL:      
-     		
 				LCD_SetColors(CL_BLACK,CL_WHITE);
         ILI9341_DrawLine(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2);
-      
       break;   
-
-      
     case LINE_2_PIXCEL:
-        
         LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           1);
- 
-    
       break;
-        
     case LINE_4_PIXCEL:
    
             LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           2);
- 
-    
       break;
-    
         case LINE_6_PIXCEL:
         
         LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           3);
- 
-    
       break;
-        
      case LINE_8_PIXCEL:
    
             LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           4);
- 
-    
       break;
-    
        case LINE_16_PIXCEL:
    
             LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           8 );
- 
-    
       break;
-        
        case LINE_20_PIXCEL:
    
             LCD_DrawUniLineCircle(ptr->start_x+20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,ptr->end_x-20,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           10);
- 
-    
       break;
-            
-            
-    
      case LINE_WITH_CIRCLE: 
         LCD_SetColors(CL_BLACK,CL_WHITE);      
         ILI9341_DrawLine(ptr->start_x+5,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2,
                           ptr->end_x-5,
                           ptr->start_y+(ptr->end_y-ptr->start_y)/2);
-		 
-        
         for(i=0;i<((ptr->end_x - ptr->start_x-10)/10);i++)
         {
-        
         ILI9341_DrawCircle(	ptr->start_x+5+i*10,
 															ptr->start_y+(ptr->end_y-ptr->start_y)/2,
 															3,1);
         
 
         }
-
-      
     break;
-      
-      
     case RUBBER:
 			LCD_SetColors(CL_WHITE,CL_BLACK);
        ILI9341_DrawRectangle( 	ptr->start_x+((ptr->end_x - ptr->start_x -24)/2),
 																	ptr->start_y+ ((ptr->end_y - ptr->start_y-24 -16)/2),
 																	24,
 																	24,1 );   
-      
-  
-			LCD_SetColors(CL_RED,CL_BUTTON_GREY);    
-
+		LCD_SetColors(CL_RED,CL_BUTTON_GREY);    
 		/*选择字体，使用中英文显示时，尽量把英文选择成8*16的字体，
 		*中文字体大小是24*24的，需要其它字体请自行制作字模*/
 		/*这个函数只对英文字体起作用*/
@@ -669,50 +559,28 @@ static void Draw_Shape_Button(void *btn)
     ILI9341_DispString_EN_CH( ptr->start_x+(ptr->end_x - ptr->start_x -16*2)/2,
 																ptr->start_y+ ((ptr->end_y - ptr->start_y-24 -16)/2)+24,		
 																"橡皮");
-		
-
     break;
-
-  }
-  
+  } 
 }
-
-/**
-* @brief  Command_Select_Color 切换画刷颜色，颜色按键的功能执行函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 切换画刷颜色，颜色按键的功能执行函数
 static void Command_Select_Color(void *btn)
 {
   Touch_Button *ptr = (Touch_Button *)btn;
-  
   brush.color = ptr->para;	
 	LCD_SetColors(brush.color,CL_WHITE);
-  
   if(brush.shape == RUBBER)
   {
     brush.shape = LINE_SINGLE_PIXCEL;
   }
-
 }
-
-/**
-* @brief  Command_Select_Brush 切换画刷颜色，画刷按键的功能执行函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 切换画刷颜色，画刷按键的功能执行函数
 static void Command_Select_Brush(void *btn)
 {
   Touch_Button *ptr = (Touch_Button *)btn;
   brush.shape =(SHAPE) ptr->para;
 	LCD_SetColors(brush.color,CL_WHITE);
 }
-
-/**
-* @brief  Command_Select_Brush 切换画刷颜色，清屏按键的功能执行函数
-* @param  btn Touch_Button 类型的按键参数
-* @retval 无
-*/
+// 切换画刷颜色，清屏按键的功能执行函数
 static void Command_Clear_Palette(void *btn)
 {
 		LCD_SetColors(CL_WHITE,CL_WHITE);
@@ -723,18 +591,8 @@ static void Command_Clear_Palette(void *btn)
 
 }
 
-
-
 #define ABS(X)  ((X) > 0 ? (X) : -(X))
-
-/**
-  * @brief  在两点之间描绘轨迹
-  * @param  x1: specifies the point 1 x position.
-  * @param  y1: specifies the point 1 y position.
-  * @param  x2: specifies the point 2 x position.
-  * @param  y2: specifies the point 2 y position.
-  * @retval None
-  */
+// 在两点之间描绘轨迹
 static void LCD_DrawUniLineCircle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,uint8_t thick )
 {
   int16_t deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0, 
@@ -808,11 +666,4 @@ static void LCD_DrawUniLineCircle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
     y += yinc2;                 /* Change the y as appropriate */
   }
 }
-
-
-
-
-/* ------------------------------------------end of file---------------------------------------- */
-
-
 

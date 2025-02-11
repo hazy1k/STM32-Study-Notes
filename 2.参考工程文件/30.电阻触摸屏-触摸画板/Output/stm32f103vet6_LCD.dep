@@ -732,7 +732,7 @@ I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x67877B98)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B98)
 I (..\User\lcd\ili9341.h)(0x67A8450D)
 I (..\User\font\fonts.h)(0x67A84274)
-I (..\User\lcd\xpt2046.h)(0x67A83E95)
+I (..\User\lcd\xpt2046.h)(0x67AA1124)
 I (..\User\flash\flash.h)(0x67A85431)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdio.h)(0x5E8E3CC2)
 I (..\User\led\led.h)(0x67A840A1)
@@ -894,8 +894,8 @@ I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x67877B98)
 I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x67877B98)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B98)
 I (..\User\font\fonts.h)(0x67A84274)
-F (..\User\lcd\xpt2046.c)(0x67A83E95)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O2 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\flash -I ..\User\font -I ..\User\lcd -I ..\User\led-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\xpt2046.o --omf_browse ..\output\xpt2046.crf --depend ..\output\xpt2046.d)
-I (..\User\lcd\xpt2046.h)(0x67A83E95)
+F (..\User\lcd\xpt2046.c)(0x67AB6DDF)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O2 --apcs=interwork -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\User -I ..\User\flash -I ..\User\font -I ..\User\lcd -I ..\User\led-IE:\dianzi\MDKv5\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\output\xpt2046.o --omf_browse ..\output\xpt2046.crf --depend ..\output\xpt2046.d)
+I (..\User\lcd\xpt2046.h)(0x67AA1124)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x67877B98)
 I (..\Libraries\CMSIS\core_cm3.h)(0x67877B98)
 I (E:\dianzi\MDKv5\ARM\AC5\include\stdint.h)(0x5E8E3CC2)
@@ -963,5 +963,5 @@ I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x67877B98)
 I (..\Libraries\FWlib\inc\misc.h)(0x67877B98)
 I (..\User\lcd\ili9341.h)(0x67A8450D)
 I (..\User\font\fonts.h)(0x67A84274)
-I (..\User\lcd\xpt2046.h)(0x67A83E95)
+I (..\User\lcd\xpt2046.h)(0x67AA1124)
 F (..\Doc\readme.txt)(0x67877B98)()
