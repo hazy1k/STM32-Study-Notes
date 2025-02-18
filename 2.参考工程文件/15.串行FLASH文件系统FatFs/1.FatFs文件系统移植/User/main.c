@@ -1,8 +1,8 @@
 #include "stm32f10x.h"
 #include "ff.h" // FatFs文件系统头文件
-#include "./flash/bsp_spi_flash.h"
-#include "./usart/bsp_usart.h"
-#include "./led/bsp_led.h"
+#include "flash.h"
+#include "usart.h"
+#include "led.h"
 
 FATFS fs;				   // FatFs文件系统对象
 FIL fnew;				   // 文件对象
@@ -13,9 +13,8 @@ BYTE WriteBuffer[] =  "已经成功写入啦 今天是个好日子，新建文件系统测试文件\r\n";
 
 int main(void)
 {
-	LED_GPIO_Config();	
-	LED_BLUE;
-	
+	LED_Init();	
+	LED_BLUE();
 	// 初始化调试串口，一般为串口1
 	USART_Config();	
   	printf("****** 这是一个SPI FLASH 文件系统实验 ******\r\n");
@@ -44,7 +43,7 @@ int main(void)
 		}
 		else
 		{
-			LED_RED;
+			LED_RED();
 			printf("《《格式化失败。》》\r\n");
 			while(1);
 		}
@@ -83,7 +82,7 @@ int main(void)
 	}
 	else
 	{	
-		LED_RED;
+		LED_RED();
 		printf("！！打开/创建文件失败。\r\n");
 	}
 	
@@ -92,7 +91,7 @@ int main(void)
 	res_flash = f_open(&fnew, "1:FatFs读写测试文件.txt",FA_OPEN_EXISTING | FA_READ); // f_open()函数打开文件，参数：文件对象、文件名、属性
 	if(res_flash == FR_OK)
 	{
-		LED_GREEN;
+		LED_GREEN();
 		printf("》打开文件成功。\r\n");
 		res_flash = f_read(&fnew, ReadBuffer, sizeof(ReadBuffer), &fnum); // f_read()函数读取文件，参数：文件对象、读入数据、读入字节数、实际读入字节数
     if(res_flash == FR_OK)
@@ -107,16 +106,13 @@ int main(void)
 	}
 	else
 	{
-		LED_RED;
+		LED_RED();
 		printf("！！打开文件失败。\r\n");
 	}
 	// 不再读写，关闭文件
 	f_close(&fnew);	// f_close()函数关闭文件，参数：文件对象
-  
 	// 不再使用文件系统，取消挂载文件系统
 	f_mount(NULL,"1:",1); // 函数参数：文件系统对象、挂载点、格式化标志
-  
-  	// 操作完成，停机
 	while(1)
 	{
 	}

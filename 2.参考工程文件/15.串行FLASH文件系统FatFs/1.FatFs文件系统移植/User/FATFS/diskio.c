@@ -9,7 +9,7 @@
 
 #include "diskio.h"		/* FatFs lower layer API */
 #include "ff.h"
-#include "./flash/bsp_spi_flash.h"
+#include "flash.h"
 
 
 /* 为每个设备定义一个物理编号 */
@@ -70,7 +70,7 @@ DSTATUS disk_initialize (
       i=500;
 	    while(--i);	
       /* 唤醒SPI Flash */
-	    SPI_Flash_WAKEUP();
+	    SPI_FLASH_WakeUp();
       /* 获取SPI Flash芯片状态 */
       status=disk_status(SPI_FLASH);
 			break;
