@@ -296,7 +296,6 @@
           "../User/flash",
           "../User/FATFS",
           "../User/FATFS/option",
-          ".cmsis/include",
           "RTE/_FATFS"
         ],
         "libList": [],
