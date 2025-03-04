@@ -8,91 +8,86 @@
 
 ## 2. 软件设计
 
+### 2.1 编程大纲
+
+1. FatFs多项功能测试
+
+2. 文件路径获取
+
+3. 文件扫描
+
+4. 主函数测试
+
+### 2.2 代码分析
+
 上个实验我们已经移植好了FatFs，这个例程主要是应用，所以简单起见，直接拷贝上个实验的工程文件，保持FatFs底层驱动程序， 我们只改main.c文件内容，实现应用程序。
 
-- FatFs多项功能测试
+#### 2.2.1 FatFs多项功能测试
 
 ```c
-// FatFs多项功能测试 
+// FatFs基础功能测试
 static FRESULT miscellaneous(void)
 {
-    DIR dir;
-    FATFS *pfs;
-    DWORD fre_clust, fre_sect, tot_sect;
+  DIR dir; // 目录文件
+  FATFS *pfs; // 文件系统对象
+  DWORD fre_clust, fre_sect, tot_sect; // 剩余簇数、剩余扇区数、总扇区数
 
-    printf("\n*************** 设备信息获取 ***************\r\n");
-    // 获取设备信息和空簇大小 
-    res_flash = f_getfree("1:", &fre_clust, &pfs);
+  /* 设备信息获取 */
+  printf("第一项测试：设备信息获取\r\n");
+  res_flash = f_getfree("1:", &fre_clust, &pfs); // 函数参数：驱动器号、剩余簇数指针、文件系统对象指针
+  // 计算得到总扇区个数和空簇大小
+  tot_sect = (pfs->n_fatent-2)*pfs->csize;
+  fre_sect = fre_clust * pfs->csize;
+  printf("设备可用总空间：%10lu KB \n 设备剩余空间：%10lu KB \n", tot_sect*4, fre_sect*4);
 
-    // 计算得到总的扇区个数和空扇区个数 
-    tot_sect = (pfs->n_fatent - 2) * pfs->csize;
-    fre_sect = fre_clust * pfs->csize;
-
-    // 打印信息(4096 字节/扇区) 
-    printf("》设备总空间：%10lu KB。\n》可用空间：  %10lu KB。\n",
-        tot_sect *4, fre_sect *4);
-
-    printf("\n******** 文件定位和格式化写入功能测试 ********\r\n");
-    res_flash = f_open(&fnew, "1:FatFs功能测试文件.txt",
-                    FA_CREATE_ALWAYS|FA_WRITE|FA_READ );
-    res_flash=f_write(&fnew,"欢迎使用野火STM32开发板",50,&fnum);
-    if (res_flash == FR_OK )
+  /* 进行文件系统格式化和写入 */
+  printf("第二项测试：文件系统格式化和写入\r\n");
+  res_flash = f_open(&fnew, "1:FatFS读写测试文件.txt", FA_OPEN_ALWAYS|FA_WRITE|FA_READ);
+  if(res_flash == FR_OK)
+  {
+    // 文件定位
+    res_flash = f_lseek(&fnew, f_size(&fnew)); // 函数参数：文件对象、文件指针位置
+    if(res_flash == FR_OK)
     {
-        //  文件定位，定位到文件的末尾
-        res_flash = f_lseek(&fnew,f_size(&fnew)-1);
-        if (res_flash == FR_OK)
-        {
-            // 格式化写入，参数格式类似printf函数 
-            f_printf(&fnew,"\n在原来文件新添加一行内容\n");
-            f_printf(&fnew,"》设备总空间：%10lu KB。\n》可用空间;%10lu KB。\n",
-                    tot_sect *4, fre_sect *4);
-            // 文件定位到文件起始位置
-            res_flash = f_lseek(&fnew,0);
-            // 读取文件所有内容到缓存区
-            res_flash = f_read(&fnew,readbuffer,f_size(&fnew),&fnum);
-            if (res_flash == FR_OK)
-            {
-                printf("》文件内容：\n%s\n",readbuffer);
-            }
-        }
-        f_close(&fnew);
+      // 格式化写入
+      f_printf(&fnew, "在原来文件新添加一行内容！\r\n");
+      f_printf(&fnew, "设备总空间：%10lu KB \n 设备剩余空间：%10lu KB \n", tot_sect*4, fre_sect*4);
 
-        printf("\n********** 目录创建和重命名功能测试 **********\r\n");
-        // 尝试打开目录
-        res_flash = f_opendir(&dir,"1:TestDir");
-        if(res_flash != FR_OK)
-        {
-            // 打开目录失败，就创建目录 
-            res_flash = f_mkdir("1:TestDir");
-        }
-        else
-        {
-            // 如果目录已经存在，关闭它 
-            res_flash=f_closedir(&dir);
-            // 删除文件 
-            f_unlink("1:TestDir/testdir.txt");
-        }
-        if(res_flash == FR_OK)
-        {
-            // 重命名并移动文件
-            res_flash=f_rename("1:FatFs功能测试文件.txt",
-                            "1:TestDir/testdir.txt");
-            if(res_flash == FR_OK)
-            {
-                printf("》重命名并移动文件操作成功\n");
-            }
-            else
-            {
-                printf("》重命名并移动文件操作失败：%d\n",res_flash);
-            }
-        }
+      // 文件定位到起始位置
+      res_flash = f_lseek(&fnew, 0);
+      res_flash = f_read(&fnew, readbuffer, f_size(&fnew), &fnum);
+      if(res_flash == FR_OK)
+      {
+        printf("文件内容：\r\n%s", readbuffer);
+      }
+    }
+    f_close(&fnew); // 关闭文件
+
+    /* 目录创建和重命名功能测试 */
+    printf("第三项测试：目录创建和重命名功能测试\r\n");
+    res_flash = f_opendir(&dir, "1:TestDir");
+    if(res_flash != FR_OK)
+    {
+      res_flash = f_mkdir("1:TestDir"); // 创建目录
     }
     else
     {
-        printf("!! 打开文件失败：%d\n",res_flash);
-        printf("!! 或许需要再次运行“FatFs移植与读写测试”工程\n");
+      // 如果目录已经存在，关闭它
+      res_flash = f_closedir(&dir);
+      f_unlink("1:TestDir/testdir.txt");
     }
-    return res_flash;
+    if(res_flash == FR_OK)
+    {
+      // 重命名并移动文件
+      res_flash = f_rename("1:FatFS读写测试文件.txt","1:TestDir/testdir.txt");
+    }
+  }
+  else
+  {
+    printf("文件打开失败: %d\r\n", res_flash);
+    printf("文件系统格式化失败！\r\n");
+  }
+  return res_flash;
 }
 ```
 
@@ -110,85 +105,78 @@ f_mkdir函数用于创建路径，如果指定的路径不存在就创建它，�
 
 f_rename函数是带有移动功能的重命名函数，它有两个形参，第一个参数为源文件名称，第二个参数为目标名称。目标名称可附带路径， 如果路径与源文件路径不同则移动文件到目标路径下。
 
-- 文件信息获取
+#### 2.2.2 文件信息获取
 
 ```c
+// 文件信息获取
 static FRESULT file_check(void)
 {
-    static FILINFO fno;
-
-    // 获取文件信息，必须确保文件存在
-    res_flash = f_stat("1:TestDir/testdir.txt",&fno);
-    if (res_flash==FR_OK) {
-        printf("“testdir.txt”文件信息：\n");
-        printf("》文件大小: %ld(字节)\n", fno.fsize);
-        printf("》时间戳: %u/%02u/%02u, %02u:%02u\n",
-            (fno.fdate >> 9) + 1980, fno.fdate >> 5 & 15, fno.fdate & 31,
-            fno.ftime >> 11, fno.ftime >> 5 & 63);
-        printf("》属性: %c%c%c%c%c\n\n",
-            (fno.fattrib & AM_DIR) ? 'D' : '-',      // 是一个目录
-            (fno.fattrib & AM_RDO) ? 'R' : '-',      // 只读文件
-            (fno.fattrib & AM_HID) ? 'H' : '-',      // 隐藏文件
-            (fno.fattrib & AM_SYS) ? 'S' : '-',      // 系统文件
-            (fno.fattrib & AM_ARC) ? 'A' : '-');     // 档案文件
-    }
-    return res_flash;
+  res_flash = f_stat("1:TestDir/testdir.txt", &fno);
+  if(res_flash == FR_OK)
+  {
+    printf("testdir.txt文件信息:\n");
+    printf("文件大小: %ld(字节)\n", fno.fsize);
+        printf("时间戳信息: %u/%02u/%02u, %02u:%02u\n",
+           (fno.fdate >> 9) + 1980, fno.fdate >> 5 & 15, fno.fdate & 31,fno.ftime >> 11, fno.ftime >> 5 & 63);
+    printf("文件属性: %c%c%c%c%c\n\n",
+           (fno.fattrib & AM_DIR) ? 'D' : '-',  // 目录
+           (fno.fattrib & AM_RDO) ? 'R' : '-',  // 只读
+           (fno.fattrib & AM_HID) ? 'H' : '-',  // 隐藏
+           (fno.fattrib & AM_SYS) ? 'S' : '-',  // 系统
+           (fno.fattrib & AM_ARC) ? 'A' : '-'); // 存档
+  }
+  return res_flash;
 }
 ```
 
 f_stat函数用于获取文件的属性，有两个形参，第一个参数为文件路径，第二个参数为返回指向文件信息结构体变量的指针。 文件信息结构体变量包含文件的大小、最后修改时间和日期、文件属性、短文件名以及长文件名等信息。
 
-- 路径扫描
+#### 2.2.3 路径扫描
 
 ```c
+// 递归扫描FatFs内的文件
 static FRESULT scan_files (char* path)
-{
-    FRESULT res;    //部分在递归过程被修改的变量，不用全局变量
-    FILINFO fno;
-    DIR dir;
-    int i;
-    char *fn;        // 文件名
-
-#if _USE_LFN
-    // 长文件名支持 
-    // 简体中文需要2个字节保存一个“字”
-    static char lfn[_MAX_LFN*2 + 1];
-    fno.lfname = lfn;
-    fno.lfsize = sizeof(lfn);
-#endif
-    //打开目录
-    res = f_opendir(&dir, path);
-    if (res == FR_OK) {
-        i = strlen(path);
-        for (;;) {
-            //读取目录下的内容，再读会自动读下一个文件
-            res = f_readdir(&dir, &fno);
-            //为空时表示所有项目读取完毕，跳出
-            if (res != FR_OK || fno.fname[0] == 0) break;
-#if _USE_LFN
-            fn = *fno.lfname ? fno.lfname : fno.fname;
-#else
-            fn = fno.fname;
-#endif
-            //点表示当前目录，跳过
-            if (*fn == '.') continue;
-            //目录，递归读取
-            if (fno.fattrib & AM_DIR) {
-                //合成完整目录名
-                sprintf(&path[i], "/%s", fn);
-                //递归遍历
-                res = scan_files(path);
-                path[i] = 0;
-                //打开失败，跳出循环
-                if (res != FR_OK)
-                    break;
-            } else {
-                printf("%s/%s\r\n", path, fn);              //输出文件名
-                /* 可以在这里提取特定格式的文件路径 */
-            }//else
-        } //for
+{ 
+  FRESULT res; 	
+  FILINFO fno; 
+  DIR dir; 
+  int i;            
+  char *fn;   
+	
+#if _USE_LFN 
+  static char lfn[_MAX_LFN*2 + 1]; 	
+  fno.lfname = lfn; 
+  fno.lfsize = sizeof(lfn); 
+#endif 
+  res = f_opendir(&dir, path); 
+  if (res == FR_OK) 
+	{ 
+    i = strlen(path); 
+    for (;;) 
+		{ 
+      res = f_readdir(&dir, &fno); 								
+      if (res != FR_OK || fno.fname[0] == 0) break; 	
+#if _USE_LFN 
+      fn = *fno.lfname ? fno.lfname : fno.fname; 
+#else 
+      fn = fno.fname; 
+#endif 	
+      if (*fn == '.') continue; 	   
+      if (fno.fattrib & AM_DIR)         
+			{ 			    
+        sprintf(&path[i], "/%s", fn); 		      
+        res = scan_files(path);	
+        path[i] = 0;              
+        if (res != FR_OK) 
+					break; 
+      } 
+			else 
+			{ 
+				printf("%s/%s\r\n", path, fn);     
+      }
     }
-    return res;
+  } 
+  return res; 
 }
 ```
 
@@ -200,41 +188,29 @@ scan_files函数用来扫描指定路径下的文件。比如我们设计一个m
 
 在f_readdir函数成功读取到一个对象时，我们还不清楚它是一个文件还是一个文件夹，此时我们就可以使用文件信息对象变量的文件属性来判断了， 如果判断得出是个文件那我们就直接通过串口打印出来就好了。如果是个文件夹，我们就要进入该文件夹扫描，这时就重新调用扫描函数scan_files就可以了， 形成一个递归调用结构，只是我们这次用的参数与最开始时候是不同的，现在是使用子文件夹名称。
 
-- 主函数
+#### 2.2.4 主函数测试
 
 ```c
 int main(void)
 {
-    /* 初始化调试串口，一般为串口1 */
-    USART_Config();
-    printf("******** 这是一个SPI FLASH 文件系统实验 *******\r\n");
-
-    // 在外部SPI Flash挂载文件系统，文件系统挂载时会对SPI设备初始化
-    res_flash = f_mount(&fs,"1:",1);
-    if (res_flash!=FR_OK) {
-        printf("！！外部Flash挂载文件系统失败。(%d)\r\n",res_flash);
-        printf("！！可能原因：SPI Flash初始化不成功。\r\n");
-        while (1);
-    } else {
-        printf("》文件系统挂载成功，可以进行测试\r\n");
-    }
-
-    // FatFs多项功能测试
-    res_flash = miscellaneous();
-
-    printf("\n*************** 文件信息获取测试 **************\r\n");
-    res_flash = file_check();
-
-    printf("***************** 文件扫描测试 ****************\r\n");
-    strcpy(fpath,"1:");
-    scan_files(fpath);
-
-    // 不再使用文件系统，取消挂载文件系统 
-    f_mount(NULL,"1:",1);
-
-    // 操作完成，停机 
-    while (1) {
-    }
+  USART_Config();
+  res_flash = f_mount(&fs, "1:", 1); // 挂载FatFs文件系统
+  if(res_flash != FR_OK)
+  {
+    printf("文件系统挂载失败！\r\n");
+    while(1);
+  }
+  else{
+    printf("FatFs文件系统初始化成功！\r\n");
+  }
+  printf("FatFs文件系统常用函数测试\r\n");
+  res_flash = miscellaneous(); // FatFs基础功能测试
+  printf("文件扫描测试");
+  res_flash = file_check();
+  strcpy(fpath, "1:");
+  scan_files(fpath);
+  f_mount(NULL, "1:", 1); // 卸载FatFs文件系统
+  while(1);
 }
 ```
 
@@ -278,7 +254,6 @@ printf("》设备总空间：%10lu KB。\n》可用空间：  %10lu KB。\n",
 
 ```c
 res_flash = f_open(&fnew, "1:FatFs功能测试文件.txt",FA_CREATE_ALWAYS|FA_WRITE|FA_READ );
-
 ```
 
 创建一个新文件“FatFs功能测试文件.txt”，若已存在则覆盖。以读写模式打开文件。
@@ -324,7 +299,6 @@ if(res_flash != FR_OK)
 {
     res_flash = f_mkdir("1:TestDir");
 }
-
 ```
 
 尝试打开目录“TestDir”。若打开失败，则创建该目录。
@@ -338,7 +312,6 @@ f_unlink("1:TestDir/testdir.txt");
 ```c
 res_flash=f_rename("1:FatFs功能测试文件.txt",
                     "1:TestDir/testdir.txt");
-
 ```
 
 将之前创建的文件重命名并移动到“TestDir”目录下。
@@ -421,9 +394,10 @@ void fatfs_example(void)
     // 5. 卸载文件系统
     f_mount(NULL, "", 1);
 }
-
 ```
 
 ---
 
 2024.9.8 第一次修订，后期不再维护
+
+2025.3.4 简化文档，优化代码注释
