@@ -9,7 +9,7 @@
 
 #include "diskio.h"		/* FatFs lower layer API */
 #include "ff.h"
-#include "./flash/bsp_spi_flash.h"
+#include "flash.h"
 
 
 /* 为每个设备定义一个物理编号 */
@@ -70,7 +70,7 @@ DSTATUS disk_initialize (
       i=500;
 	    while(--i);	
       /* 唤醒SPI Flash */
-	    SPI_Flash_WAKEUP();
+	    SPI_FLASH_WakeUp();
       /* 获取SPI Flash芯片状态 */
       status=disk_status(SPI_FLASH);
 			break;
@@ -100,7 +100,7 @@ DRESULT disk_read (
 		case SPI_FLASH:
       /* 扇区偏移2MB，外部Flash文件系统空间放在SPI Flash后面6MB空间 */
       sector+=512;      
-      SPI_FLASH_BufferRead(buff, sector <<12, count<<12);
+      SPI_FLASH_BufferRead(buff, sector <<12, count<<12);  
       status = RES_OK;
 		break;
     
@@ -111,7 +111,7 @@ DRESULT disk_read (
 }
 
 /*-----------------------------------------------------------------------*/
-/* 写扇区：见数据写入指定扇区空间上                                      */
+/* 写扇区：将数据写入指定扇区空间上                                      */
 /*-----------------------------------------------------------------------*/
 #if _USE_WRITE
 DRESULT disk_write (
@@ -198,4 +198,3 @@ __weak DWORD get_fattime(void) {
 			| ((DWORD)0 << 5)				  /* Min 0 */
 			| ((DWORD)0 >> 1);				/* Sec 0 */
 }
-
