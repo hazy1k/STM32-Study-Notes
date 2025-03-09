@@ -1,8 +1,10 @@
 # 第四十六章 RTC-万年历
 
+## 1. 导入
+
 RTC外设是个连续计数的计数器，利用它提供的时间戳，可通过程序转换输出实时时钟和日历的功能， 修改计数器的值则可以重新设置系统当前的时间和日期。由于它的时钟配置系统(RCC_BDCR寄存器)是在备份域，在系统复位或从待机模式唤醒后RTC的设置维持不变， 而且使用备份域电源可以使RTC计时器在主电源关掉的情况下仍然运行，保证时间的正确。
 
-## 1. 硬件设计
+## 2. 硬件设计
 
 开发板中与RTC相关的硬件设计见图
 
@@ -10,23 +12,25 @@ RTC外设是个连续计数的计数器，利用它提供的时间戳，可通�
 
 原理图中的右上角是备份域的供电电路，在本开发板中提供了一个钮扣电池插槽，可以接入型号为CR1220的钮扣电池，该型号的钮扣电池电压为3.2V， 图中的BAT54C双向二极管可切换输入到STM32备份域电源引脚VBAT的供电，当主电源正常供电时，由稳压器输出的3.3V供电，当主电源掉电时，由钮扣电池供电 。
 
-原理图下方的是本开发板采用的LSE晶振电路，此处使用的晶振频率为32.768KHz，RTC外设可以使用LSE作为时钟，把它进行分频得到1Hz的RTC计时时钟。
+原理图下方的是本开发板采用的LSE晶振电路，此处使用的晶振频率为32.768KHz，RTC外设可以使用LSE作为时钟，把它进行分频得到1Hz 的RTC计时时钟。
 
-本实验默认使用LSI内部时钟，使用内部时钟时，即使安装了钮扣电池，主电源掉电后时间是不会继续走的，只会保留上次断电的时间。 若要持续运行，需要修改bsp_rtc.h文件，使用RTC_CLOCK_SOURCE_LSE宏，切换成使用LSE外部时钟。
+本实验默认使用LSI内部时钟，使用内部时钟时，即使安装了钮扣电池，主电源掉电后时间是不会继续走的，只会保留上次断电的时间。 若要持续运行，需要修改brtc.h文件，使用RTC_CLOCK_SOURCE_LSE宏，切换成使用LSE外部时钟。
 
-## 2. 软件设计
+## 3. 软件设计
 
-### 2.1 编程目标
+### 3.1 编程目标
 
-1. 初始化RTC外设；
+1. 初始化RTC外设
 
-2. 设置时间以及添加配置标志；
+2. 设置时间以及添加配置标志
 
-3. 获取当前时间；
+3. 获取当前时间
 
-### 2.2 代码分析
+4. 主函数测试
 
-- RTC宏定义设置
+### 3.2 代码分析
+
+#### 3.2.1 RTC宏定义设置
 
 ```c
 // 是否使用LCD显示日期
@@ -53,7 +57,7 @@ RTC外设是个连续计数的计数器，利用它提供的时间戳，可通�
 
 关于这些宏的作用，在后面的C源代码中都会有体现。
 
-- 初始化RTC
+#### 3.2.2 初始化RTC
 
 ```c
 void RTC_Configuration(void)
@@ -131,48 +135,48 @@ void RTC_Configuration(void)
 
 当然了，出现了新的库函数，我们还是要介绍一下：
 
-### 1. `RCC_LSICmd(ENABLE)`
+1. `RCC_LSICmd(ENABLE)`
 
 - **功能**：使能低速内部振荡器（LSI）。
 - **参数**：`ENABLE`表示开启LSI；`DISABLE`表示关闭LSI。
 - **作用**：启动LSI振荡器，使其可以用作RTC时钟源。
 
-### 2. `Rcc_GetFlagStatus(uint32_t RCC_FLAG)`
+2. `Rcc_GetFlagStatus(uint32_t RCC_FLAG)`
 
 - **功能**：检查指定的RCC标志位状态。
 - **参数**：`RCC_FLAG`是要检查的标志，如`RCC_FLAG_LSIRDY`表示LSI是否准备就绪。
 - **返回值**：返回标志位的状态，`SET`表示标志位被置位，`RESET`表示未被置位。
 - **作用**：在启用LSI后，通过此函数检查LSI是否已准备好，确保后续操作的稳定性。
 
-### 3. `RCC_RTCCLKConfig(uint32_t RCC_RTCCLKSource)`
+3. `RCC_RTCCLKConfig(uint32_t RCC_RTCCLKSource)`
 
 - **功能**：选择RTC时钟源。
 - **参数**：`RCC_RTCCLKSource_LSI` 或 `RCC_RTCCLKSource_LSE`等，选择LSI或外部低速晶振（LSE）作为RTC的时钟源。
 - **作用**：设定RTC使用LSI作为时钟源，以便进行时间计量。
 
-### 4. `RCC_RTCCLKCmd(ENABLE)`
+4. `RCC_RTCCLKCmd(ENABLE)`
 
 - **功能**：使能或禁用RTC时钟。
 - **参数**：`ENABLE`表示启用RTC时钟；`DISABLE`表示禁用。
 - **作用**：启用RTC模块，开始其时钟工作。
 
-### 5. `RTC_WaitForSynchro()`
+5. `RTC_WaitForSynchro()`
 
 - **功能**：等待RTC寄存器同步。
 - **作用**：确保RTC的设置在进行下一次操作之前已经完成，防止因操作不当导致数据不一致。
 
-### 6. `RTC_WaitForLastTask()`
+6. `RTC_WaitForLastTask()`
 
 - **功能**：等待上一次RTC操作完成。
 - **作用**：确保当前任务之前的所有RTC操作都已完成，这对于避免数据竞争和状态错误是必要的。
 
-### 7. `RTC_ITConfig(FunctionalState NewState, uint32_t RTC_IT)`
+7. `RTC_ITConfig(FunctionalState NewState, uint32_t RTC_IT)`
 
 - **功能**：配置RTC中断。
 - **参数**：`RTC_IT`指定要使能的中断类型，例如`RTC_IT_SEC`表示秒中断；`NewState`为`ENABLE`或`DISABLE`。
 - **作用**：启用RTC秒中断，允许在每秒产生一次中断请求，这对于需要定时操作的应用非常重要。
 
-### 8. `RTC_SetPrescaler(uint32_t Prescaler)`
+8. `RTC_SetPrescaler(uint32_t Prescaler)`
 
 - **功能**：设置RTC的分频器。
 - **参数**：`Prescaler`是RTC的分频值。根据选定的时钟源，设定分频器以实现所需的RTC周期。
@@ -180,7 +184,7 @@ void RTC_Configuration(void)
 
 ---
 
-- 时间管理结构
+#### 3.2.3 时间管理结构
 
 RTC初始化完成后可以直接往它的计数器写入时间戳，但是时间戳对用户不友好，不方便配置和显示时间， 在本工程中，使用bsp_date.h文件的rtc_time结构体来管理时间
 
@@ -202,7 +206,7 @@ struct rtc_time {
 
 其实在C语言标准库ANSI C中，也具有类似这样的结构体struct tm ，位于标准的time.h文件中， 而具有以上功能的转化函数则为mktime和localtime，它们分别把tm格式的时间转化成时间戳和用时间戳转化成tm格式。 而在本实验中直接使用了开源的万年历算法源码，便于修改和学习。
 
-- 时间格式转换
+#### 3.2.4 时间格式转换
 
 在本实验中，tm格式转时间戳使用mktimev函数，时间戳转tm格式使用to_tm函数，这两个函数都定义在bsp_date.c文件中
 
@@ -267,7 +271,7 @@ void to_tm(u32 tim, struct rtc_time * tm)
 
 这两个函数都是以格林威治时间(GMT)时区来计算的，在调用这些函数时我们会对输入参数加入时区偏移的运算，进行调整。
 
-- 配置时间
+#### 3.2.5 配置时间
 
 ```c
 void Time_Adjust(struct rtc_time *tm)
@@ -286,7 +290,7 @@ void Time_Adjust(struct rtc_time *tm)
 
 Time_Adjust函数用于配置时间，它先调用前面的RTC_Configuration初始化RTC，接着调用库函数RTC_SetCounter向RTC计数器写入要设置时间的时间戳值， 而时间戳的值则使用mktimev函数通过输入参数tm来计算，计算后还与宏TIME_ZOOM运算，计算时区偏移值。此处的输入参数tm是北京时间， 所以“mktimev(tm)-TIME_ZOOM”计算后写入到RTC计数器的是格林威治时区的标准UNIX时间戳。
 
-- 检查并配置RTC
+#### 3.2.6 检查并配置RTC
 
 上面的Time_Adjust函数直接把参数写入到RTC中修改配置，但在芯片每次上电时，并不希望每次都修改系统时间， 所以我们增加了RTC_CheckAndConfig函数用于检查是否需要向RTC写入新的配置，见。
 
@@ -350,7 +354,7 @@ void RTC_CheckAndConfig(struct rtc_time *tm)
 
 若本函数的标志判断相等，进入else分支，不再调用Time_Adjust函数初始化RTC，而只是使用RTC_WaitForSynchro和RTC_ITConfig同步RTC域和APB以及使能中断， 以便获取时间。如果使用的是LSI时钟，还需要使能LSI时钟，RTC才会正常运行，这是因为当主电源掉电和备份域的情况下，LSI会关闭，而LSE则会正常运行，驱动RTC计时。
 
-- 转换并输出时间
+#### 3.2.7 转换并输出时间
 
 RTC正常运行后，可以使用Time_Display函数转换时间格式并输出到串口及液晶屏
 
@@ -414,7 +418,7 @@ void Time_Display(uint32_t TimeVar,struct rtc_time *tm)
 
 利用to_tm转换格式后，调用bsp_calendar.c文件中的日历计算函数，求出星期、农历、生肖等内容，然后使用串口和液晶屏显示出来。
 
-- 中断服务函数
+#### 3.2.8 中断服务函数
 
 一般来说，上面的Time_Display时间显示每秒中更新一次，而根据前面的配置，RTC每秒会进入一次中断
 
@@ -436,7 +440,7 @@ void RTC_IRQHandler(void)
 
 RTC的秒中断服务函数只是简单地对全局变量TimeDisplay置1，在main函数的while循环中会检测这个标志，当标志为1时， 就调用Time_Display函数显示一次时间，达到每秒钟更新当前时间的效果。
 
-- 主函数
+#### 3.2.9 主函数
 
 ```c
 /*时间结构体，默认时间2000-01-01 00:00:00*/
@@ -483,7 +487,7 @@ int main()
 
 main函数的流程非常清晰，初始化了液晶、串口等外设后，调用RTC_CheckAndConfig函数初始化RTC，若RTC是第一次初始化，就使用变量systmtime中的默认时间配置， 若之前已配置好RTC，那么RTC_CheckAndConfig函数仅同步时钟系统，便于获取实时时间。在while循环里检查中断设置的TimeDisplay是否置1， 若置1了就调用Time_Display函数，它的输入参数是库函数RTC_GetCounter的返回值，也就是RTC计数器里的时间戳， Time_Display函数把该时间戳转化成北京时间显示到串口和液晶上。
 
-- 使用串口配置时间
+#### 3.2.10 使用串口配置时间
 
 在main函数的44-54行，是一个按键检测分支，当检测到开发板上的KEY1被按下时，会调用Time_Regulate_Get函数通过串口获取配置时间， 然后把获取得的时间输入到Time_Adjust函数把该时间写入到RTC计数器中，更新配置
 
@@ -532,21 +536,21 @@ Time_Regulate_Get函数的本质是利用重定向到串口的C标准数据流�
 
 ![](https://doc.embedfire.com/mcu/stm32/f103zhinanzhe/std/zh/latest/_images/RTC005.jpg)
 
-## 3. 小结
+## 4. 小结
 
 实际上使用RTC设置万年历还算比较简单，单色我们结合了LCD，所以代码有点多，下面我们简单回顾一下整个流程（使用串口）
 
-### 实验目的
+### 4.1 实验目的
 
 1. 学习如何使用RTC设置万年历。
 2. 通过串口接收输入，能够动态修改RTC的时间和日期。
 
-### 硬件准备
+### 4.2 硬件准备
 
 - STM32开发板（如STM32F4系列）
 - 串口调试工具（如Tera Term或PuTTY）
 
-### 实验步骤
+### 4.3 实验步骤
 
 #### 1. RTC初始化
 
@@ -652,7 +656,7 @@ void getTimeAndDate(void) {
     sprintf(buffer, "当前时间: %02d:%02d:%02d, 当前日期: %04d-%02d-%02d\r\n",
             RTC_TimeStructure.RTC_Hours, RTC_TimeStructure.RTC_Minutes, RTC_TimeStructure.RTC_Seconds,
             2000 + RTC_DateStructure.RTC_Year, RTC_DateStructure.RTC_Month, RTC_DateStructure.RTC_Date);
-    
+
     USART_SendString(buffer); // 发送时间和日期
 }
 
@@ -666,9 +670,10 @@ int main(void) {
         for (volatile int i = 0; i < 1000000; i++); // 延时
     }
 }
-
 ```
 
 ---
 
 2024.9.24 第一次修订，后期不再维护
+
+2025.3.9 简化内容

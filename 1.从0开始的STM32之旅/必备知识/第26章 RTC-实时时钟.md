@@ -247,7 +247,7 @@ void RTC_Config(void) {
 
     // 等待RTC同步
     RTC_WaitForSynchro();          
-    
+
     // RTC初始化
     RTC_InitTypeDef RTC_InitStructure;
     RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;  // 设置24小时制
@@ -287,7 +287,6 @@ void RTC_GetDate(uint8_t* day, uint8_t* month, uint8_t* year) {
     *month = RTC_DateStructure.RTC_Month;
     *year = RTC_DateStructure.RTC_Year;
 }
-
 ```
 
 ### 代码详解
