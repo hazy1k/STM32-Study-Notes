@@ -303,7 +303,6 @@
           "../../Libraries/CMSIS",
           "../../User",
           "../../Libraries/FWlib/inc",
-          ".cmsis/include",
           "RTE/_RTC 闹钟实验"
         ],
         "libList": [],
