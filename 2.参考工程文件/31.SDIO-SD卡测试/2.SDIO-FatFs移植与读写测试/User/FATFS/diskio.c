@@ -1,20 +1,12 @@
-/*-----------------------------------------------------------------------*/
-/* Low level disk I/O module skeleton for FatFs     (C)ChaN, 2007        */
-/*-----------------------------------------------------------------------*/
-/* This is a stub disk I/O module that acts as front end of the existing */
-/* disk I/O modules and attach it to FatFs module with common interface. */
-/*-----------------------------------------------------------------------*/
 #include <string.h>
 #include "diskio.h"
 #include "stm32f10x.h"
-#include "./sdio/bsp_sdio_sdcard.h"
+#include "sdio_sdcard.h"
 
 /* 为每个设备定义一个物理编号 */
 #define ATA			           0     // SD卡
 #define SPI_FLASH		       1     // 预留外部SPI Flash使用
-
-#define SD_BLOCKSIZE     512 
-
+#define SD_BLOCKSIZE     512 // sd卡的块大小 
 extern  SD_CardInfo SDCardInfo;
 
 /*-----------------------------------------------------------------------*/
