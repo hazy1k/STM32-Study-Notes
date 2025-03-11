@@ -27,8 +27,8 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "./sdio/bsp_sdio_sdcard.h"
-#include "./flash/fatfs_flash_spi.h" 
+#include "sdio_sdcard.h"
+#include "fatfs_flash_spi.h" 
 #include "mass_mal.h"
 #include <stdio.h>
 /* Private typedef -----------------------------------------------------------*/

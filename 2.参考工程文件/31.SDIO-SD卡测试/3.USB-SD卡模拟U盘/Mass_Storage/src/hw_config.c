@@ -29,7 +29,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "hw_config.h"
-#include "./sdio/bsp_sdio_sdcard.h"
+#include "sdio_sdcard.h"
 #include "mass_mal.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"

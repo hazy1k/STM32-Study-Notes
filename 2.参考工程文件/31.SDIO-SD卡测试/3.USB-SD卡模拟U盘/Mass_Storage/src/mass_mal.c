@@ -29,7 +29,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 
-#include "./sdio/bsp_sdio_sdcard.h"
+#include "sdio_sdcard.h"
 #include "mass_mal.h"
 
 /* Private typedef -----------------------------------------------------------*/

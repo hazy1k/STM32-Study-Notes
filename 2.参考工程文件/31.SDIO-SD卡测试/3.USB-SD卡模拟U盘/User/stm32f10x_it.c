@@ -23,7 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./sdio/bsp_sdio_sdcard.h"	
+#include "sdio_sdcard.h"	
 
 #include "usb_lib.h"
 #include "usb_istr.h"

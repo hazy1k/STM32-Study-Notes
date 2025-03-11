@@ -2,7 +2,7 @@
 ..\..\output\bsp_chipid.o: ..\..\User\./chipid/bsp_chipid.h
 ..\..\output\bsp_chipid.o: ..\..\Libraries\CMSIS\stm32f10x.h
 ..\..\output\bsp_chipid.o: ..\..\Libraries\CMSIS\core_cm3.h
-..\..\output\bsp_chipid.o: E:\dianzi\MDK\ARM\AC5\Bin\..\include\stdint.h
+..\..\output\bsp_chipid.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdint.h
 ..\..\output\bsp_chipid.o: ..\..\Libraries\CMSIS\system_stm32f10x.h
 ..\..\output\bsp_chipid.o: ..\..\User\stm32f10x_conf.h
 ..\..\output\bsp_chipid.o: ..\..\Libraries\FWlib\inc\stm32f10x_adc.h

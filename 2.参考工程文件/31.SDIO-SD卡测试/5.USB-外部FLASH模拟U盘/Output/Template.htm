@@ -1,9 +1,9 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html><head>
-<title>Static Call Graph - [..\..\Output\Template.axf]</title></head>
+<title>Static Call Graph - [..\Output\Template.axf]</title></head>
 <body><HR>
-<H1>Static Call Graph for image ..\..\Output\Template.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Jan 31 22:16:22 2025
+<H1>Static Call Graph for image ..\Output\Template.axf</H1><HR>
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Tue Mar 11 13:42:02 2025
 <BR><P>
 <H3>Maximum Stack Usage =        208 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -113,7 +113,7 @@ Function Pointers
  <LI><a href="#[15]">UsageFault_Handler</a> from stm32f10x_it.o(i.UsageFault_Handler) referenced from startup_stm32f10x_hd.o(RESET)
  <LI><a href="#[1a]">WWDG_IRQHandler</a> from startup_stm32f10x_hd.o(.text) referenced from startup_stm32f10x_hd.o(RESET)
  <LI><a href="#[58]">__main</a> from entry.o(.ARM.Collect$$$$00000000) referenced from startup_stm32f10x_hd.o(.text)
- <LI><a href="#[5d]">fputc</a> from bsp_usart.o(i.fputc) referenced from printf1.o(i.__0printf$1)
+ <LI><a href="#[5d]">fputc</a> from usart.o(i.fputc) referenced from printf1.o(i.__0printf$1)
  <LI><a href="#[56]">main</a> from main.o(i.main) referenced from entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
 <P>
@@ -350,8 +350,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SetEPRxStatus
 <LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SetEPTxStatus
 </UL>
-<BR>[Called By]<UL><LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_ClearFeature
-<LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Write10_Cmd
+<BR>[Called By]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Write10_Cmd
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Verify10_Cmd
 <LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_TestUnitReady_Cmd
 <LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_ReadFormatCapacity_Cmd
@@ -362,6 +361,7 @@ Global Symbols
 <LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_Out
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CBW_Decode
 <LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Address_Management
+<LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_ClearFeature
 </UL>
 
 <P><STRONG><a name="[14]"></a>BusFault_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f10x_it.o(i.BusFault_Handler))
@@ -415,15 +415,15 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[98]"></a>ClearDTOG_RX</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, usb_regs.o(i.ClearDTOG_RX))
-<BR><BR>[Called By]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_SetConfiguration
+<BR><BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
+<LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_SetConfiguration
 <LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_NoData_Setup
-<LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
 </UL>
 
 <P><STRONG><a name="[97]"></a>ClearDTOG_TX</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, usb_regs.o(i.ClearDTOG_TX))
-<BR><BR>[Called By]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_SetConfiguration
+<BR><BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
+<LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_SetConfiguration
 <LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_NoData_Setup
-<LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
 </UL>
 
 <P><STRONG><a name="[9e]"></a>Clear_Status_Out</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, usb_regs.o(i.Clear_Status_Out))
@@ -467,7 +467,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_SPI_disk_initialize
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Cable_Config
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_Config
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_GPIO_Config
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_Init
 </UL>
 
 <P><STRONG><a name="[af]"></a>GPIO_ResetBits</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f10x_gpio.o(i.GPIO_ResetBits))
@@ -478,6 +478,7 @@ Global Symbols
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_WriteEnable
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_WaitForWriteEnd
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_PageWrite
+<LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[85]"></a>GPIO_SetBits</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f10x_gpio.o(i.GPIO_SetBits))
@@ -489,7 +490,7 @@ Global Symbols
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_WriteEnable
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_WaitForWriteEnd
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_PageWrite
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_GPIO_Config
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_Init
 </UL>
 
 <P><STRONG><a name="[7d]"></a>GetEPRxAddr</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, usb_regs.o(i.GetEPRxAddr))
@@ -536,8 +537,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CTR_LP
 </UL>
 
-<P><STRONG><a name="[8d]"></a>LED_GPIO_Config</STRONG> (Thumb, 92 bytes, Stack size 16 bytes, bsp_led.o(i.LED_GPIO_Config))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = LED_GPIO_Config &rArr; GPIO_Init
+<P><STRONG><a name="[8d]"></a>LED_Init</STRONG> (Thumb, 92 bytes, Stack size 16 bytes, led.o(i.LED_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = LED_Init &rArr; GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_SetBits
 <LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
@@ -650,9 +651,9 @@ Global Symbols
 <P><STRONG><a name="[3]"></a>MASS_init</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, usb_prop.o(i.MASS_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = MASS_init &rArr; PowerOn &rArr; USB_Cable_Config &rArr; GPIO_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PowerOn
-<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_SerialNum
+<BR>[Calls]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_SerialNum
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SIL_Init
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PowerOn
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usb_prop.o(.data)
 </UL>
@@ -765,7 +766,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_SPI_disk_initialize
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Cable_Config
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_Config
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_GPIO_Config
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_Init
 </UL>
 
 <P><STRONG><a name="[c2]"></a>RCC_GetClocksFreq</STRONG> (Thumb, 154 bytes, Stack size 8 bytes, stm32f10x_rcc.o(i.RCC_GetClocksFreq))
@@ -1058,8 +1059,8 @@ Global Symbols
 <P><STRONG><a name="[8c]"></a>SetDeviceAddress</STRONG> (Thumb, 58 bytes, Stack size 20 bytes, usb_core.o(i.SetDeviceAddress))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = SetDeviceAddress
 </UL>
-<BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
-<LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;In0_Process
+<BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;In0_Process
+<LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
 </UL>
 
 <P><STRONG><a name="[9b]"></a>SetEPRxAddr</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPRxAddr))
@@ -1067,17 +1068,17 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[9c]"></a>SetEPRxCount</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPRxCount))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
-<LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
+<BR><BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Post0_Process
+<LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
 </UL>
 
 <P><STRONG><a name="[63]"></a>SetEPRxStatus</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPRxStatus))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
-<LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Write10_Cmd
+<BR><BR>[Called By]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCSI_Write10_Cmd
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mass_Storage_In
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Bot_Abort
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Write_Memory
+<LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
 </UL>
 
 <P><STRONG><a name="[9f]"></a>SetEPRxValid</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPRxValid))
@@ -1096,12 +1097,12 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[62]"></a>SetEPTxStatus</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPTxStatus))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Transfer_Data_Request
+<BR><BR>[Called By]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Transfer_Data_Request
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Bot_Abort
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_CSW
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Read_Memory
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Standard_ClearFeature
+<LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_Reset
 </UL>
 
 <P><STRONG><a name="[9a]"></a>SetEPType</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, usb_regs.o(i.SetEPType))
@@ -1189,9 +1190,9 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> usb_core.o(i.Data_Setup0)
 </UL>
 <P><STRONG><a name="[96]"></a>Standard_GetDescriptorData</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, usb_core.o(i.Standard_GetDescriptorData))
-<BR><BR>[Called By]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_GetStringDescriptor
-<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_GetDeviceDescriptor
+<BR><BR>[Called By]<UL><LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_GetDeviceDescriptor
 <LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_GetConfigDescriptor
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MASS_GetStringDescriptor
 </UL>
 
 <P><STRONG><a name="[5b]"></a>Standard_GetInterface</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, usb_core.o(i.Standard_GetInterface))
@@ -1256,7 +1257,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_Config
 </UL>
 
-<P><STRONG><a name="[bf]"></a>USART_Config</STRONG> (Thumb, 122 bytes, Stack size 32 bytes, bsp_usart.o(i.USART_Config))
+<P><STRONG><a name="[bf]"></a>USART_Config</STRONG> (Thumb, 122 bytes, Stack size 32 bytes, usart.o(i.USART_Config))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = USART_Config &rArr; USART_Init &rArr; RCC_GetClocksFreq
 </UL>
 <BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
@@ -1390,7 +1391,6 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_FLASH_PageWrite
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_TIMEOUT_UserCallback
-<LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[dc]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
@@ -1399,7 +1399,7 @@ Global Symbols
 
 <P><STRONG><a name="[de]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
-<P><STRONG><a name="[5d]"></a>fputc</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, bsp_usart.o(i.fputc))
+<P><STRONG><a name="[5d]"></a>fputc</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, usart.o(i.fputc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = fputc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_SendData
@@ -1407,16 +1407,16 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> printf1.o(i.__0printf$1)
 </UL>
-<P><STRONG><a name="[56]"></a>main</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, main.o(i.main))
+<P><STRONG><a name="[56]"></a>main</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = main &rArr; Set_System &rArr; MAL_Config &rArr; MAL_Init &rArr; FLASH_SPI_disk_initialize &rArr; SPI_FLASH_ReadID &rArr; SPI_FLASH_SendByte &rArr; SPI_TIMEOUT_UserCallback &rArr; __2printf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Interrupts_Config
+<BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_ResetBits
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Interrupts_Config
 <LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_USBClock
 <LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_System
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Init
-<LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_Config
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_GPIO_Config
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_Init
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_Delay
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
