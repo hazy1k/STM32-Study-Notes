@@ -46,5 +46,4 @@ int main(void)
   printf("芯片flash大小: %d KB\r\n", *(__IO uint16_t*)(0x1FFFF7E0));
   while(1);
 }
-
 ```
