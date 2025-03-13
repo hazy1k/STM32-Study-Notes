@@ -1,20 +1,5 @@
-/************************************************************
-  * @brief   core_delay.c
-  * @author  jiejie
-  * @github  https://github.com/jiejieTop
-  * @date    2018-xx-xx
-  * @version v1.0
-  * @note    使用内核寄存器精确延时
-  ***********************************************************/
-  
-#include "./dwt_delay/core_delay.h"   
+#include "core_delay.h"   
 
-
-/*
-**********************************************************************
-*         时间戳相关寄存器定义
-**********************************************************************
-*/
 /*
  在Cortex-M里面有一个外设叫DWT(Data Watchpoint and Trace)，
  该外设有一个32位的寄存器叫CYCCNT，它是一个向上的计数器，
@@ -26,67 +11,31 @@
  1、先使能DWT外设，这个由另外内核调试寄存器DEMCR的位24控制，写1使能
  2、使能CYCCNT寄存器之前，先清0
  3、使能CYCCNT寄存器，这个由DWT_CTRL(代码上宏定义为DWT_CR)的位0控制，写1使能
- */
+*/
  
-#if USE_DWT_DELAY
+#if USE_DWT_DELAY // 宏定义，如果没有定义，则不使用DWT延时函数
 
+#define  DWT_CR      *(__IO uint32_t *)0xE0001000 // DWT控制寄存器地址
+#define  DWT_CYCCNT  *(__IO uint32_t *)0xE0001004 // DWT计数器地址
+#define  DEM_CR      *(__IO uint32_t *)0xE000EDFC // 调试监视器控制寄存器地址
+#define  DEM_CR_TRCENA     (1 << 24) // 调试监视器控制寄存器的位24，DWT使能位
+#define  DWT_CR_CYCCNTENA  (1 <<  0) // DWT控制寄存器的位0，CYCCNT使能位
 
-#define  DWT_CR      *(__IO uint32_t *)0xE0001000
-#define  DWT_CYCCNT  *(__IO uint32_t *)0xE0001004
-#define  DEM_CR      *(__IO uint32_t *)0xE000EDFC
-
-
-#define  DEM_CR_TRCENA                   (1 << 24)
-#define  DWT_CR_CYCCNTENA                (1 <<  0)
-
-
-/**
-  * @brief  初始化时间戳
-  * @param  无
-  * @retval 无
-  * @note   使用延时函数前，必须调用本函数
-  */
+// 初始化时间戳
 void CPU_TS_TmrInit(void)
 {
-    /* 使能DWT外设 */
-    DEM_CR |= (uint32_t)DEM_CR_TRCENA;                
-
-    /* DWT CYCCNT寄存器计数清0 */
-    DWT_CYCCNT = (uint32_t)0u;
-
-    /* 使能Cortex-M DWT CYCCNT寄存器 */
-    DWT_CR |= (uint32_t)DWT_CR_CYCCNTENA;
+    DEM_CR |= (uint32_t)DEM_CR_TRCENA; // 使能DWT外设
+    DWT_CYCCNT = (uint32_t)0u; // 清0计数器
+    DWT_CR |= (uint32_t)DWT_CR_CYCCNTENA; // 使能CYCCNT计数器
 }
 
-/**
-  * @brief  读取当前时间戳
-  * @param  无
-  * @retval 当前时间戳，即DWT_CYCCNT寄存器的值
-  */
+// 读取当前时间戳
 uint32_t CPU_TS_TmrRd(void)
 {        
   return ((uint32_t)DWT_CYCCNT);
 }
 
-///**
-//  * @brief  读取当前时间戳
-//  * @param  无
-//  * @retval 当前时间戳，即DWT_CYCCNT寄存器的值
-//	* 				此处给HAL库替换HAL_GetTick函数，用于os
-//  */
-//uint32_t HAL_GetTick(void)
-//{        
-//  return ((uint32_t)DWT_CYCCNT*1000/SysClockFreq);
-//}
-
-/**
-  * @brief  采用CPU的内部计数实现精确延时，32位计数器
-  * @param  us : 延迟长度，单位1 us
-  * @retval 无
-  * @note   使用本函数前必须先调用CPU_TS_TmrInit函数使能计数器，
-            或使能宏CPU_TS_INIT_IN_DELAY_FUNCTION
-            最大延时值为60秒，即60s=2的32次方/72000000
-  */
+// 采用CPU的内部计数实现精确延时，32位计数器
 void CPU_TS_Tmr_Delay_US(__IO uint32_t us)
 {
   uint32_t ticks;
@@ -101,7 +50,6 @@ void CPU_TS_Tmr_Delay_US(__IO uint32_t us)
   ticks = us * (GET_CPU_ClkFreq() / 1000000);  /* 需要的节拍数 */      
   tcnt = 0;
   told = (uint32_t)CPU_TS_TmrRd();         /* 刚进入时的计数器值 */
-
   while(1)
   {
     tnow = (uint32_t)CPU_TS_TmrRd();  
@@ -117,9 +65,7 @@ void CPU_TS_Tmr_Delay_US(__IO uint32_t us)
       {
         tcnt += UINT32_MAX - told + tnow; 
       } 
-      
       told = tnow;
-
       /*时间超过/等于要延迟的时间,则退出 */
       if(tcnt >= ticks)break;
     }  
@@ -127,5 +73,3 @@ void CPU_TS_Tmr_Delay_US(__IO uint32_t us)
 }
 
 #endif
-
-/*********************************************END OF FILE**********************/

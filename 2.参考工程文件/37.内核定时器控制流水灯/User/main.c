@@ -1,40 +1,21 @@
-
 #include "stm32f10x.h"
-#include "bsp_led.h"
-#include "./dwt_delay/core_delay.h"   
+#include "led.h"
+#include "core_delay.h"   
 
-/**
-  * @brief  主函数
-  * @param  无  
-  * @retval 无
-  */
 int main(void)
 {	
-	/* LED 端口初始化 */
-	LED_GPIO_Config();
-
-	/* 配置内核定时器 */
+	LED_Init();
 	CPU_TS_TmrInit();
-
-	for(;;)
+	while(1)
 	{
-
-		LED1( ON ); 
-	    Delay_us(100000);    	// 100000 * 10us = 1000ms
-		//Delay_ms(100);
-		LED1( OFF );
-	  
-		LED2( ON );
-	    Delay_us(100000);		// 100000 * 10us = 1000ms
-		//Delay_ms(100);
-		LED2( OFF );
-	
-		LED3( ON );
-	    Delay_us(100000);		// 100000 * 10us = 1000ms
-		//Delay_ms(100);
-		LED3( OFF );
+		LED1_ON(); 
+	    Delay_us(100000); // 100000 * 10us = 1000ms
+		LED1_OFF();
+		LED2_ON();
+	    Delay_us(100000);		
+		LED2_OFF();
+		LED3_ON();
+	    Delay_us(100000);		
+		LED3_OFF();
 	} 
 }
-
-
-/*********************************************END OF FILE**********************/
