@@ -1,38 +1,15 @@
-/**
-  ******************************************************************************
-  * @file    main.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   LCD显示BMP文件及截图
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
- 
 #include "stm32f10x.h"
-#include "./lcd/bsp_ili9341_lcd.h"
-#include "./usart/bsp_usart.h" 
-#include "./key/bsp_key.h"  
-#include "./led/bsp_led.h"   
-#include "./bmp/bsp_bmp.h"
+#include "ili9341_lcd.h"
+#include "usart.h" 
+#include "key.h"  
+#include "led.h"   
+#include "bmp.h"
 #include "ff.h"
 #include <stdio.h>
 
+FATFS fs;				
+FRESULT res_sd; 
 
-FATFS fs;													/* FatFs文件系统对象 */
-FRESULT res_sd;                /* 文件操作结果 */
-
-/**
-  * @brief  主函数
-  * @param  无  
-  * @retval 无
-  */
 int main ( void )
 {
 
@@ -95,9 +72,3 @@ int main ( void )
 		}
 	}	
 }
-
-
-
-
-/* ------------------------------------------end of file---------------------------------------- */
-

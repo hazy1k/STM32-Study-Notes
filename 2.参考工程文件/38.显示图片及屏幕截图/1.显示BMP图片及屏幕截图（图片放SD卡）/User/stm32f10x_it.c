@@ -25,9 +25,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "./sdio/bsp_sdio_sdcard.h"	
-
-
+#include "sdio_sdcard.h"	
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{

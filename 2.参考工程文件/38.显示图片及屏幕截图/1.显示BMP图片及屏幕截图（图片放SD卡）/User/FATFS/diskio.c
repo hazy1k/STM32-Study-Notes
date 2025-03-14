@@ -7,7 +7,7 @@
 #include <string.h>
 #include "diskio.h"
 #include "stm32f10x.h"
-#include "./sdio/bsp_sdio_sdcard.h"
+#include "sdio_sdcard.h"
 
 /* 为每个设备定义一个物理编号 */
 #define ATA			           0     // SD卡

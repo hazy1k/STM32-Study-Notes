@@ -15,9 +15,9 @@
   ******************************************************************************
   */
 #include "sdio/sdio_test.h"
-#include "./led/bsp_led.h"
-#include "./sdio/bsp_sdio_sdcard.h"
-#include "./usart/bsp_usart.h"
+#include "led.h"
+#include "sdio_sdcard.h"
+#include "usart.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
