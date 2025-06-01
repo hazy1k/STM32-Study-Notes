@@ -28,7 +28,9 @@ USART 只需两根信号线即可完成双向通信，对硬件要求低，使�
 
 ![屏幕截图 2025-06-01 114459.png](https://raw.githubusercontent.com/hazy1k/My-drawing-bed/main/2025/06/01-11-45-10-屏幕截图%202025-06-01%20114459.png)
 
-### 2.1 usart相关参数宏定义
+### 2.1 数据接发中断回显
+
+#### 2.1.1 usart相关参数宏定义
 
 ```c
 #ifndef __USART_H__
@@ -51,10 +53,9 @@ void usart_sendbyte(USART_TypeDef* pUSARTx, uint8_t ch);
 void usart_sendstring(USART_TypeDef* pUSARTx, const char *str);
 
 #endif /*  __USART_H__ */
-
 ```
 
-### 2.2 usart工作参数及中断配置
+#### 2.1.2 usart工作参数及中断配置
 
 ```c
 static void NVIC_Configuration(void)
@@ -104,7 +105,7 @@ void USARTx_Init(void)
 }
 ```
 
-### 2.3 usart发送数据函数
+#### 2.1.3 usart发送数据函数
 
 ```c
 void usart_sendbyte(USART_TypeDef* pUSARTx, uint8_t ch)
@@ -124,7 +125,7 @@ void usart_sendstring(USART_TypeDef* pUSARTx, const char *str)
 }
 ```
 
-### 2.4 中断服务函数
+#### 2.1.4 中断服务函数
 
 ```c
 void USARTx_IRQHandler(void)
@@ -138,7 +139,7 @@ void USARTx_IRQHandler(void)
 }
 ```
 
-### 2.5 主函数测试
+#### 2.1.5 主函数测试
 
 ```c
 #include "stm32f10x.h"
@@ -147,16 +148,95 @@ void USARTx_IRQHandler(void)
 
 int main()
 {
-	SysTick_Init();
+    SysTick_Init();
     USARTx_Init();
     usart_sendstring(USARTx, "hello world\r\n");
     while(1)
     {
-		usart_sendstring(USARTx, "hello world\r\n");
-		Delay_ms(1000);
+        usart_sendstring(USARTx, "hello world\r\n");
+        Delay_ms(1000);
     }
 }
+```
 
+### 2.2 指令控制LED
+
+#### 2.2.1 重定向printf和scanf函数
+
+```c
+int fputc(int ch, FILE *f)
+{
+    usart_sendbyte(USARTx, (uint8_t)ch);
+    while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+    return (ch);
+}
+
+int fgetc(FILE *f)
+{
+    while(USART_GetFlagStatus(USARTx, USART_FLAG_RXNE) == RESET);
+    return (int)USART_ReceiveData(USARTx);
+}
+```
+
+#### 2.2.2 打印指令菜单
+
+```c
+static void show_info(void)
+{
+  printf("\r\n LED Control Commands :\r\n");
+  printf("1. RED LED ON\r\n");
+  printf("2. GREEN LED ON\r\n");
+  printf("3. BLUE LED ON\r\n");
+  printf("4. RED LED OFF\r\n");
+  printf("5. GREEN LED OFF\r\n");
+  printf("6. BLUE LED OFF\r\n");
+  printf("7. TURN OFF ALL LEDS");
+}
+```
+
+#### 2.2.3 主函数测试
+
+```c
+int main()
+{
+  char ch;
+    SysTick_Init();
+  BSP_LED_Init();
+  USARTx_Init();
+  show_info();
+  while(1)
+  {
+    ch = getchar();
+        switch(ch)
+    {
+      case '1':
+        LED_ON(RED_LED_Pin);
+        break;
+      case '2':
+        LED_ON(GREEN_LED_Pin);
+        break;
+      case '3':
+        LED_ON(BLUE_LED_Pin);
+        break;
+      case '4':
+        LED_OFF(RED_LED_Pin);
+        break;
+      case '5':
+        LED_OFF(GREEN_LED_Pin);
+        break;
+      case '6':
+        LED_OFF(BLUE_LED_Pin);
+        break;
+      case '7':
+        LED_OFF(RED_LED_Pin);
+        LED_OFF(GREEN_LED_Pin);
+        LED_OFF(BLUE_LED_Pin);
+        break;
+      default:
+        break;  
+    }
+  }
+}
 ```
 
 ## 3. USART常见函数（STD库）
@@ -267,7 +347,7 @@ void USART1_IRQHandler(void) {
         uint8_t data = USART_ReceiveData(USART1);
         // 处理接收到的数据...
     }
-    
+
     if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) {
         // 发送完成中断处理
         USART_ClearITPendingBit(USART1, USART_IT_TC);
