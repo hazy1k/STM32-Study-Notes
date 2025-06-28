@@ -116,5 +116,3 @@ if (RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET) {
 > - 计数周期 = 1 / (分频后时钟)
 > 
 > - 超时时间 = (rlr + 1) × 计数周期
-
-
