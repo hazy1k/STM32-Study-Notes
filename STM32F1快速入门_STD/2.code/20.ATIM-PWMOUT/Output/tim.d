@@ -29,4 +29,6 @@
 ..\output\tim.o: ..\Libraries\FWlib\inc\stm32f10x_usart.h
 ..\output\tim.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\output\tim.o: ..\Libraries\FWlib\inc\misc.h
-..\output\tim.o: ..\User\led\led.h
+..\output\tim.o: ..\User\usart\usart.h
+..\output\tim.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h
+..\output\tim.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\math.h

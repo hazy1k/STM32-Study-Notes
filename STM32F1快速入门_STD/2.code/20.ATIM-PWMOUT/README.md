@@ -1,3 +1,5 @@
 # TIM-PWM互补输出
 
-本实验利用基本定时器 TIM6/7 定时 1s， 1s 时间到 LED 翻转一次。基本定时器是单片机内部的资源，没有外部 IO，不需要接外部电路，现只需要一个 LED 即可。
+
+
+![屏幕截图 2025-07-08 013811.png](https://raw.githubusercontent.com/hazy1k/My-drawing-bed/main/2025/07/08-01-39-03-屏幕截图%202025-07-08%20013811.png)

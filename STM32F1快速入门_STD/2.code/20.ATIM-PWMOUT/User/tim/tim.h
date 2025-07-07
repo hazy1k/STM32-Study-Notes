@@ -3,8 +3,7 @@
 
 #include "stm32f10x.h"
 
-void TIM_Mode_Init(void);
-
-extern volatile uint32_t time;
+void ATIM_Mode_Init(void);
+void TIM1_DebugInfo(void);
 
 #endif /* __TIM_H */

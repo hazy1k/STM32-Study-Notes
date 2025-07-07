@@ -8,5 +8,6 @@ void Delay_10us(__IO uint32_t nTime);
 void Delay_us(__IO uint32_t us);
 void Delay_ms(__IO uint32_t ms);
 void SysTick_Handler(void);
+uint32_t SysTick_GetTick(void);
 
 #endif /* __SYSTICK_H__ */

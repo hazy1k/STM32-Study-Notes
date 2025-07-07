@@ -36,3 +36,8 @@ void SysTick_Handler(void)
         Delay_Time--; // 每次SysTick中断减1
     }
 }
+
+uint32_t SysTick_GetTick(void)
+{
+    return Delay_Time;
+}

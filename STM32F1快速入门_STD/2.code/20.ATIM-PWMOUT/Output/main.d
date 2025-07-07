@@ -29,6 +29,6 @@
 ..\output\main.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\output\main.o: ..\Libraries\FWlib\inc\misc.h
 ..\output\main.o: ..\User\tim\tim.h
+..\output\main.o: ..\User\SysTick\systick.h
 ..\output\main.o: ..\User\usart\usart.h
 ..\output\main.o: E:\dianzi\MDKv5\ARM\AC5\Bin\..\include\stdio.h
-..\output\main.o: ..\User\led\led.h
