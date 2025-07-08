@@ -153,20 +153,20 @@ static uint32_t calc_deadtime(uint8_t dt)
 static void ATIM_GPIO_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    
+
     // PA8: TIM1_CH1 (PWM主输出)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
+
     // PB13: TIM1_CH1N (互补输出)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-    
+
     // PB12: 刹车输入
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;  // 输入上拉模式
@@ -181,7 +181,7 @@ void ATIM_Mode_Init(void)
 {
     ATIM_GPIO_Init();
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-    
+
     /* 时基单元配置 */
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     TIM_TimeBaseStructure.TIM_Period = 7;          // ARR = 7
@@ -190,7 +190,7 @@ void ATIM_Mode_Init(void)
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-    
+
     /* 输出比较配置 */
     TIM_OCInitTypeDef TIM_OCInitStructure;
     TIM_OCStructInit(&TIM_OCInitStructure);
@@ -204,7 +204,7 @@ void ATIM_Mode_Init(void)
     TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
     TIM_OC1Init(TIM1, &TIM_OCInitStructure);
     TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-    
+
     /* 刹车和死区配置 */
     TIM_BDTRInitTypeDef TIM_BDTRInitStructure;
     TIM_BDTRStructInit(&TIM_BDTRInitStructure);
@@ -216,11 +216,11 @@ void ATIM_Mode_Init(void)
     TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High;
     TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
     TIM_BDTRConfig(TIM1, &TIM_BDTRInitStructure);
-    
+
     // 使能定时器
     TIM_Cmd(TIM1, ENABLE);
     TIM_CtrlPWMOutputs(TIM1, ENABLE);
-    
+
     // 清除中断标志
     TIM_ClearFlag(TIM1, TIM_FLAG_Update | TIM_FLAG_Break);
 }
@@ -237,7 +237,7 @@ void TIM1_DebugInfo(void)
     float output_freq = (float)tim_clk / (TIM1->ARR + 1);
     float duty_cycle = (TIM1->CCR1 * 100.0f) / (TIM1->ARR + 1);
     uint32_t deadtime_ns = calc_deadtime(TIM1->BDTR & 0xFF);
-    
+
     printf("\r\n===== TIM1 Configuration =====\r\n");
     printf("System Clock: %u Hz\r\n", system_clk);
     printf("TIM1 Clock: %u Hz\r\n", tim_clk);
@@ -258,7 +258,6 @@ void TIM1_DebugInfo(void)
     printf("BDTR Register: 0x%04X\r\n", TIM1->BDTR);
     printf("=============================\r\n");
 }
-
 ```
 
 #### 3.1.5 主函数测试
@@ -300,7 +299,7 @@ int main(void)
                 printf("Testing Break Function...\r\n");
                 printf("Current PB12 state: %s\r\n", 
                        GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12) ? "HIGH" : "LOW");
-                
+
                 if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) {
                     printf("PB12 is already HIGH. Break should be active.\r\n");
                 } else {
@@ -311,29 +310,29 @@ int main(void)
                           (SysTick_GetTick() - start < 5000)) {
                         // 等待PB12变高或超时(5秒)
                     }
-                    
+
                     if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) {
                         printf("PB12 is now HIGH. Break should be active.\r\n");
                     } else {
                         printf("Timeout. PB12 still LOW.\r\n");
                     }
                 }
-                
+
                 // 检查刹车状态
                 if(TIM_GetFlagStatus(TIM1, TIM_FLAG_Break)) {
                     printf("Break Event Detected!\r\n");
                 } else {
                     printf("No Break Event Detected! Check PB12 connection.\r\n");
                 }
-                
+
                 TIM1_DebugInfo();
                 break;
-                
+
             case '3':  // 清除刹车标志
                 printf("Clearing Break Flag...\r\n");
                 printf("Current PB12 state: %s\r\n", 
                        GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12) ? "HIGH" : "LOW");
-                
+
                 if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) {
                     printf("PB12 is still HIGH. Please disconnect PB12 from 3.3V...\r\n");
                     // 等待用户操作
@@ -343,11 +342,11 @@ int main(void)
                         // 等待PB12变低或超时(5秒)
                     }
                 }
-                
+
                 if(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) {
                     TIM_ClearFlag(TIM1, TIM_FLAG_Break);
                     Delay_ms(10);  // 稍等片刻让标志位更新
-                    
+
                     if(TIM_GetFlagStatus(TIM1, TIM_FLAG_Break) == RESET) {
                         printf("Break flag cleared.\r\n");
                     } else {
@@ -356,20 +355,20 @@ int main(void)
                 } else {
                     printf("PB12 still HIGH. Cannot clear break flag.\r\n");
                 }
-                
+
                 TIM1_DebugInfo();
                 break;
-                
+
             case '4':  // 重新使能PWM输出
                 printf("Re-enabling PWM Output...\r\n");
-                
+
                 // 确保刹车标志已清除
                 if(TIM_GetFlagStatus(TIM1, TIM_FLAG_Break)) {
                     printf("Break flag still active! Clear it first.\r\n");
                     TIM1_DebugInfo();
                     break;
                 }
-                
+
                 // 重新配置BDTR（确保所有配置正确）
                 TIM_BDTRInitTypeDef TIM_BDTRInitStructure;
                 TIM_BDTRStructInit(&TIM_BDTRInitStructure);
@@ -381,22 +380,540 @@ int main(void)
                 TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High;
                 TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
                 TIM_BDTRConfig(TIM1, &TIM_BDTRInitStructure);
-                
+
                 // 使能主输出
                 TIM1->BDTR |= TIM_BDTR_MOE;
                 TIM_CtrlPWMOutputs(TIM1, ENABLE);
-                
+
                 printf("PWM output re-enabled.\r\n");
                 TIM1_DebugInfo();
                 break;
-                
+
             default:
                 printf("Invalid choice!\r\n");
         }
         Delay_ms(1000);
     }
 }
-
 ```
 
 ### 3.2 脉宽测量输入
+
+我们选用通用定时器 TIM5 的 CH1，就 PA0 这个 GPIO 来测量信号的脉宽。在开发板中 PA0 接的是一个按键，默认接 GND，当按键按下的时候 IO 口会被拉高，这个时候我们可以利用定时器的输入捕获功能来测量按键按下的这段高电平的时间
+
+![屏幕截图 2025-07-08 105303.png](https://raw.githubusercontent.com/hazy1k/My-drawing-bed/main/2025/07/08-10-53-11-屏幕截图%202025-07-08%20105303.png)
+
+#### 3.2.1 TIM GPIO初始化
+
+```c
+static void TIM_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+```
+
+#### 3.2.2 TIM NVIC初始化
+
+```c
+static void TIM_NVIC_Init(void)
+{
+    NVIC_InitTypeDef NVIC_InitStructure; 
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+    NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+```
+
+#### 3.2.3 TIM工作模式初始化
+
+```c
+void TIM_Mode_Init(void)
+{
+    TIM_GPIO_Init();
+    TIM_NVIC_Init();
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+    /* 时基结构初始化 */
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+    TIM_TimeBaseStructure.TIM_Prescaler = (72 - 1);
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+    /* 输入捕获结构初始化 */
+    TIM_ICInitTypeDef TIM_ICInitStructure;
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; // 上升沿捕获
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+    TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+    TIM_ICInitStructure.TIM_ICFilter = 0;
+    TIM_ICInit(TIM5, &TIM_ICInitStructure);
+    TIM_ClearFlag(TIM5, TIM_FLAG_Update|TIM_IT_CC1);
+    TIM_ITConfig(TIM5, TIM_IT_Update|TIM_IT_CC1, ENABLE);
+    TIM_Cmd(TIM5, ENABLE);
+}
+```
+
+#### 3.2.4 TIM中断函数
+
+```c
+void TIM5_IRQHandler(void) {
+    // 处理定时器更新中断（溢出）
+    if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET) {
+        TIM5_OverflowCount++;  // 溢出次数增加
+        TIM_ClearITPendingBit(TIM5, TIM_IT_Update); // 清除中断标志
+    }
+    // 处理通道1捕获中断
+    if(TIM_GetITStatus(TIM5, TIM_IT_CC1) != RESET) {
+        if(g_captureState == 0) {  // 第一次捕获：上升沿（按键按下）
+            // 1. 清除计数器并重置溢出计数
+            TIM5->CNT = 0;
+            TIM5_OverflowCount = 0;      
+            // 2. 切换为下降沿捕获
+            TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Falling);
+            // 3. 更新捕获状态
+            g_captureState = 1;
+        }
+        else {  // 第二次捕获：下降沿（按键释放）
+            // 1. 获取当前捕获值
+            uint32_t captureEnd = TIM_GetCapture1(TIM5);
+            // 2. 计算总时间（考虑溢出）
+            g_capturePeriod = (TIM5_OverflowCount * 0x10000) + captureEnd;
+            // 3. 设置新数据可用标志
+            g_newCaptureAvailable = 1;
+            // 4. 切换回上升沿捕获（准备下一次测量）
+            TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Rising);
+            // 5. 重置捕获状态
+            g_captureState = 0;
+        }
+        TIM_ClearITPendingBit(TIM5, TIM_IT_CC1); // 清除捕获中断标志
+    }
+}
+```
+
+#### 3.2.5 获取捕获值
+
+```c
+// 获取按键持续时间（微秒）
+uint32_t Get_KeyPressDuration(void) {
+    g_newCaptureAvailable = 0; // 清除标志
+    return g_capturePeriod;
+}
+
+// 检查是否有新的捕获数据
+uint8_t Is_NewCaptureAvailable(void) {
+    return g_newCaptureAvailable;
+}
+```
+
+#### 3.2.6 主函数测试
+
+```c
+#include "stm32f10x.h"
+#include "tim.h"
+#include "systick.h"
+#include "usart.h"
+#include <stdio.h>
+
+int main(void)
+{   
+    SysTick_Init();
+    USARTx_Init(115200);
+    TIM_Mode_Init();
+    printf("TIM_Mode_Init...\r\n");
+    while(1)
+    {
+        if(Is_NewCaptureAvailable())
+        {
+            uint32_t duration_us = Get_KeyPressDuration();
+            float duration_ms = duration_us / 1000.0f;
+            printf("duration_us: %d, duration_ms: %.2f\r\n", duration_us, duration_ms);
+            Delay_ms(100);
+        }
+    }
+}
+```
+
+### 3.3 PWM输入捕获
+
+我们讲了用输入捕获测量了信号的脉宽，这一节我们讲输入捕获的一个特例—PWM 输入。普通的输入捕获可以使用定时器的四个通道，一路捕获占用一个捕获寄存器，而 PWM 输入则只能使用两个通道，即通道 1 和通道 2，且一路 PWM 输入要占用两个捕获寄存器，一个用于捕获周期，一个用于捕获占空比。在本节实验中，我们用通用定时器产生一路 PWM 信号，然后用高级定时器的通道 1 或者通道 2 来捕获。
+
+#### 3.3.1 TIM2 PWM输出初始化
+
+```c
+// 全局变量存储捕获数据
+static volatile PWM_CaptureData pwm_data;
+static volatile uint32_t tim1_overflows = 0;
+
+// TIM2 PWM输出初始化 (PA0)
+void TIM2_PWM_Init(void) {
+    GPIO_InitTypeDef GPIO_InitStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    // 1. 使能时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    // 2. 配置GPIOA.0为复用推挽输出
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    // 3. 配置TIM2时基
+    TIM_TimeBaseStructure.TIM_Period = 999;           // 自动重装载值 (1000-1)
+    TIM_TimeBaseStructure.TIM_Prescaler = 71;         // 预分频器 (72MHz/72 = 1MHz)
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+    // 4. 配置PWM模式
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_Pulse = 300;  // 初始占空比 30%
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+    // 5. 使能TIM2
+    TIM_Cmd(TIM2, ENABLE);
+    TIM_CtrlPWMOutputs(TIM2, ENABLE);
+}
+
+// 设置PWM参数
+void TIM2_SetPWM(uint32_t period, uint32_t duty_cycle) {
+    TIM2->ARR = period - 1;
+    TIM2->CCR1 = duty_cycle;
+}
+```
+
+#### 3.3.2 TIM1 PWM输入捕获初始化
+
+```c
+// TIM1 PWM输入捕获初始化 (PA8)
+void TIM1_PWMCapture_Init(void) {
+    GPIO_InitTypeDef GPIO_InitStructure;
+    TIM_ICInitTypeDef TIM_ICInitStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    // 1. 使能时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 | RCC_APB2Periph_GPIOA, ENABLE);
+    // 2. 配置GPIOA.8为浮空输入
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    // 3. 配置TIM1时基
+    TIM_TimeBaseStructure.TIM_Period = 0xFFFF;        // 最大计数器值
+    TIM_TimeBaseStructure.TIM_Prescaler = 0;          // 不分频 (72MHz)
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+    // 4. 配置PWM输入模式
+    // 选择TI1作为输入源
+    TIM_SelectInputTrigger(TIM1, TIM_TS_TI1FP1);
+    // 从模式: 复位模式 (在上升沿复位计数器)
+    TIM_SelectSlaveMode(TIM1, TIM_SlaveMode_Reset);
+    // 使能主从模式
+    TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable);
+    // 配置通道1 (直接模式): 上升沿捕获
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+    TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+    TIM_ICInitStructure.TIM_ICFilter = 0x0;
+    TIM_ICInit(TIM1, &TIM_ICInitStructure);
+    // 配置通道2 (间接模式): 下降沿捕获
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
+    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_IndirectTI;
+    TIM_ICInit(TIM1, &TIM_ICInitStructure);
+    // 5. 配置中断
+    // 更新中断 (用于处理溢出)
+    TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+    // 捕获中断 (通道1和通道2)
+    TIM_ITConfig(TIM1, TIM_IT_CC1 | TIM_IT_CC2, ENABLE);
+    // 配置NVIC
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
+    NVIC_Init(&NVIC_InitStructure);
+    // 6. 使能TIM1
+    TIM_Cmd(TIM1, ENABLE);
+}
+```
+
+#### 3.3.3 中断服务函数
+
+```c
+// TIM1更新中断 (处理溢出)
+void TIM1_UP_IRQHandler(void) {
+    if (TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET) {
+        tim1_overflows++;
+        TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+    }
+}
+
+// TIM1捕获中断
+void TIM1_CC_IRQHandler(void) {
+    // 通道1捕获 (上升沿 - 周期开始)
+    if (TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET) {
+        // 读取周期值 (计数器在上升沿复位，所以CCR1是周期)
+        uint32_t capture1 = TIM_GetCapture1(TIM1);
+        // 考虑溢出的情况
+        if (capture1 == 0) {
+            // 如果捕获值为0，则周期是溢出次数 * 0x10000
+            pwm_data.period = tim1_overflows * 0x10000;
+        } else {
+            // 否则周期 = 溢出次数 * 0x10000 + 捕获值
+            pwm_data.period = tim1_overflows * 0x10000 + capture1;
+        }
+        // 重置溢出计数器
+        tim1_overflows = 0;
+        TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
+    }
+    // 通道2捕获 (下降沿 - 占空比)
+    if (TIM_GetITStatus(TIM1, TIM_IT_CC2) != RESET) {
+        // 读取占空比值 (从上升沿到下降沿的时间)
+        pwm_data.duty_cycle = TIM_GetCapture2(TIM1);   
+        // 计算频率 (72MHz时钟)
+        pwm_data.frequency = 72000000.0f / pwm_data.period;
+        // 计算占空比百分比
+        pwm_data.duty_ratio = (pwm_data.duty_cycle * 100.0f) / pwm_data.period;
+        TIM_ClearITPendingBit(TIM1, TIM_IT_CC2);
+    }
+}
+```
+
+#### 3.3.4 获取捕获值
+
+```c
+// 获取PWM捕获数据
+PWM_CaptureData TIM1_GetPWMCaptureData(void) {
+    return pwm_data;
+}
+```
+
+#### 3.3.5 主函数测试
+
+```c
+#include "stm32f10x.h"
+#include "tim.h"
+#include "systick.h"
+#include "usart.h"
+#include <stdio.h>
+
+int main(void)
+{   
+    SysTick_Init();
+    USARTx_Init(115200);
+    printf("TIM2产生PWM信号 -> TIM1捕获PWM参数\r\n");
+    printf("PA0 (PWM输出) 连接到 PA8 (PWM输入)\r\n");
+    TIM2_PWM_Init();
+    TIM1_PWMCapture_Init();
+    /* PWM参数设置 */
+    uint32_t periods[] = {1000, 2000, 5000};  // 不同周期值
+    uint32_t duties[] = {200, 500, 800};      // 不同占空比值
+    uint8_t p_index = 0, d_index = 0;
+    printf("开始PWM捕获测试...\r\n");
+    while(1)
+    {
+        TIM2_SetPWM(periods[p_index], duties[d_index]);
+        // 打印设置的PWM参数
+        printf("设置的PWM参数: 周期=%lu, 占空比=%lu (%.1f%%)\r\n", 
+               periods[p_index], duties[d_index],
+               (duties[d_index] * 100.0f) / periods[p_index]);
+        Delay_ms(1000);
+        // 获取捕获的PWM数据
+        PWM_CaptureData cap_data = TIM1_GetPWMCaptureData();
+        // 打印捕获结果
+        printf("捕获的PWM参数:\r\n");
+        printf("  周期: %lu 计数\r\n", cap_data.period);
+        printf("  占空比: %lu 计数\r\n", cap_data.duty_cycle);
+        printf("  频率: %.2f Hz\r\n", cap_data.frequency);
+        printf("  占空比: %.2f%%\r\n", cap_data.duty_ratio);
+        printf("------------------------------------\r\n");
+        // 更新PWM参数索引
+        d_index = (d_index + 1) % 3;
+        if (d_index == 0) {
+            p_index = (p_index + 1) % 3;
+        }
+        Delay_ms(2000);
+    }
+}
+```
+
+## 4. ATIM常见函数（STD库）
+
+### 4.1 时基配置函数
+
+#### 4.1.1 基础初始化
+
+```c
+TIM_TimeBaseInitTypeDef TIM_InitStruct;
+TIM_InitStruct.TIM_Prescaler = 72 - 1;        // 预分频值（72MHz/72=1MHz）
+TIM_InitStruct.TIM_CounterMode = TIM_CounterMode_Up; // 递增计数
+TIM_InitStruct.TIM_Period = 1000 - 1;         // 自动重装载值（1KHz周期）
+TIM_InitStruct.TIM_ClockDivision = TIM_CKD_DIV1; // 时钟分频
+TIM_InitStruct.TIM_RepetitionCounter = 0;      // 重复计数器（高级功能）
+
+TIM_TimeBaseInit(TIM1, &TIM_InitStruct);      // 初始化时基
+```
+
+#### 4.1.2 时钟源选择
+
+```c
+// 使用内部时钟（默认）
+TIM_InternalClockConfig(TIM1);
+
+// 使用外部时钟（ETR引脚）
+TIM_ETRClockMode1Config(TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+```
+
+### 4.2 PWM输出配置（通道1-4）
+
+#### 4.2.1 通道初始化
+
+```c
+TIM_OCInitTypeDef PWM_InitStruct;
+PWM_InitStruct.TIM_OCMode = TIM_OCMode_PWM1;        // PWM模式1
+PWM_InitStruct.TIM_OutputState = TIM_OutputState_Enable; // 使能主输出
+PWM_InitStruct.TIM_OutputNState = TIM_OutputNState_Enable; // 使能互补输出
+PWM_InitStruct.TIM_Pulse = 500;                    // 初始占空比50%（1000周期）
+PWM_InitStruct.TIM_OCPolarity = TIM_OCPolarity_High; // 输出极性
+PWM_InitStruct.TIM_OCNPolarity = TIM_OCNPolarity_High; // 互补输出极性
+PWM_InitStruct.TIM_OCIdleState = TIM_OCIdleState_Reset; // 空闲状态
+PWM_InitStruct.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+
+TIM_OC1Init(TIM1, &PWM_InitStruct);  // 通道1初始化
+TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable); // 使能预装载
+```
+
+#### 4.2.2 动态调整占空比
+
+```c
+// 设置通道1占空比（0-ARR范围）
+TIM_SetCompare1(TIM1, new_pulse_value);
+```
+
+### 4.3 死区时间配置
+
+```c
+TIM_BDTRInitTypeDef BDTR_InitStruct;
+BDTR_InitStruct.TIM_OSSRState = TIM_OSSRState_Enable;
+BDTR_InitStruct.TIM_OSSIState = TIM_OSSIState_Enable;
+BDTR_InitStruct.TIM_LOCKLevel = TIM_LOCKLevel_1;
+BDTR_InitStruct.TIM_DeadTime = 0x54;  // 典型值84ns（1.5MHz下）
+BDTR_InitStruct.TIM_Break = TIM_Break_Enable; // 使能刹车功能
+BDTR_InitStruct.TIM_BreakPolarity = TIM_BreakPolarity_Low; // 低电平触发刹车
+BDTR_InitStruct.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+
+TIM_BDTRConfig(TIM1, &BDTR_InitStruct);  // 应用配置
+TIM_CtrlPWMOutputs(TIM1, ENABLE);        // 必须使能PWM输出
+```
+
+### 4.4 输入捕获配置
+
+#### 4.4.1 通道初始化（通道1为例）
+
+```c
+TIM_ICInitTypeDef IC_InitStruct;
+IC_InitStruct.TIM_Channel = TIM_Channel_1;
+IC_InitStruct.TIM_ICPolarity = TIM_ICPolarity_Rising; // 上升沿捕获
+IC_InitStruct.TIM_ICSelection = TIM_ICSelection_DirectTI; // 直接输入
+IC_InitStruct.TIM_ICPrescaler = TIM_ICPSC_DIV1;       // 不分频
+IC_InitStruct.TIM_ICFilter = 0x0;                     // 无滤波
+
+TIM_ICInit(TIM1, &IC_InitStruct);
+```
+
+#### 4.4.2 读取捕获值
+
+```c
+// 获取输入捕获值
+uint32_t capture_value = TIM_GetCapture1(TIM1);
+
+// 计算脉冲宽度（单位us）
+float pulse_width = (capture_value * 1000000.0) / (SystemCoreClock / (TIM_InitStruct.TIM_Prescaler + 1));
+```
+
+### 4.5 编码器接口配置
+
+```c
+TIM_EncoderInterfaceConfig(
+    TIM1, 
+    TIM_EncoderMode_TI12,  // 双通道编码模式
+    TIM_ICPolarity_Rising, // 通道1极性
+    TIM_ICPolarity_Rising  // 通道2极性
+);
+
+// 设置计数器范围
+TIM_SetAutoreload(TIM1, 65535);  // 最大计数值
+
+// 使能定时器
+TIM_Cmd(TIM1, ENABLE);
+
+// 读取编码器位置
+int16_t encoder_pos = TIM_GetCounter(TIM1);
+```
+
+### 4.6 中断与DMA配置
+
+#### 4.6.1 中断控制
+
+```c
+// 使能更新中断
+TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+
+// 使能捕获中断
+TIM_ITConfig(TIM1, TIM_IT_CC1, ENABLE);
+
+// 配置NVIC
+NVIC_InitTypeDef NVIC_InitStruct;
+NVIC_InitStruct.NVIC_IRQChannel = TIM1_UP_IRQn;  // 更新中断
+// ...其他参数
+NVIC_Init(&NVIC_InitStruct);
+```
+
+#### 4.6.2 DMA配置
+
+```c
+// 配置PWM DMA传输（通道1）
+TIM_DMACmd(TIM1, TIM_DMA_CC1, ENABLE);
+
+// 初始化DMA（以DMA1通道2为例）
+DMA_InitTypeDef DMA_InitStruct;
+DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&TIM1->CCR1; // 捕获/比较寄存器
+DMA_InitStruct.DMA_MemoryBaseAddr = (uint32_t)pwm_buffer;     // 内存地址
+// ...其他DMA参数
+DMA_Init(DMA1_Channel2, &DMA_InitStruct);
+```
+
+### 4.7 刹车与保护功能
+
+```c
+// 紧急刹车（软件触发）
+TIM_GenerateEvent(TIM1, TIM_EventSource_Break);
+
+// 配置刹车引脚（PB12）
+GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12;
+GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;  // 上拉输入
+GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+// 配置刹车源（详见TIM_BDTRConfig）
+BDTR_InitStruct.TIM_Break = TIM_Break_Enable;
+BDTR_InitStruct.TIM_BreakPolarity = TIM_BreakPolarity_Low;
+```
+
+| **功能** | **配置函数**                       | **重要参数**                         |
+| ------ | ------------------------------ | -------------------------------- |
+| PWM输出  | `TIM_OCxInit()`                | `TIM_OCMode`, `TIM_Pulse`        |
+| 死区控制   | `TIM_BDTRConfig()`             | `TIM_DeadTime` (0x00-0xFF)       |
+| 编码器接口  | `TIM_EncoderInterfaceConfig()` | `TIM_EncoderMode_TIx`            |
+| 刹车功能   | `TIM_BDTRConfig()`             | `TIM_Break`, `TIM_BreakPolarity` |
+| 重复计数器  | `TIM_SetRepetitionCounter()`   | 0-255                            |
