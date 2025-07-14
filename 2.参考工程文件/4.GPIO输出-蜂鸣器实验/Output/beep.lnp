@@ -1,5 +1,4 @@
 --cpu Cortex-M3
-"..\output\core_cm3.o"
 "..\output\system_stm32f10x.o"
 "..\output\misc.o"
 "..\output\stm32f10x_adc.o"
